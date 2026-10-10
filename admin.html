@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>إدارة التسجيلات | نادي الجودو</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #172033;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 25px auto;
+    }
+    .card {
+      background: white;
+      padding: 22px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px #0000000d;
+    }
+    h1, h2 { color: #142b4a; }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+    input { border: 1px solid #cbd5e1; }
+    button {
+      border: 0;
+      background: #17365d;
+      color: white;
+      cursor: pointer;
+    }
+    button.secondary { background: #64748b; }
+    #status { white-space: pre-wrap; }
+    .table-wrap { overflow-x: auto; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 850px;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 10px;
+      text-align: right;
+    }
+    th { background: #eaf0f7; }
+    .hidden { display: none; }
+    .note { color: #64748b; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>لوحة إدارة نادي الجودو</h1>
+    <p>تسجيل دخول المدير للاطلاع على طلبات التسجيل.</p>
+
+    <form id="loginForm">
+      <label for="email">البريد الإلكتروني للمدير</label>
+      <input id="email" type="email" autocomplete="username"
+             required placeholder="البريد الإلكتروني">
+
+      <label for="password">كلمة المرور</label>
+      <input id="password" type="password"
+             autocomplete="current-password" required
+             placeholder="كلمة المرور">
+
+      <button type="submit">تسجيل الدخول</button>
+    </form>
+
+    <button id="logoutBtn" class="secondary hidden" type="button">
+      تسجيل الخروج
+    </button>
+    <p id="status" role="status"></p>
+  </div>
+
+  <div id="recordsPanel" class="card hidden">
+    <h2>طلبات التسجيل</h2>
+    <button id="refreshBtn" type="button">تحديث الطلبات</button>
+    <p id="count"></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>تاريخ الطلب</th>
+            <th>اسم الرياضي</th>
+            <th>تاريخ الميلاد</th>
+            <th>مكان الميلاد</th>
+            <th>الجنس</th>
+            <th>الإقامة</th>
+            <th>سبق له ممارسة الجودو؟</th>
+            <th>الحزام</th>
+            <th>اسم الولي</th>
+            <th>هاتف الولي</th>
+          </tr>
+        </thead>
+        <tbody id="recordsBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <p class="note">
+    هذه الصفحة تعرض البيانات فقط، ولا توفر حذف التسجيلات أو تعديلها.
+  </p>
+</div>
+
+<script>
+(() => {
+  const SUPABASE_URL = "https://jtvorszomguszvygbxbs.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const $ = id => document.getElementById(id);
+  const loginForm = $("loginForm");
+  const status = $("status");
+  const recordsPanel = $("recordsPanel");
+  const logoutBtn = $("logoutBtn");
+
+  function showStatus(message) {
+    status.textContent = message;
+  }
+
+  function setLoggedIn(loggedIn) {
+    loginForm.classList.toggle("hidden", loggedIn);
+    logoutBtn.classList.toggle("hidden", !loggedIn);
+    recordsPanel.classList.toggle("hidden", !loggedIn);
+  }
+
+  function addCell(row, value) {
+    const cell = document.createElement("td");
+    cell.textContent = value == null || value === "" ? "—" : String(value);
+    row.appendChild(cell);
+  }
+
+  async function loadRecords() {
+    $("refreshBtn").disabled = true;
+    showStatus("جارٍ تحميل التسجيلات...");
+    $("recordsBody").replaceChildren();
+
+    try {
+      const { data, error } = await db
+        .from("registrations")
+        .select(
+          "created_at,athlete_name,date_of_birth,birthplace,gender,residence,practiced_judo,current_belt,guardian_name,guardian_phone"
+        )
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      for (const item of data || []) {
+        const row = document.createElement("tr");
+        let created = "—";
+
+        if (item.created_at) {
+          created = new Date(item.created_at).toLocaleString("ar-DZ");
+        }
+
+        addCell(row, created);
+        addCell(row, item.athlete_name);
+        addCell(row, item.date_of_birth);
+        addCell(row, item.birthplace);
+        addCell(row, item.gender);
+        addCell(row, item.residence);
+        addCell(row, item.practiced_judo ? "نعم" : "لا");
+        addCell(row, item.current_belt);
+        addCell(row, item.guardian_name);
+        addCell(row, item.guardian_phone);
+        $("recordsBody").appendChild(row);
+      }
+
+      $("count").textContent =
+        "عدد طلبات التسجيل: " + (data || []).length;
+      showStatus("تم تحميل التسجيلات بنجاح.");
+    } catch (error) {
+      showStatus("تعذر تحميل التسجيلات. تأكد من تسجيل الدخول وصلاحيات الحساب.");
+      console.error(error);
+    } finally {
+      $("refreshBtn").disabled = false;
+    }
+  }
+
+  loginForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    showStatus("جارٍ تسجيل الدخول...");
+
+    const { error } = await db.auth.signInWithPassword({
+      email: $("email").value.trim(),
+      password: $("password").value
+    });
+
+    if (error) {
+      showStatus("تعذر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.");
+      return;
+    }
+
+    $("password").value = "";
+    setLoggedIn(true);
+    await loadRecords();
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    await db.auth.signOut();
+    setLoggedIn(false);
+    $("recordsBody").replaceChildren();
+    $("count").textContent = "";
+    showStatus("تم تسجيل الخروج.");
+  });
+
+  $("refreshBtn").addEventListener("click", loadRecords);
+
+  async function initialize() {
+    const { data, error } = await db.auth.getSession();
+
+    if (error) {
+      showStatus("تعذر التحقق من جلسة الدخول.");
+      return;
+    }
+
+    if (data.session) {
+      setLoggedIn(true);
+      await loadRecords();
+    } else {
+      setLoggedIn(false);
+    }
+  }
+
+  initialize();
+})();
+</script>
+</body>
+</html>
