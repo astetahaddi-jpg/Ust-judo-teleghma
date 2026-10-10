@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -11,195 +10,400 @@
   <style>
     :root {
       --navy: #102c46;
+      --navy-light: #20557a;
       --red: #d62839;
       --gold: #f2bd54;
       --light: #f4f7fa;
+      --white: #ffffff;
+      --text: #203247;
+      --muted: #5c6b7b;
+      --shadow: 0 8px 28px rgba(16, 44, 70, 0.08);
     }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 20px;
+    }
 
     body {
       margin: 0;
       font-family: Arial, Tahoma, sans-serif;
-      color: #203247;
+      color: var(--text);
       line-height: 1.8;
       background: var(--light);
     }
 
+    img {
+      max-width: 100%;
+    }
+
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* رأس الموقع */
+
     header {
       background: var(--navy);
-      color: white;
+      color: var(--white);
       padding: 15px 5%;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 18px;
     }
 
     .brand {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 12px;
       font-size: 19px;
       font-weight: bold;
+      min-width: 0;
     }
 
     .brand-logo {
+      display: block;
+      flex: 0 0 65px;
       width: 65px;
       height: 65px;
       object-fit: contain;
+      object-position: center;
       border-radius: 50%;
-      background: white;
-      padding: 3px;
+      background: var(--white);
+      padding: 4px;
       border: 2px solid var(--gold);
     }
 
     nav {
       display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 16px;
       flex-wrap: wrap;
     }
 
     nav a {
-      color: white;
+      color: var(--white);
       text-decoration: none;
+      padding: 5px 2px;
+      font-size: 15px;
+      transition: color 0.2s;
     }
 
-    nav a:hover { color: var(--gold); }
+    nav a:hover,
+    nav a:focus-visible {
+      color: var(--gold);
+    }
+
+    /* الواجهة الرئيسية */
 
     .hero {
-      color: white;
+      color: var(--white);
       text-align: center;
-      padding: 45px 20px 65px;
-      background: linear-gradient(135deg, #102c46, #20557a);
+      padding: 55px 20px 75px;
+      background: linear-gradient(
+        135deg,
+        var(--navy),
+        var(--navy-light)
+      );
     }
 
     .emblem {
-      width: 190px;
-      height: 190px;
-      margin: 0 auto 15px;
-      border: 3px solid var(--gold);
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      background: white;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 22px;
+      border: 4px solid var(--gold);
+      border-radius: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--white);
+      padding: 12px;
       overflow: hidden;
-      padding: 8px;
     }
 
     .emblem img {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: contain;
+      object-position: center;
     }
 
-    h1 {
-      font-size: clamp(28px, 6vw, 43px);
-      line-height: 1.4;
+    .hero h1 {
+      font-size: clamp(27px, 5vw, 43px);
+      line-height: 1.5;
+      margin: 12px auto;
+      max-width: 900px;
     }
 
-    .hero p { font-size: 18px; }
+    .hero p {
+      font-size: clamp(16px, 2.5vw, 20px);
+      margin: 15px auto 25px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* الأزرار */
 
     .btn {
-      display: inline-block;
-      padding: 11px 22px;
-      margin: 8px;
-      border-radius: 8px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 48px;
+      padding: 11px 24px;
+      border-radius: 10px;
       text-decoration: none;
       font-weight: bold;
       background: var(--red);
-      color: white;
-      border: 0;
+      color: var(--white);
+      border: 2px solid transparent;
       cursor: pointer;
       font-size: 16px;
       font-family: inherit;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.92;
+      transform: translateY(-2px);
     }
 
     .btn:disabled {
       opacity: 0.6;
       cursor: wait;
+      transform: none;
     }
 
     .btn-light {
-      background: white;
+      background: var(--white);
       color: var(--navy);
     }
 
+    /* المحتوى */
+
     main {
-      max-width: 1000px;
-      margin: auto;
-      padding: 25px 16px;
+      width: 100%;
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 28px 18px;
     }
 
     section {
-      background: white;
-      padding: 25px;
+      background: var(--white);
+      padding: 28px;
       margin: 22px 0;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px #102c4610;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 20px;
     }
 
-    h2 { color: var(--navy); margin-top: 0; }
+    h2 {
+      color: var(--navy);
+      margin: 0 0 18px;
+      font-size: clamp(23px, 4vw, 30px);
+    }
+
+    h3 {
+      color: var(--navy);
+    }
+
+    section p {
+      font-size: 16px;
+    }
+
+    /* بطاقات مزايا الجودو */
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
     }
 
     .card {
       background: #f4f7fa;
       border-right: 4px solid var(--red);
-      border-radius: 8px;
-      padding: 17px;
+      border-radius: 12px;
+      padding: 18px;
     }
 
-    form { display: grid; gap: 13px; }
-    label { font-weight: bold; }
+    .card h3 {
+      margin-top: 0;
+      font-size: 19px;
+    }
 
-    input, select {
+    .card p {
+      margin-bottom: 0;
+    }
+
+    /* استمارة التسجيل */
+
+    #registrationForm {
+      display: grid;
+      gap: 15px;
+    }
+
+    #registrationForm > h3 {
+      margin: 10px 0 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #edf1f5;
+    }
+
+    #registrationForm label {
+      display: block;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    input,
+    select {
+      display: block;
       width: 100%;
-      padding: 12px;
-      margin-top: 5px;
+      min-height: 48px;
+      padding: 11px 13px;
+      margin-top: 6px;
       border: 1px solid #cbd5df;
-      border-radius: 7px;
+      border-radius: 9px;
       font: inherit;
-      background: white;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--white);
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid var(--gold);
+      border-color: var(--navy);
     }
 
     .notice {
-      padding: 12px;
+      padding: 13px 15px;
       background: #fff4d8;
-      border-radius: 8px;
+      border-right: 4px solid var(--gold);
+      border-radius: 9px;
       font-size: 14px;
     }
 
-    #formMessage {
-      padding: 10px;
-      border-radius: 7px;
-      overflow-wrap: anywhere;
+    #submitButton {
+      width: 100%;
+      margin-top: 8px;
     }
+
+    #formMessage {
+      padding: 12px;
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    /* إخفاء مساحة الرسالة قبل الاستخدام */
+
+    #formMessage:empty {
+      display: none;
+    }
+
+    /* أسفل الموقع */
 
     footer {
       text-align: center;
       background: var(--navy);
-      color: white;
-      padding: 22px 12px;
+      color: var(--white);
+      padding: 25px 15px;
+      margin-top: 15px;
     }
 
-    @media (max-width: 600px) {
-      header { justify-content: center; }
-      .brand { justify-content: center; }
-      nav { justify-content: center; gap: 10px; }
-      .emblem { width: 150px; height: 150px; }
-      section { padding: 18px; }
+    footer p {
+      margin: 5px 0;
+    }
+
+    /* الهواتف والأجهزة اللوحية */
+
+    @media (max-width: 760px) {
+      header {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        padding: 16px 12px;
+      }
+
+      .brand {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      nav {
+        width: 100%;
+        gap: 8px 15px;
+      }
+
+      .hero {
+        padding: 40px 16px 55px;
+      }
+
+      .emblem {
+        width: 190px;
+        height: 190px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        padding: 18px 12px;
+      }
+
+      section {
+        padding: 21px 17px;
+        margin: 17px 0;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .brand {
+        font-size: 16px;
+      }
+
+      .brand-logo {
+        flex-basis: 55px;
+        width: 55px;
+        height: 55px;
+      }
+
+      .emblem {
+        width: 165px;
+        height: 165px;
+        border-radius: 20px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .hero-actions .btn {
+        width: 100%;
+        max-width: 280px;
+      }
     }
   </style>
 </head>
 
 <body>
+
   <header>
     <div class="brand">
       <img
@@ -210,7 +414,7 @@
       <span>UST JUDO TELEGHMA</span>
     </div>
 
-    <nav>
+    <nav aria-label="القائمة الرئيسية">
       <a href="#about">عن النادي</a>
       <a href="#training">التدريب</a>
       <a href="#register">التسجيل</a>
@@ -227,18 +431,25 @@
     </div>
 
     <h1>الاتحاد الرياضي التلاغمة للجودو</h1>
+
     <p>الانضباط • الاحترام • القوة • روح الفريق</p>
-    <a class="btn" href="#register">طلب التسجيل</a>
-    <a class="btn btn-light" href="#about">اكتشف النادي</a>
+
+    <div class="hero-actions">
+      <a class="btn" href="#register">طلب التسجيل</a>
+      <a class="btn btn-light" href="#about">اكتشف النادي</a>
+    </div>
   </div>
 
   <main>
+
     <section id="about">
       <h2>مرحبًا بكم في نادينا</h2>
+
       <p>
-        مرحبًا بكم في الموقع الإلكتروني لنادي UST JUDO TELEGHMA.
-        نعمل على تشجيع ممارسة الجودو وتنمية اللياقة البدنية
-        والانضباط والاحترام لدى الرياضيين وتكوين الأبطال.
+        مرحبًا بكم في الموقع الإلكتروني لنادي
+        UST JUDO TELEGHMA. نعمل على تشجيع ممارسة الجودو
+        وتنمية اللياقة البدنية والانضباط والاحترام لدى
+        الرياضيين وتكوين الأبطال.
       </p>
     </section>
 
@@ -248,17 +459,17 @@
       <div class="cards">
         <div class="card">
           <h3>💪 اللياقة البدنية</h3>
-          <p>تنمية القوة والتوازن والمرونة.</p>
+          <p>تنمية القوة والتوازن والمرونة وتحسين اللياقة البدنية.</p>
         </div>
 
         <div class="card">
           <h3>🎯 الانضباط</h3>
-          <p>تعلم التركيز والالتزام واحترام الآخرين.</p>
+          <p>تعلم التركيز والالتزام واحترام المدربين والزملاء.</p>
         </div>
 
         <div class="card">
           <h3>🏅 التطور الرياضي</h3>
-          <p>تطوير المهارات والتقدم في مستويات الجودو.</p>
+          <p>تطوير المهارات والتقدم في مستويات الجودو والاستعداد للمنافسات.</p>
         </div>
       </div>
 
@@ -270,50 +481,75 @@
 
     <section id="register">
       <h2>استمارة طلب التسجيل</h2>
-      <p>املأ المعلومات التالية لإرسال طلب الانضمام إلى النادي.</p>
+
+      <p>
+        املأ المعلومات التالية لإرسال طلب الانضمام إلى النادي.
+      </p>
 
       <p class="notice">
         تُستخدم المعلومات المقدمة لمعالجة طلب التسجيل لدى النادي.
-        يرجى إدخال بيانات صحيحة وعدم إرسال معلومات تخص أشخاصًا آخرين دون إذن.
+        يرجى إدخال بيانات صحيحة وعدم إرسال معلومات تخص أشخاصًا
+        آخرين دون إذن.
       </p>
 
       <form id="registrationForm">
         <h3>معلومات الرياضي</h3>
 
-        <label>الاسم واللقب
-          <input name="athleteName" required autocomplete="name">
+        <label for="athleteName">الاسم واللقب
+          <input
+            id="athleteName"
+            name="athleteName"
+            type="text"
+            required
+            autocomplete="name"
+          >
         </label>
 
-        <label>تاريخ الميلاد
-          <input type="date" name="birthDate" required>
+        <label for="birthDate">تاريخ الميلاد
+          <input
+            id="birthDate"
+            type="date"
+            name="birthDate"
+            required
+          >
         </label>
 
-        <label>مكان الميلاد
-          <input name="birthPlace" required>
+        <label for="birthPlace">مكان الميلاد
+          <input
+            id="birthPlace"
+            name="birthPlace"
+            type="text"
+            required
+          >
         </label>
 
-        <label>الجنس
-          <select name="gender" required>
+        <label for="gender">الجنس
+          <select id="gender" name="gender" required>
             <option value="">اختر</option>
             <option value="ذكر">ذكر</option>
             <option value="أنثى">أنثى</option>
           </select>
         </label>
 
-        <label>مكان الإقامة
-          <input name="residence" required>
+        <label for="residence">مكان الإقامة
+          <input
+            id="residence"
+            name="residence"
+            type="text"
+            required
+          >
         </label>
 
-        <label>هل سبق لك ممارسة الجودو؟
-          <select name="previousJudo" required>
+        <label for="previousJudo">هل سبق لك ممارسة الجودو؟
+          <select id="previousJudo" name="previousJudo" required>
             <option value="">اختر</option>
             <option value="نعم">نعم</option>
             <option value="لا">لا</option>
           </select>
         </label>
 
-        <label>الحزام الحالي إن وجد
-          <select name="belt">
+        <label for="belt">الحزام الحالي إن وجد
+          <select id="belt" name="belt">
             <option value="">لا يوجد / لم أحدد</option>
             <option value="أبيض">أبيض</option>
             <option value="أصفر">أصفر</option>
@@ -327,16 +563,23 @@
 
         <h3>معلومات الولي</h3>
 
-        <label>اسم الولي ولقبه
-          <input name="guardianName" required>
+        <label for="guardianName">اسم الولي ولقبه
+          <input
+            id="guardianName"
+            name="guardianName"
+            type="text"
+            required
+          >
         </label>
 
-        <label>رقم هاتف الولي
+        <label for="guardianPhone">رقم هاتف الولي
           <input
-            type="tel"
+            id="guardianPhone"
             name="guardianPhone"
+            type="tel"
             required
             autocomplete="tel"
+            inputmode="tel"
           >
         </label>
 
@@ -347,6 +590,7 @@
         <p id="formMessage" role="status" aria-live="polite"></p>
       </form>
     </section>
+
   </main>
 
   <footer>
@@ -419,5 +663,6 @@
       }
     });
   </script>
+
 </body>
 </html>
