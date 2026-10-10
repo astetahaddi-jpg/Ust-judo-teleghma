@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -46,8 +47,8 @@
     }
 
     .brand-logo {
-      width: 55px;
-      height: 55px;
+      width: 65px;
+      height: 65px;
       object-fit: contain;
       border-radius: 50%;
       background: white;
@@ -55,8 +56,17 @@
       border: 2px solid var(--gold);
     }
 
-    nav { display: flex; gap: 16px; flex-wrap: wrap; }
-    nav a { color: white; text-decoration: none; }
+    nav {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+    }
+
     nav a:hover { color: var(--gold); }
 
     .hero {
@@ -67,11 +77,11 @@
     }
 
     .emblem {
-      width: 150px;
-      height: 150px;
+      width: 190px;
+      height: 190px;
       margin: 0 auto 15px;
       border: 3px solid var(--gold);
-      border-radius: 50%;
+      border-radius: 18px;
       display: grid;
       place-items: center;
       background: white;
@@ -107,8 +117,15 @@
       font-family: inherit;
     }
 
-    .btn:disabled { opacity: 0.6; cursor: wait; }
-    .btn-light { background: white; color: var(--navy); }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .btn-light {
+      background: white;
+      color: var(--navy);
+    }
 
     main {
       max-width: 1000px;
@@ -176,7 +193,7 @@
       header { justify-content: center; }
       .brand { justify-content: center; }
       nav { justify-content: center; gap: 10px; }
-      .emblem { width: 125px; height: 125px; }
+      .emblem { width: 150px; height: 150px; }
       section { padding: 18px; }
     }
   </style>
@@ -187,9 +204,8 @@
     <div class="brand">
       <img
         class="brand-logo"
-        src="./Logo.png"
+        src="./ei_1791625385714-removebg-preview.png"
         alt="شعار نادي الاتحاد الرياضي التلاغمة للجودو"
-        onerror="this.style.display='none'"
       >
       <span>UST JUDO TELEGHMA</span>
     </div>
@@ -205,9 +221,8 @@
   <div class="hero">
     <div class="emblem">
       <img
-        src="./Logo.png"
+        src="./ei_1791625385714-removebg-preview.png"
         alt="شعار نادي الجودو"
-        onerror="this.parentElement.innerHTML='🥋'"
       >
     </div>
 
@@ -229,20 +244,24 @@
 
     <section id="training">
       <h2>لماذا تمارس الجودو؟</h2>
+
       <div class="cards">
         <div class="card">
           <h3>💪 اللياقة البدنية</h3>
           <p>تنمية القوة والتوازن والمرونة.</p>
         </div>
+
         <div class="card">
           <h3>🎯 الانضباط</h3>
           <p>تعلم التركيز والالتزام واحترام الآخرين.</p>
         </div>
+
         <div class="card">
           <h3>🏅 التطور الرياضي</h3>
           <p>تطوير المهارات والتقدم في مستويات الجودو.</p>
         </div>
       </div>
+
       <p>
         للحصول على أوقات التدريب والفئات العمرية،
         يرجى التواصل مع إدارة النادي.
@@ -313,8 +332,12 @@
         </label>
 
         <label>رقم هاتف الولي
-          <input type="tel" name="guardianPhone"
-                 required autocomplete="tel">
+          <input
+            type="tel"
+            name="guardianPhone"
+            required
+            autocomplete="tel"
+          >
         </label>
 
         <button class="btn" type="submit" id="submitButton">
