@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102c46">
+  <meta name="description" content="الموقع الرسمي لنادي الاتحاد الرياضي التلاغمة للجودو">
+  <title>UST JUDO TELEGHMA | النادي الرياضي للجودو</title>
+  <style>
+    :root {
+      --navy: #102c46;
+      --red: #d62839;
+      --gold: #f2bd54;
+      --light: #f4f7fa;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Arial, Tahoma, sans-serif;
+      color: #203247;
+      line-height: 1.8;
+      background: var(--light);
+    }
+    header {
+      background: var(--navy);
+      color: white;
+      padding: 15px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand { font-size: 19px; font-weight: bold; }
+    nav { display: flex; gap: 16px; flex-wrap: wrap; }
+    nav a { color: white; text-decoration: none; }
+    .hero {
+      color: white;
+      text-align: center;
+      padding: 75px 20px;
+      background: linear-gradient(135deg, #102c46, #20557a);
+    }
+    .emblem {
+      width: 100px; height: 100px;
+      margin: 0 auto 15px;
+      border: 3px solid var(--gold);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 48px;
+    }
+    h1 { font-size: clamp(28px, 6vw, 43px); line-height: 1.4; }
+    .hero p { font-size: 18px; }
+    .btn {
+      display: inline-block;
+      padding: 11px 22px;
+      margin: 8px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      background: var(--red);
+      color: white;
+      border: 0;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn-light { background: white; color: var(--navy); }
+    main { max-width: 1000px; margin: auto; padding: 25px 16px; }
+    section {
+      background: white;
+      padding: 25px;
+      margin: 22px 0;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px #102c4610;
+    }
+    h2 { color: var(--navy); margin-top: 0; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 15px;
+    }
+    .card {
+      background: #f4f7fa;
+      border-right: 4px solid var(--red);
+      border-radius: 8px;
+      padding: 17px;
+    }
+    form { display: grid; gap: 13px; }
+    label { font-weight: bold; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid #cbd5df;
+      border-radius: 7px;
+      font: inherit;
+      background: white;
+    }
+    .notice {
+      padding: 12px;
+      background: #fff4d8;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    footer {
+      text-align: center;
+      background: var(--navy);
+      color: white;
+      padding: 22px 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">🥋 UST JUDO TELEGHMA</div>
+    <nav>
+      <a href="#about">عن النادي</a>
+      <a href="#training">التدريب</a>
+      <a href="#register">التسجيل</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="emblem">🥋</div>
+    <h1>الاتحاد الرياضي التلاغمة للجودو</h1>
+    <p>الانضباط • الاحترام • القوة • روح الفريق</p>
+    <a class="btn" href="#register">طلب التسجيل</a>
+    <a class="btn btn-light" href="#about">اكتشف النادي</a>
+  </div>
+
+  <main>
+    <section id="about">
+      <h2>مرحبًا بكم في نادينا</h2>
+      <p>
+        مرحبًا بكم في الموقع الإلكتروني لنادي UST JUDO TELEGHMA.
+        نعمل على تشجيع ممارسة الجودو وتنمية اللياقة البدنية
+        والانضباط والاحترام لدى الرياضيين.
+      </p>
+    </section>
+
+    <section id="training">
+      <h2>لماذا تمارس الجودو؟</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>💪 اللياقة البدنية</h3>
+          <p>تنمية القوة والتوازن والمرونة.</p>
+        </div>
+        <div class="card">
+          <h3>🎯 الانضباط</h3>
+          <p>تعلم التركيز والالتزام واحترام الآخرين.</p>
+        </div>
+        <div class="card">
+          <h3>🏅 التطور الرياضي</h3>
+          <p>تطوير المهارات والتقدم في مستويات الجودو.</p>
+        </div>
+      </div>
+      <p>للحصول على أوقات التدريب والفئات العمرية، يرجى التواصل مع إدارة النادي.</p>
+    </section>
+
+    <section id="register">
+      <h2>استمارة طلب التسجيل</h2>
+      <p>املأ المعلومات التالية لإعداد طلب الانضمام إلى النادي.</p>
+      <p class="notice">
+        تنبيه: هذه استمارة تجريبية للواجهة فقط. لا ترسل البيانات إلى الإدارة
+        ولا تحفظها في قاعدة بيانات. لا تدخل معلومات شخصية حقيقية قبل إعداد
+        نظام إرسال وتخزين آمن.
+      </p>
+
+      <form id="registrationForm">
+        <h3>معلومات الرياضي</h3>
+        <label>الاسم واللقب
+          <input name="athleteName" required autocomplete="name">
+        </label>
+        <label>تاريخ الميلاد
+          <input type="date" name="birthDate" required>
+        </label>
+        <label>مكان الميلاد
+          <input name="birthPlace" required>
+        </label>
+        <label>الجنس
+          <select name="gender" required>
+            <option value="">اختر</option>
+            <option>ذكر</option>
+            <option>أنثى</option>
+          </select>
+        </label>
+        <label>مكان الإقامة
+          <input name="residence" required>
+        </label>
+        <label>هل سبق لك ممارسة الجودو؟
+          <select name="previousJudo" required>
+            <option value="">اختر</option>
+            <option>نعم</option>
+            <option>لا</option>
+          </select>
+        </label>
+        <label>الحزام الحالي إن وجد
+          <select name="belt">
+            <option value="">لا يوجد / لم أحدد</option>
+            <option>أبيض</option>
+            <option>أصفر</option>
+            <option>برتقالي</option>
+            <option>أخضر</option>
+            <option>أزرق</option>
+            <option>بني</option>
+            <option>أسود</option>
+          </select>
+        </label>
+
+        <h3>معلومات الولي</h3>
+        <label>اسم الولي ولقبه
+          <input name="guardianName" required>
+        </label>
+        <label>رقم هاتف الولي
+          <input type="tel" name="guardianPhone" required autocomplete="tel">
+        </label>
+
+        <button class="btn" type="submit">تجربة إرسال الطلب</button>
+        <p id="formMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>UST JUDO TELEGHMA</strong></p>
+    <p>النادي الرياضي الهاوي الاتحاد الرياضي التلاغمة</p>
+    <p>© <span id="year"></span> جميع الحقوق محفوظة</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
+
+    document.getElementById("registrationForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      document.getElementById("formMessage").textContent =
+        "هذه نسخة تجريبية فقط. لم يتم إرسال الطلب أو حفظه. يرجى انتظار تفعيل نظام التسجيل.";
+    });
+  </script>
+</body>
+</html>
