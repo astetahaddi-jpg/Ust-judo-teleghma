@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -38,30 +37,58 @@
       gap: 12px;
     }
 
-    .brand { font-size: 19px; font-weight: bold; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .brand-logo {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: white;
+      padding: 3px;
+      border: 2px solid var(--gold);
+    }
 
     nav { display: flex; gap: 16px; flex-wrap: wrap; }
     nav a { color: white; text-decoration: none; }
+    nav a:hover { color: var(--gold); }
 
     .hero {
       color: white;
       text-align: center;
-      padding: 65px 20px;
+      padding: 45px 20px 65px;
       background: linear-gradient(135deg, #102c46, #20557a);
     }
 
     .emblem {
-      width: 100px;
-      height: 100px;
+      width: 150px;
+      height: 150px;
       margin: 0 auto 15px;
       border: 3px solid var(--gold);
       border-radius: 50%;
       display: grid;
       place-items: center;
-      font-size: 48px;
+      background: white;
+      overflow: hidden;
+      padding: 8px;
     }
 
-    h1 { font-size: clamp(28px, 6vw, 43px); line-height: 1.4; }
+    .emblem img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    h1 {
+      font-size: clamp(28px, 6vw, 43px);
+      line-height: 1.4;
+    }
 
     .hero p { font-size: 18px; }
 
@@ -83,7 +110,11 @@
     .btn:disabled { opacity: 0.6; cursor: wait; }
     .btn-light { background: white; color: var(--navy); }
 
-    main { max-width: 1000px; margin: auto; padding: 25px 16px; }
+    main {
+      max-width: 1000px;
+      margin: auto;
+      padding: 25px 16px;
+    }
 
     section {
       background: white;
@@ -109,7 +140,6 @@
     }
 
     form { display: grid; gap: 13px; }
-
     label { font-weight: bold; }
 
     input, select {
@@ -141,24 +171,46 @@
       color: white;
       padding: 22px 12px;
     }
+
+    @media (max-width: 600px) {
+      header { justify-content: center; }
+      .brand { justify-content: center; }
+      nav { justify-content: center; gap: 10px; }
+      .emblem { width: 125px; height: 125px; }
+      section { padding: 18px; }
+    }
   </style>
 </head>
 
 <body>
   <header>
-    <div class="brand">🥋 UST JUDO TELEGHMA</div>
+    <div class="brand">
+      <img
+        class="brand-logo"
+        src="./Logo.png"
+        alt="شعار نادي الاتحاد الرياضي التلاغمة للجودو"
+        onerror="this.style.display='none'"
+      >
+      <span>UST JUDO TELEGHMA</span>
+    </div>
+
     <nav>
       <a href="#about">عن النادي</a>
       <a href="#training">التدريب</a>
       <a href="#register">التسجيل</a>
-     
-<a href="admin.html">دخول المدير (Admin Login)</a>
- 
+      <a href="admin.html">دخول المدير (Admin Login)</a>
     </nav>
   </header>
 
   <div class="hero">
-    <div class="emblem">🥋</div>
+    <div class="emblem">
+      <img
+        src="./Logo.png"
+        alt="شعار نادي الجودو"
+        onerror="this.parentElement.innerHTML='🥋'"
+      >
+    </div>
+
     <h1>الاتحاد الرياضي التلاغمة للجودو</h1>
     <p>الانضباط • الاحترام • القوة • روح الفريق</p>
     <a class="btn" href="#register">طلب التسجيل</a>
@@ -191,7 +243,10 @@
           <p>تطوير المهارات والتقدم في مستويات الجودو.</p>
         </div>
       </div>
-      <p>للحصول على أوقات التدريب والفئات العمرية، يرجى التواصل مع إدارة النادي.</p>
+      <p>
+        للحصول على أوقات التدريب والفئات العمرية،
+        يرجى التواصل مع إدارة النادي.
+      </p>
     </section>
 
     <section id="register">
@@ -298,7 +353,8 @@
       if (!form.reportValidity()) return;
 
       const fields = new FormData(form);
-      const get = name => (fields.get(name) || "").toString().trim();
+      const get = name =>
+        (fields.get(name) || "").toString().trim();
 
       const data = {
         athlete_name: get("athleteName"),
