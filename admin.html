@@ -4,537 +4,423 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#102c46">
-<title>إدارة النادي | UST JUDO TELEGHMA</title>
+<title>UST JUDO TELEGHMA - Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--navy:#102c46;--red:#d62839;--gold:#f2bd54;--bg:#f3f6fa;--green:#16834a}
+:root{--navy:#102c46;--red:#d62839;--gold:#f2bd54;--light:#f4f7fa}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:#172b40;font-family:Arial,Tahoma,sans-serif}
-button,input,select{font:inherit}
-button{cursor:pointer;border:0;border-radius:9px;padding:11px 15px;background:var(--navy);color:white}
-button:disabled{opacity:.5;cursor:wait}
-input,select{padding:11px;border:1px solid #cbd5e1;border-radius:8px;background:white;width:100%;min-width:0}
-label{display:block;font-size:13px;margin-bottom:6px;font-weight:bold}
-header{background:var(--navy);color:white;padding:18px 16px}
-header h1{font-size:21px;margin:0 0 7px}
-header p{margin:0;color:#d9e4ef;font-size:13px}
-.wrap{max-width:1250px;margin:auto;padding:16px}
-.panel,.stat{background:white;border:1px solid #e1e7ef;border-radius:14px;padding:16px;margin-bottom:15px}
-h2{font-size:19px;margin:0 0 15px}
-.muted{color:#65758a;font-size:13px;line-height:1.7}
-.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.row>*{flex:1}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.stat small{display:block;color:#65758a;margin-bottom:8px}
-.stat strong{font-size:22px}
-nav{display:flex;gap:8px;overflow-x:auto;padding:12px 0}
-nav button{white-space:nowrap;background:white;color:var(--navy);border:1px solid #dbe2ea}
-nav button.active{background:var(--navy);color:white}
-.tablebox{overflow:auto;border:1px solid #e1e7ef;border-radius:10px}
-table{border-collapse:collapse;background:white;width:100%;min-width:820px}
-th,td{padding:10px 8px;border-bottom:1px solid #e8edf3;text-align:center;font-size:13px;white-space:nowrap}
-th{background:#edf2f8;color:#20374d}
-th:first-child,td:first-child{text-align:right}
-td input{min-width:100px}
-.pay{width:37px;height:37px;padding:0;border-radius:9px;font-weight:bold;font-size:17px}
-.paid{background:#d9f7e5;color:#126d3b;border:1px solid #8bd7a8}
-.unpaid{background:#ffe1e3;color:#a21e2b;border:1px solid #f2a8ae}
-.neutral{background:#e8edf3;color:#526174}
-.primary{background:var(--navy)}
-.secondary{background:#e7edf5;color:var(--navy)}
-.danger{background:#b42332}
+body{margin:0;font-family:Arial,sans-serif;background:var(--light);color:#172b3a}
+header{background:var(--navy);color:white;padding:20px;text-align:center}
+header h1{margin:0 0 8px;font-size:23px}
+main{max-width:1100px;margin:20px auto;padding:12px}
+.card{background:white;border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px #0000000d}
+input,select,button{font:inherit;padding:11px;border-radius:7px;border:1px solid #ccd5df;margin:4px 0}
+input,select{max-width:100%;width:100%}
+button{background:var(--navy);color:white;border:0;cursor:pointer}
+button:hover{opacity:.9}
+button.red{background:var(--red)}
+button.gold{background:#a56b00}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}
+nav button{flex:1;min-width:120px}
 .hidden{display:none!important}
-.notice{padding:12px;border-radius:9px;background:#fff4d8;color:#76520c;margin:10px 0;line-height:1.7}
-.status{font-size:13px;margin:10px 0;white-space:pre-wrap}
-footer{text-align:center;padding:20px;color:#718096;font-size:12px}
-@media(max-width:650px){.grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.wrap{padding:10px}.panel{padding:12px}header h1{font-size:18px}}
+.notice{padding:12px;background:#fff3cd;border-radius:8px;margin:10px 0}
+.status{font-weight:bold}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;background:white;min-width:650px}
+th,td{border:1px solid #dce3e9;padding:9px;text-align:center}
+th{background:var(--navy);color:white}
+.paid{background:#d9f5e3;color:#126b38}
+.unpaid{background:#ffe0e0;color:#9b1c1c}
+.small{font-size:13px;color:#586777}
+h2{color:var(--navy)}
+a{color:var(--navy)}
 </style>
 </head>
 <body>
 <header>
   <h1>UST JUDO TELEGHMA</h1>
-  <p id="subtitle">منصة إدارة الرياضيين والاشتراكات</p>
+  <div>لوحة إدارة النادي الرياضي الهاوي الاتحاد الرياضي التلاغمة</div>
+  <div class="small" style="color:#fff;margin-top:7px">Admin Dashboard</div>
 </header>
 
-<main class="wrap">
-  <section id="login" class="panel">
-    <h2 id="loginTitle">دخول المدير</h2>
-    <p class="muted" id="loginHint">أدخل البريد الإلكتروني وكلمة مرور حساب المدير في Supabase.</p>
-    <div class="grid">
-      <div>
-        <label id="emailLabel">البريد الإلكتروني</label>
-        <input id="email" type="email" autocomplete="username" placeholder="admin@example.com">
-      </div>
-      <div>
-        <label id="passwordLabel">كلمة المرور</label>
-        <input id="password" type="password" autocomplete="current-password">
-      </div>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <button id="loginBtn" onclick="login()">دخول</button>
-      <button class="secondary" onclick="changeLang()" id="langLogin">Français</button>
-    </div>
-    <p id="loginStatus" class="status"></p>
+<main>
+  <section id="loginCard" class="card">
+    <h2>دخول المدير | Admin Login</h2>
+    <p>استعمل البريد الإلكتروني وكلمة المرور المسجلين في Supabase Authentication.</p>
+    <label for="email">البريد الإلكتروني | Email</label>
+    <input id="email" type="email" autocomplete="username" placeholder="admin@example.com">
+    <label for="password">كلمة المرور | Password</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="Password">
+    <button id="loginBtn">دخول | Login</button>
+    <p id="loginMessage" role="status"></p>
   </section>
 
-  <section id="app" class="hidden">
-    <div class="row" style="margin-bottom:12px">
-      <span id="welcome" class="muted">لوحة الإدارة</span>
-      <button class="secondary" onclick="changeLang()" id="langApp" style="flex:0 0 auto">Français</button>
-      <button class="danger" onclick="logout()" id="logoutBtn" style="flex:0 0 auto">خروج</button>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><small id="sAthletes">عدد الرياضيين</small><strong id="countAthletes">0</strong></div>
-      <div class="stat"><small id="sPaid">اشتراكات الأشهر المدفوعة</small><strong id="countPaid">0</strong></div>
-      <div class="stat"><small id="sDebt">مستحقات الأشهر غير المدفوعة</small><strong id="countDebt">0 دج</strong></div>
+  <section id="dashboard" class="hidden">
+    <div class="card">
+      <div class="row" style="align-items:center">
+        <div><strong>لوحة الإدارة | Dashboard</strong><div id="who" class="small"></div></div>
+        <button id="logoutBtn" class="red">تسجيل الخروج | Logout</button>
+      </div>
     </div>
 
     <nav>
-      <button class="active" data-tab="subs" onclick="showTab('subs',this)" id="navSubs">الاشتراكات</button>
-      <button data-tab="athletes" onclick="showTab('athletes',this)" id="navAthletes">الرياضيون</button>
-      <button data-tab="insurance" onclick="showTab('insurance',this)" id="navInsurance">التأمين</button>
-      <button data-tab="exams" onclick="showTab('exams',this)" id="navExams">امتحانات الأحزمة</button>
+      <button data-tab="athletes">الرياضيون | Athletes</button>
+      <button data-tab="subscriptions">الاشتراكات | Subscriptions</button>
+      <button data-tab="insurance">التأمين | Insurance</button>
+      <button data-tab="exams">امتحانات الأحزمة | Belt Exams</button>
     </nav>
 
-    <p id="appStatus" class="status"></p>
+    <section id="tab-athletes" class="card">
+      <h2>إضافة رياضي | Add Athlete</h2>
+      <input id="athleteId" type="hidden">
+      <div class="row">
+        <div><label for="firstName">الاسم | First name</label><input id="firstName" placeholder="الاسم"></div>
+        <div><label for="lastName">اللقب | Last name</label><input id="lastName" placeholder="اللقب"></div>
+      </div>
+      <button id="saveAthlete">حفظ الرياضي | Save Athlete</button>
+      <button id="cancelEdit" class="gold hidden">إلغاء التعديل | Cancel</button>
+      <p id="athleteMessage" role="status"></p>
+      <hr>
+      <div class="row">
+        <input id="athleteSearch" placeholder="ابحث بالاسم أو اللقب | Search">
+        <button id="refreshAthletes">تحديث القائمة | Refresh</button>
+        <button id="exportAthletes">تصدير Excel (CSV)</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الاسم واللقب | Name</th><th>إجراء | Action</th></tr></thead>
+        <tbody id="athletesBody"></tbody>
+      </table></div>
+    </section>
 
-    <section id="tab-subs" class="panel">
-      <h2 id="subsTitle">جدول الاشتراكات الشهرية</h2>
-      <p class="muted" id="subsHint">اضغط على خانة الشهر لتغيير حالتها. الأخضر مدفوع والأحمر غير مدفوع. كل شهر 1,000 دج.</p>
-      <div class="row" style="margin-bottom:12px">
-        <div>
-          <label id="seasonLabel">بداية الموسم الرياضي</label>
-          <select id="season" onchange="loadAll()"></select>
+    <section id="tab-subscriptions" class="card hidden">
+      <h2>الاشتراكات الشهرية | Monthly Subscriptions</h2>
+      <p>المبلغ الشهري: 1000 دج. الموسم يمتد من سبتمبر إلى جويلية (11 شهرًا = 11000 دج).</p>
+      <div class="row">
+        <div><label for="seasonYear">سنة بداية الموسم | Season start year</label>
+          <input id="seasonYear" type="number" min="2000" max="2100">
         </div>
-        <div>
-          <label id="searchLabel">بحث عن رياضي</label>
-          <input id="search" oninput="renderSubs()" placeholder="اكتب الاسم أو اللقب">
-        </div>
+        <div><label for="subSearch">بحث | Search</label><input id="subSearch" placeholder="الاسم أو اللقب"></div>
       </div>
-      <div class="row" style="margin-bottom:12px">
-        <button onclick="exportCSV()" id="exportBtn">تنزيل Excel</button>
-        <button class="secondary" onclick="loadAll()" id="refreshBtn">تحديث البيانات</button>
-      </div>
-      <div class="tablebox">
-        <table>
-          <thead><tr id="subsHead"></tr></thead>
-          <tbody id="subsBody"></tbody>
-        </table>
-      </div>
-      <p class="muted" id="exportHint">يمكن فتح الملف الناتج باستخدام Excel.</p>
+      <button id="loadSubscriptions">عرض الاشتراكات | Load</button>
+      <button id="exportSubscriptions">تصدير CSV</button>
+      <div id="subMessage" role="status"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الاسم واللقب</th><th>سبتمبر</th><th>أكتوبر</th><th>نوفمبر</th><th>ديسمبر</th><th>جانفي</th><th>فيفري</th><th>مارس</th><th>أفريل</th><th>ماي</th><th>جوان</th><th>جويلية</th><th>المدفوع</th><th>الدين</th></tr></thead>
+        <tbody id="subsBody"></tbody>
+      </table></div>
     </section>
 
-    <section id="tab-athletes" class="panel hidden">
-      <h2 id="athletesTitle">إدارة الرياضيين</h2>
-      <div class="grid">
-        <div><label id="firstLabel">الاسم</label><input id="firstName"></div>
-        <div><label id="lastLabel">اللقب</label><input id="lastName"></div>
+    <section id="tab-insurance" class="card hidden">
+      <h2>التأمين السنوي | Annual Insurance</h2>
+      <p>قيمة التأمين: 1000 دج لكل رياضي في السنة.</p>
+      <div class="row">
+        <input id="insuranceYear" type="number" min="2000" max="2100">
+        <input id="insuranceSearch" placeholder="ابحث بالاسم أو اللقب">
       </div>
-      <input type="hidden" id="editId">
-      <div class="row" style="margin-top:12px">
-        <button onclick="saveAthlete()" id="saveAthleteBtn">إضافة رياضي</button>
-        <button class="secondary" onclick="clearAthleteForm()" id="cancelEditBtn">إلغاء / مسح</button>
-      </div>
-      <p class="muted" id="athletesHint">يمكنك تعديل الاسم واللقب دون حذف سجل الاشتراكات.</p>
-      <div class="tablebox">
-        <table>
-          <thead><tr><th id="thName">اسم ولقب الرياضي</th><th id="thActions">الإجراءات</th></tr></thead>
-          <tbody id="athletesBody"></tbody>
-        </table>
-      </div>
+      <button id="loadInsurance">عرض التأمين | Load</button>
+      <button id="exportInsurance">تصدير CSV</button>
+      <div id="insuranceMessage" role="status"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الاسم واللقب</th><th>السنة</th><th>المبلغ</th><th>الحالة</th><th>تغيير الحالة</th></tr></thead>
+        <tbody id="insuranceBody"></tbody>
+      </table></div>
     </section>
 
-    <section id="tab-insurance" class="panel hidden">
-      <h2 id="insuranceTitle">التأمين السنوي</h2>
-      <p class="muted" id="insuranceHint">التأمين 1,000 دج لكل رياضي في السنة. اضغط على الحالة لتبديلها.</p>
-      <div class="row" style="margin-bottom:12px">
-        <div><label id="yearLabel">السنة</label><select id="insuranceYear"></select></div>
-        <button onclick="loadInsurance()" id="insuranceRefresh">تحديث</button>
+    <section id="tab-exams" class="card hidden">
+      <h2>امتحانات الأحزمة | Belt Exams</h2>
+      <p>رسوم الامتحان بين 700 و1500 دج حسب الحزام. يوجد امتحانان في السنة.</p>
+      <div class="row">
+        <div><label for="examAthlete">الرياضي | Athlete</label><select id="examAthlete"></select></div>
+        <div><label for="examYear">السنة | Year</label><input id="examYear" type="number" min="2000" max="2100"></div>
+        <div><label for="examNumber">رقم الامتحان | Exam</label><select id="examNumber"><option value="1">الأول | 1</option><option value="2">الثاني | 2</option></select></div>
+        <div><label for="beltName">الحزام | Belt</label><input id="beltName" placeholder="مثال: أصفر / Yellow"></div>
+        <div><label for="examAmount">المبلغ بالدينار | Amount DZD</label><input id="examAmount" type="number" min="700" max="1500" value="700"></div>
       </div>
-      <div class="tablebox"><table><thead><tr id="insuranceHead"></tr></thead><tbody id="insuranceBody"></tbody></table></div>
+      <button id="saveExam">حفظ الامتحان | Save Exam</button>
+      <p id="examMessage" role="status"></p>
+      <button id="loadExams">عرض الامتحانات | Load Exams</button>
+      <button id="exportExams">تصدير CSV</button>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الاسم واللقب</th><th>السنة</th><th>الامتحان</th><th>الحزام</th><th>المبلغ</th><th>الحالة</th><th>تغيير الحالة</th></tr></thead>
+        <tbody id="examsBody"></tbody>
+      </table></div>
     </section>
 
-    <section id="tab-exams" class="panel hidden">
-      <h2 id="examsTitle">حقوق امتحان الأحزمة</h2>
-      <p class="muted" id="examsHint">رسوم الامتحان من 700 إلى 1,500 دج حسب الحزام، مرتان في السنة.</p>
-      <div class="grid">
-        <div><label id="examAthleteLabel">الرياضي</label><select id="examAthlete"></select></div>
-        <div><label id="examYearLabel">السنة</label><select id="examYear"></select></div>
-        <div><label id="examNumberLabel">رقم الامتحان</label><select id="examNumber"><option value="1">1</option><option value="2">2</option></select></div>
-        <div><label id="beltLabel">الحزام</label><input id="beltName" placeholder="مثال: أصفر / Jaune"></div>
-        <div><label id="amountLabel">المبلغ بالدينار</label><input id="examAmount" type="number" min="700" max="1500" step="100" value="700"></div>
-      </div>
-      <div class="row" style="margin-top:12px">
-        <button onclick="saveExam()" id="saveExamBtn">حفظ رسم الامتحان</button>
-        <button class="secondary" onclick="loadExams()" id="examRefresh">تحديث القائمة</button>
-      </div>
-      <div class="tablebox" style="margin-top:14px"><table><thead><tr id="examHead"></tr></thead><tbody id="examBody"></tbody></table></div>
-    </section>
+    <div class="card small">
+      يجب تفعيل سياسات RLS الآمنة في Supabase قبل استخدام البيانات. لا تُعطِ صلاحيات التعديل العامة للزوار.
+    </div>
   </section>
 </main>
-<footer>UST JUDO TELEGHMA · L’administration du club</footer>
 
 <script>
-/* ضع رابط مشروعك والمفتاح العام هنا */
 const SUPABASE_URL = "https://jtvorszomguszvygbxbs.supabase.co";
-const SUPABASE_PUBLIC_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY_HERE";
-
+const SUPABASE_PUBLIC_KEY = "sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
 
 const months = [
-  ["september","سبتمبر","Septembre"],
-  ["october","أكتوبر","Octobre"],
-  ["november","نوفمبر","Novembre"],
-  ["december","ديسمبر","Décembre"],
-  ["january","جانفي","Janvier"],
-  ["february","فيفري","Février"],
-  ["march","مارس","Mars"],
-  ["april","أفريل","Avril"],
-  ["may","ماي","Mai"],
-  ["june","جوان","Juin"],
-  ["july","جويلية","Juillet"]
+  ["september","سبتمبر"],["october","أكتوبر"],["november","نوفمبر"],
+  ["december","ديسمبر"],["january","جانفي"],["february","فيفري"],
+  ["march","مارس"],["april","أفريل"],["may","ماي"],
+  ["june","جوان"],["july","جويلية"]
 ];
-
-let lang = "ar";
 let athletes = [];
 let subscriptions = [];
 let insuranceRows = [];
 let examRows = [];
+let currentTab = "athletes";
 
-const words = {
-ar:{
-subtitle:"منصة إدارة الرياضيين والاشتراكات",loginTitle:"دخول المدير",
-loginHint:"أدخل البريد الإلكتروني وكلمة مرور حساب المدير في Supabase.",
-emailLabel:"البريد الإلكتروني",passwordLabel:"كلمة المرور",loginBtn:"دخول",
-lang:"Français",logoutBtn:"خروج",welcome:"لوحة الإدارة",
-sAthletes:"عدد الرياضيين",sPaid:"اشتراكات الأشهر المدفوعة",sDebt:"ديون الاشتراكات الشهرية",
-navSubs:"الاشتراكات",navAthletes:"الرياضيون",navInsurance:"التأمين",navExams:"امتحانات الأحزمة",
-subsTitle:"جدول الاشتراكات الشهرية",subsHint:"اضغط على خانة الشهر لتغيير حالتها. الأخضر مدفوع والأحمر غير مدفوع. كل شهر 1,000 دج.",
-seasonLabel:"بداية الموسم الرياضي",searchLabel:"بحث عن رياضي",exportBtn:"تنزيل Excel",refreshBtn:"تحديث البيانات",
-exportHint:"يمكن فتح الملف الناتج باستخدام Excel.",athletesTitle:"إدارة الرياضيين",
-firstLabel:"الاسم",lastLabel:"اللقب",saveAthleteBtn:"إضافة رياضي",cancelEditBtn:"إلغاء / مسح",
-athletesHint:"يمكنك تعديل الاسم واللقب دون حذف سجل الاشتراكات.",thName:"اسم ولقب الرياضي",thActions:"الإجراءات",
-insuranceTitle:"التأمين السنوي",insuranceHint:"التأمين 1,000 دج لكل رياضي في السنة. اضغط على الحالة لتبديلها.",
-yearLabel:"السنة",insuranceRefresh:"تحديث",examsTitle:"حقوق امتحان الأحزمة",
-examsHint:"رسوم الامتحان من 700 إلى 1,500 دج حسب الحزام، مرتان في السنة.",
-examAthleteLabel:"الرياضي",examYearLabel:"السنة",examNumberLabel:"رقم الامتحان",beltLabel:"الحزام",
-amountLabel:"المبلغ بالدينار",saveExamBtn:"حفظ رسم الامتحان",examRefresh:"تحديث القائمة",
-paid:"مدفوع",unpaid:"غير مدفوع",edit:"تعديل",save:"حفظ التعديل",cancel:"إلغاء",
-name:"اسم ولقب الرياضي",actions:"الإجراءات",month:"الشهر",amount:"المبلغ",
-date:"تاريخ الدفع",exam:"الامتحان",belt:"الحزام",loading:"جارٍ تحميل البيانات...",
-noAthletes:"لا يوجد رياضيون. أضف أول رياضي من قسم الرياضيين.",
-empty:"لا توجد بيانات بعد.",missingKey:"أضف مفتاح Supabase العام في الكود أولًا.",
-badLogin:"تعذر تسجيل الدخول. تحقق من البريد وكلمة المرور.",loadError:"تعذر تحميل البيانات: ",
-saveError:"تعذر الحفظ: ",saved:"تم الحفظ بنجاح.",confirm:"هل تريد تغيير حالة الدفع؟",
-needNames:"يرجى إدخال الاسم واللقب.",needExam:"اختر الرياضي واكتب اسم الحزام والمبلغ بين 700 و1500 دج.",
-editName:"تعديل الاسم",paidShort:"✓ مدفوع",unpaidShort:"✕ غير مدفوع",
-csvName:"اشتراكات_الجودو",season:"الموسم",noAdmin:"تم تسجيل الدخول، لكن قد تحتاج الجداول إلى سياسات صلاحيات المدير في Supabase."
-},
-fr:{
-subtitle:"Gestion des athlètes et des cotisations",loginTitle:"Connexion administrateur",
-loginHint:"Entrez l’adresse e-mail et le mot de passe du compte administrateur Supabase.",
-emailLabel:"Adresse e-mail",passwordLabel:"Mot de passe",loginBtn:"Connexion",
-lang:"العربية",logoutBtn:"Déconnexion",welcome:"Administration",
-sAthletes:"Nombre d’athlètes",sPaid:"Mois payés",sDebt:"Cotisations mensuelles dues",
-navSubs:"Cotisations",navAthletes:"Athlètes",navInsurance:"Assurance",navExams:"Examens de ceinture",
-subsTitle:"Tableau des cotisations mensuelles",subsHint:"Touchez une case pour changer son statut. Vert = payé, rouge = impayé. 1 000 DA par mois.",
-seasonLabel:"Année de début de saison",searchLabel:"Rechercher un athlète",exportBtn:"Exporter vers Excel",refreshBtn:"Actualiser",
-exportHint:"Le fichier peut être ouvert avec Excel.",athletesTitle:"Gestion des athlètes",
-firstLabel:"Prénom",lastLabel:"Nom",saveAthleteBtn:"Ajouter un athlète",cancelEditBtn:"Annuler / Effacer",
-athletesHint:"Vous pouvez modifier le nom sans supprimer les cotisations.",thName:"Nom complet",thActions:"Actions",
-insuranceTitle:"Assurance annuelle",insuranceHint:"Assurance : 1 000 DA par athlète et par an. Touchez le statut pour le modifier.",
-yearLabel:"Année",insuranceRefresh:"Actualiser",examsTitle:"Frais d’examen de ceinture",
-examsHint:"Frais de 700 à 1 500 DA selon la ceinture, deux examens par an.",
-examAthleteLabel:"Athlète",examYearLabel:"Année",examNumberLabel:"Numéro d’examen",beltLabel:"Ceinture",
-amountLabel:"Montant en DA",saveExamBtn:"Enregistrer les frais",examRefresh:"Actualiser la liste",
-paid:"Payé",unpaid:"Impayé",edit:"Modifier",save:"Enregistrer",cancel:"Annuler",
-name:"Nom complet",actions:"Actions",month:"Mois",amount:"Montant",
-date:"Date de paiement",exam:"Examen",belt:"Ceinture",loading:"Chargement...",
-noAthletes:"Aucun athlète. Ajoutez le premier dans la section Athlètes.",
-empty:"Aucune donnée.",missingKey:"Ajoutez d’abord la clé publique Supabase dans le code.",
-badLogin:"Connexion impossible. Vérifiez l’e-mail et le mot de passe.",loadError:"Erreur de chargement : ",
-saveError:"Erreur d’enregistrement : ",saved:"Enregistré avec succès.",confirm:"Changer le statut du paiement ?",
-needNames:"Veuillez saisir le prénom et le nom.",needExam:"Choisissez l’athlète, la ceinture et un montant entre 700 et 1 500 DA.",
-editName:"Modifier le nom",paidShort:"✓ Payé",unpaidShort:"✕ Impayé",
-csvName:"cotisations_judo",season:"Saison",noAdmin:"Connecté, mais les politiques d’accès aux tables doivent être configurées dans Supabase."
-}
-};
-function t(k){return words[lang][k]||k}
-function status(msg){document.getElementById("appStatus").textContent=msg}
-function setLoginStatus(msg){document.getElementById("loginStatus").textContent=msg}
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+const fullName = a => `${a.first_name || ""} ${a.last_name || ""}`.trim();
+const errText = e => e?.message || String(e || "حدث خطأ غير معروف");
+const yearNow = new Date().getFullYear();
+$("seasonYear").value = yearNow;
+$("insuranceYear").value = yearNow;
+$("examYear").value = yearNow;
 
-function changeLang(){
-  lang=lang==="ar"?"fr":"ar";
-  document.documentElement.lang=lang;
-  document.documentElement.dir=lang==="ar"?"rtl":"ltr";
-  const ids=["subtitle","loginTitle","loginHint","emailLabel","passwordLabel","loginBtn","logoutBtn","welcome","sAthletes","sPaid","sDebt","navSubs","navAthletes","navInsurance","navExams","subsTitle","subsHint","seasonLabel","searchLabel","exportBtn","refreshBtn","exportHint","athletesTitle","firstLabel","lastLabel","saveAthleteBtn","cancelEditBtn","athletesHint","thName","thActions","insuranceTitle","insuranceHint","yearLabel","insuranceRefresh","examsTitle","examsHint","examAthleteLabel","examYearLabel","examNumberLabel","beltLabel","amountLabel","saveExamBtn","examRefresh"];
-  ids.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=t(id)});
-  document.getElementById("langLogin").textContent=t("lang");
-  document.getElementById("langApp").textContent=t("lang");
-  renderSubs();renderAthletes();renderInsurance();renderExams();updateStats();
-}
+function showMessage(id, text) { $(id).textContent = text || ""; }
 
-function fillYears(){
-  const now=new Date().getFullYear();
-  const season=document.getElementById("season");
-  for(let y=now-2;y<=now+2;y++){
-    const o=document.createElement("option");o.value=y;o.textContent=y+"-"+(y+1);
-    if(y===now) o.selected=true;
-    season.appendChild(o);
-  }
-  ["insuranceYear","examYear"].forEach(id=>{
-    const s=document.getElementById(id);
-    for(let y=now-2;y<=now+2;y++){
-      const o=document.createElement("option");o.value=y;o.textContent=y;
-      if(y===now)o.selected=true;s.appendChild(o);
-    }
-  });
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add("hidden"));
+  $("tab-" + tab).classList.remove("hidden");
 }
-fillYears();
-
-async function login(){
-  if(SUPABASE_PUBLIC_KEY.includes("PASTE_YOUR")){
-    setLoginStatus(t("missingKey"));return;
-  }
-  const btn=document.getElementById("loginBtn");btn.disabled=true;
-  setLoginStatus(t("loading"));
-  const {error}=await db.auth.signInWithPassword({
-    email:document.getElementById("email").value.trim(),
-    password:document.getElementById("password").value
-  });
-  btn.disabled=false;
-  if(error){setLoginStatus(t("badLogin"));return}
-  setLoginStatus("");
-  await checkSession();
-}
-
-async function logout(){
-  await db.auth.signOut();
-  document.getElementById("app").classList.add("hidden");
-  document.getElementById("login").classList.remove("hidden");
-}
-async function checkSession(){
-  const {data}=await db.auth.getSession();
-  if(data.session){
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    await loadAll();
-  }
-}
-db.auth.onAuthStateChange((_event,session)=>{
-  if(!session){
-    document.getElementById("app").classList.add("hidden");
-    document.getElementById("login").classList.remove("hidden");
-  }
+document.querySelectorAll("nav button").forEach(btn => {
+  btn.addEventListener("click", () => setTab(btn.dataset.tab));
 });
-checkSession();
 
-function showTab(tab,btn){
-  document.querySelectorAll('[id^="tab-"]').forEach(e=>e.classList.add("hidden"));
-  document.getElementById("tab-"+tab).classList.remove("hidden");
-  document.querySelectorAll("nav button").forEach(e=>e.classList.remove("active"));
-  btn.classList.add("active");
-  if(tab==="insurance")loadInsurance();
-  if(tab==="exams")loadExams();
+async function checkSession() {
+  const {data, error} = await db.auth.getSession();
+  if (error) { showMessage("loginMessage", errText(error)); return; }
+  if (data.session) await enterDashboard(data.session.user);
 }
+async function enterDashboard(user) {
+  $("loginCard").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+  $("who").textContent = user.email || "Admin";
+  await loadAthletes();
+}
+$("loginBtn").addEventListener("click", async () => {
+  showMessage("loginMessage", "جارٍ تسجيل الدخول...");
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  if (!email || !password) { showMessage("loginMessage", "أدخل البريد الإلكتروني وكلمة المرور."); return; }
+  const {data, error} = await db.auth.signInWithPassword({email, password});
+  if (error) { showMessage("loginMessage", "تعذر الدخول: " + errText(error)); return; }
+  showMessage("loginMessage", "");
+  await enterDashboard(data.user);
+});
+$("logoutBtn").addEventListener("click", async () => {
+  await db.auth.signOut();
+  $("dashboard").classList.add("hidden");
+  $("loginCard").classList.remove("hidden");
+  $("password").value = "";
+  showMessage("loginMessage", "تم تسجيل الخروج.");
+});
 
-async function loadAll(){
-  status(t("loading"));
-  const [a,s]=await Promise.all([
-    db.from("athletes").select("*").order("last_name"),
-    db.from("season_subscriptions").select("*").eq("season_start_year",Number(document.getElementById("season").value))
-  ]);
-  if(a.error||s.error){
-    status(t("loadError")+(a.error?.message||s.error?.message)+"\n"+t("noAdmin"));
-    return;
+async function loadAthletes() {
+  const {data, error} = await db.from("athletes").select("*").order("last_name");
+  if (error) { showMessage("athleteMessage", "تعذر تحميل الرياضيين: " + errText(error)); return; }
+  athletes = data || [];
+  renderAthletes();
+  fillExamAthletes();
+}
+function renderAthletes() {
+  const q = $("athleteSearch").value.trim().toLowerCase();
+  const rows = athletes.filter(a => fullName(a).toLowerCase().includes(q));
+  $("athletesBody").innerHTML = rows.map(a => `<tr>
+    <td>${esc(fullName(a))}</td>
+    <td><button data-edit="${a.id}">تعديل الاسم | Edit</button></td>
+  </tr>`).join("") || `<tr><td colspan="2">لا يوجد رياضيون بعد.</td></tr>`;
+  $("athletesBody").querySelectorAll("[data-edit]").forEach(btn => btn.addEventListener("click", () => {
+    const a = athletes.find(x => String(x.id) === btn.dataset.edit);
+    if (!a) return;
+    $("athleteId").value = a.id;
+    $("firstName").value = a.first_name || "";
+    $("lastName").value = a.last_name || "";
+    $("cancelEdit").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }));
+}
+$("athleteSearch").addEventListener("input", renderAthletes);
+$("refreshAthletes").addEventListener("click", loadAthletes);
+$("cancelEdit").addEventListener("click", () => {
+  $("athleteId").value = "";
+  $("firstName").value = "";
+  $("lastName").value = "";
+  $("cancelEdit").classList.add("hidden");
+  showMessage("athleteMessage", "");
+});
+$("saveAthlete").addEventListener("click", async () => {
+  const first_name = $("firstName").value.trim();
+  const last_name = $("lastName").value.trim();
+  const id = $("athleteId").value;
+  if (!first_name || !last_name) { showMessage("athleteMessage", "أدخل الاسم واللقب."); return; }
+  let result;
+  if (id) result = await db.from("athletes").update({first_name,last_name}).eq("id",id);
+  else result = await db.from("athletes").insert({first_name,last_name});
+  if (result.error) { showMessage("athleteMessage", "تعذر الحفظ: " + errText(result.error)); return; }
+  $("athleteId").value = "";
+  $("firstName").value = "";
+  $("lastName").value = "";
+  $("cancelEdit").classList.add("hidden");
+  showMessage("athleteMessage", "تم الحفظ بنجاح.");
+  await loadAthletes();
+});
+
+async function ensureSubscriptions() {
+  const season = Number($("seasonYear").value);
+  for (const a of athletes) {
+    const {error} = await db.from("season_subscriptions").upsert({
+      athlete_id:a.id, season_start_year:season, monthly_fee:1000
+    }, {onConflict:"athlete_id,season_start_year", ignoreDuplicates:true});
+    if (error) throw error;
   }
-  athletes=a.data||[];
-  subscriptions=s.data||[];
-  const have=new Set(subscriptions.map(x=>x.athlete_id));
-  for(const a of athletes){
-    if(!have.has(a.id)){
-      const {error}=await db.from("season_subscriptions").insert({
-        athlete_id:a.id,season_start_year:Number(document.getElementById("season").value),monthly_fee:1000
-      });
-      if(error){status(t("saveError")+error.message);return}
+}
+async function loadSubscriptions() {
+  showMessage("subMessage", "جارٍ تحميل البيانات...");
+  try {
+    await loadAthletes();
+    await ensureSubscriptions();
+    const season = Number($("seasonYear").value);
+    const {data, error} = await db.from("season_subscriptions")
+      .select("*, athletes(id,first_name,last_name)")
+      .eq("season_start_year",season).order("id");
+    if (error) throw error;
+    subscriptions = data || [];
+    renderSubscriptions();
+    showMessage("subMessage", "");
+  } catch(e) { showMessage("subMessage", "تعذر تحميل الاشتراكات: " + errText(e)); }
+}
+function renderSubscriptions() {
+  const q = $("subSearch").value.trim().toLowerCase();
+  const rows = subscriptions.filter(s => fullName(s.athletes || {}).toLowerCase().includes(q));
+  $("subsBody").innerHTML = rows.map(s => {
+    const paidCount = months.filter(([key]) => s[key]).length;
+    const paid = paidCount * 1000;
+    const debt = (11 - paidCount) * 1000;
+    return `<tr><td>${esc(fullName(s.athletes || {}))}</td>` +
+      months.map(([key,label]) => `<td><button class="${s[key]?'paid':'unpaid'}" data-sub="${s.id}" data-month="${key}" aria-label="${label}">${s[key]?'مدفوع':'غير مدفوع'}</button></td>`).join("") +
+      `<td>${paid} دج</td><td>${debt} دج</td></tr>`;
+  }).join("") || `<tr><td colspan="14">لا توجد بيانات لهذا الموسم.</td></tr>`;
+  $("subsBody").querySelectorAll("[data-sub]").forEach(btn => btn.addEventListener("click", async () => {
+    const s = subscriptions.find(x => String(x.id) === btn.dataset.sub);
+    if (!s) return;
+    const key = btn.dataset.month;
+    const {error} = await db.from("season_subscriptions").update({[key]:!s[key]}).eq("id",s.id);
+    if (error) { showMessage("subMessage", "تعذر تحديث الحالة: " + errText(error)); return; }
+    await loadSubscriptions();
+  }));
+}
+$("loadSubscriptions").addEventListener("click", loadSubscriptions);
+$("subSearch").addEventListener("input", renderSubscriptions);
+
+async function loadInsurance() {
+  showMessage("insuranceMessage", "جارٍ تحميل البيانات...");
+  try {
+    await loadAthletes();
+    const year = Number($("insuranceYear").value);
+    for (const a of athletes) {
+      const {error} = await db.from("annual_insurance").upsert({
+        athlete_id:a.id, insurance_year:year, amount:1000
+      }, {onConflict:"athlete_id,insurance_year",ignoreDuplicates:true});
+      if (error) throw error;
     }
-  }
-  const refreshed=await db.from("season_subscriptions").select("*").eq("season_start_year",Number(document.getElementById("season").value));
-  if(refreshed.error){status(t("loadError")+refreshed.error.message);return}
-  subscriptions=refreshed.data||[];
-  renderSubs();renderAthletes();updateStats();fillExamAthletes();
-  status("");
+    const {data,error} = await db.from("annual_insurance")
+      .select("*, athletes(id,first_name,last_name)")
+      .eq("insurance_year",year).order("id");
+    if (error) throw error;
+    insuranceRows = data || [];
+    renderInsurance();
+    showMessage("insuranceMessage","");
+  } catch(e) { showMessage("insuranceMessage","تعذر تحميل التأمين: "+errText(e)); }
 }
+function renderInsurance() {
+  const q = $("insuranceSearch").value.trim().toLowerCase();
+  const rows = insuranceRows.filter(x => fullName(x.athletes || {}).toLowerCase().includes(q));
+  $("insuranceBody").innerHTML = rows.map(x => `<tr>
+    <td>${esc(fullName(x.athletes || {}))}</td><td>${x.insurance_year}</td><td>${x.amount} دج</td>
+    <td class="${x.paid?'paid':'unpaid'}">${x.paid?'مدفوع':'غير مدفوع'}</td>
+    <td><button data-ins="${x.id}">${x.paid?'تسجيل كغير مدفوع':'تسجيل كمدفوع'}</button></td>
+  </tr>`).join("") || `<tr><td colspan="5">لا توجد بيانات.</td></tr>`;
+  $("insuranceBody").querySelectorAll("[data-ins]").forEach(btn => btn.addEventListener("click", async () => {
+    const x = insuranceRows.find(r => String(r.id) === btn.dataset.ins);
+    const paid = !x.paid;
+    const {error} = await db.from("annual_insurance").update({paid,paid_at:paid?new Date().toISOString():null}).eq("id",x.id);
+    if (error) { showMessage("insuranceMessage","تعذر التحديث: "+errText(error)); return; }
+    await loadInsurance();
+  }));
+}
+$("loadInsurance").addEventListener("click", loadInsurance);
+$("insuranceSearch").addEventListener("input", renderInsurance);
 
-function renderSubs(){
-  const head=document.getElementById("subsHead"),body=document.getElementById("subsBody");
-  head.innerHTML="";body.innerHTML="";
-  const first=document.createElement("th");first.textContent=t("name");head.appendChild(first);
-  months.forEach(m=>{const th=document.createElement("th");th.textContent=m[lang==="ar"?1:2];head.appendChild(th)});
-  const fee=document.createElement("th");fee.textContent=t("amount");head.appendChild(fee);
-  const q=(document.getElementById("search")?.value||"").trim().toLowerCase();
-  const filtered=athletes.filter(a=>(a.first_name+" "+a.last_name).toLowerCase().includes(q));
-  if(!filtered.length){
-    const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=13;td.textContent=t("noAthletes");tr.appendChild(td);body.appendChild(tr);
-  }
-  filtered.forEach(a=>{
-    const s=subscriptions.find(x=>x.athlete_id===a.id);
-    if(!s)return;
-    const tr=document.createElement("tr"),name=document.createElement("td");
-    name.textContent=a.first_name+" "+a.last_name;tr.appendChild(name);
-    months.forEach(m=>{
-      const td=document.createElement("td"),b=document.createElement("button");
-      b.className="pay "+(s[m[0]]?"paid":"unpaid");
-      b.textContent=s[m[0]]?"✓":"✕";
-      b.title=(m[lang==="ar"?1:2])+" — "+(s[m[0]]?t("paid"):t("unpaid"));
-      b.onclick=()=>toggleMonth(s,m[0]);
-      td.appendChild(b);tr.appendChild(td);
-    });
-    const total=document.createElement("td");
-    const paid=months.filter(m=>s[m[0]]).length;
-    total.textContent=paid*1000+" / 11000 DA";tr.appendChild(total);
-    body.appendChild(tr);
-  });
+function fillExamAthletes() {
+  $("examAthlete").innerHTML = athletes.map(a => `<option value="${a.id}">${esc(fullName(a))}</option>`).join("");
 }
-async function toggleMonth(s,key){
-  const newValue=!s[key];
-  const {error}=await db.from("season_subscriptions").update({[key]:newValue}).eq("id",s.id);
-  if(error){status(t("saveError")+error.message);return}
-  s[key]=newValue;renderSubs();updateStats();status(t("saved"));
-}
-
-function updateStats(){
-  document.getElementById("countAthletes").textContent=athletes.length;
-  let paid=0;subscriptions.forEach(s=>months.forEach(m=>{if(s[m[0]])paid++}));
-  document.getElementById("countPaid").textContent=paid;
-  document.getElementById("countDebt").textContent=((athletes.length*11)-paid)*1000+" DA";
-}
-
-function renderAthletes(){
-  const body=document.getElementById("athletesBody");body.innerHTML="";
-  athletes.forEach(a=>{
-    const tr=document.createElement("tr"),name=document.createElement("td");
-    name.textContent=a.first_name+" "+a.last_name;
-    const actions=document.createElement("td"),edit=document.createElement("button");
-    edit.textContent=t("edit");edit.className="secondary";
-    edit.onclick=()=>{document.getElementById("firstName").value=a.first_name;document.getElementById("lastName").value=a.last_name;document.getElementById("editId").value=a.id;document.getElementById("saveAthleteBtn").textContent=t("save");showTab("athletes",document.getElementById("navAthletes"))};
-    actions.appendChild(edit);tr.append(name,actions);body.appendChild(tr);
-  });
-}
-function clearAthleteForm(){
-  ["firstName","lastName","editId"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("saveAthleteBtn").textContent=t("saveAthleteBtn");
-}
-async function saveAthlete(){
-  const first=document.getElementById("firstName").value.trim();
-  const last=document.getElementById("lastName").value.trim();
-  const id=document.getElementById("editId").value;
-  if(!first||!last){status(t("needNames"));return}
-  const result=id
-    ?await db.from("athletes").update({first_name:first,last_name:last}).eq("id",Number(id))
-    :await db.from("athletes").insert({first_name:first,last_name:last});
-  if(result.error){status(t("saveError")+result.error.message);return}
-  clearAthleteForm();await loadAll();status(t("saved"));
-}
-
-function renderInsurance(){
-  const head=document.getElementById("insuranceHead"),body=document.getElementById("insuranceBody");
-  head.innerHTML="";body.innerHTML="";
-  [t("name"),t("amount"),t("date"),t("actions")].forEach(x=>{const th=document.createElement("th");th.textContent=x;head.appendChild(th)});
-  insuranceRows.forEach(r=>{
-    const a=athletes.find(x=>x.id===r.athlete_id);if(!a)return;
-    const tr=document.createElement("tr");
-    const n=document.createElement("td");n.textContent=a.first_name+" "+a.last_name;
-    const amount=document.createElement("td");amount.textContent="1,000 DA";
-    const date=document.createElement("td");date.textContent=r.paid_at?new Date(r.paid_at).toLocaleDateString():"—";
-    const action=document.createElement("td"),b=document.createElement("button");
-    b.textContent=r.paid?t("paidShort"):t("unpaidShort");b.className=r.paid?"pay paid":"pay unpaid";
-    b.onclick=()=>toggleInsurance(r);action.appendChild(b);tr.append(n,amount,date,action);body.appendChild(tr);
-  });
-}
-async function loadInsurance(){
-  if(!athletes.length){await loadAll();if(!athletes.length)return}
-  const year=Number(document.getElementById("insuranceYear").value);
-  const {data,error}=await db.from("annual_insurance").select("*").eq("insurance_year",year);
-  if(error){status(t("loadError")+error.message);return}
-  insuranceRows=data||[];const have=new Set(insuranceRows.map(x=>x.athlete_id));
-  for(const a of athletes)if(!have.has(a.id)){
-    const {error:e}=await db.from("annual_insurance").insert({athlete_id:a.id,insurance_year:year,amount:1000});
-    if(e){status(t("saveError")+e.message);return}
-  }
-  const refreshed=await db.from("annual_insurance").select("*").eq("insurance_year",year);
-  if(refreshed.error){status(t("loadError")+refreshed.error.message);return}
-  insuranceRows=refreshed.data||[];renderInsurance();
-}
-async function toggleInsurance(r){
-  const paid=!r.paid;
-  const {error}=await db.from("annual_insurance").update({paid,paid_at:paid?new Date().toISOString():null}).eq("id",r.id);
-  if(error){status(t("saveError")+error.message);return}
-  r.paid=paid;r.paid_at=paid?new Date().toISOString():null;renderInsurance();status(t("saved"));
-}
-
-function fillExamAthletes(){
-  const s=document.getElementById("examAthlete"),current=s.value;
-  s.innerHTML="";
-  athletes.forEach(a=>{const o=document.createElement("option");o.value=a.id;o.textContent=a.first_name+" "+a.last_name;s.appendChild(o)});
-  if(current)s.value=current;
-}
-function renderExams(){
-  const head=document.getElementById("examHead"),body=document.getElementById("examBody");
-  head.innerHTML="";body.innerHTML="";
-  [t("name"),t("yearLabel"),t("exam"),t("belt"),t("amount"),t("actions")].forEach(x=>{const th=document.createElement("th");th.textContent=x;head.appendChild(th)});
-  examRows.forEach(r=>{
-    const a=athletes.find(x=>x.id===r.athlete_id);if(!a)return;
-    const tr=document.createElement("tr");
-    [a.first_name+" "+a.last_name,r.exam_year,r.exam_number,r.belt_name,r.amount+" DA"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
-    const td=document.createElement("td"),b=document.createElement("button");b.className=r.paid?"pay paid":"pay unpaid";b.textContent=r.paid?t("paidShort"):t("unpaidShort");
-    b.onclick=()=>toggleExam(r);td.appendChild(b);tr.appendChild(td);body.appendChild(tr);
-  });
-}
-async function loadExams(){
-  const {data,error}=await db.from("belt_exam_payments").select("*").order("exam_year",{ascending:false});
-  if(error){status(t("loadError")+error.message);return}
-  examRows=data||[];renderExams();
-}
-async function saveExam(){
-  const athlete_id=Number(document.getElementById("examAthlete").value);
-  const exam_year=Number(document.getElementById("examYear").value);
-  const exam_number=Number(document.getElementById("examNumber").value);
-  const belt_name=document.getElementById("beltName").value.trim();
-  const amount=Number(document.getElementById("examAmount").value);
-  if(!athlete_id||!belt_name||amount<700||amount>1500){status(t("needExam"));return}
-  const {error}=await db.from("belt_exam_payments").upsert({
-    athlete_id,exam_year,exam_number,belt_name,amount,paid:false,paid_at:null
+$("saveExam").addEventListener("click", async () => {
+  const athlete_id = Number($("examAthlete").value);
+  const exam_year = Number($("examYear").value);
+  const exam_number = Number($("examNumber").value);
+  const belt_name = $("beltName").value.trim();
+  const amount = Number($("examAmount").value);
+  if (!athlete_id) { showMessage("examMessage","أضف رياضيًا أولًا."); return; }
+  if (!belt_name || amount < 700 || amount > 1500) { showMessage("examMessage","أدخل الحزام ومبلغًا بين 700 و1500 دج."); return; }
+  const {error} = await db.from("belt_exam_payments").upsert({
+    athlete_id,exam_year,exam_number,belt_name,amount
   },{onConflict:"athlete_id,exam_year,exam_number"});
-  if(error){status(t("saveError")+error.message);return}
-  document.getElementById("beltName").value="";
-  await loadExams();status(t("saved"));
+  if (error) { showMessage("examMessage","تعذر الحفظ: "+errText(error)); return; }
+  showMessage("examMessage","تم حفظ بيانات الامتحان.");
+  await loadExams();
+});
+async function loadExams() {
+  showMessage("examMessage","جارٍ تحميل الامتحانات...");
+  const {data,error} = await db.from("belt_exam_payments")
+    .select("*, athletes(id,first_name,last_name)").order("exam_year",{ascending:false});
+  if (error) { showMessage("examMessage","تعذر تحميل الامتحانات: "+errText(error)); return; }
+  examRows = data || [];
+  $("examsBody").innerHTML = examRows.map(x => `<tr>
+    <td>${esc(fullName(x.athletes || {}))}</td><td>${x.exam_year}</td><td>${x.exam_number}</td>
+    <td>${esc(x.belt_name)}</td><td>${x.amount} دج</td>
+    <td class="${x.paid?'paid':'unpaid'}">${x.paid?'مدفوع':'غير مدفوع'}</td>
+    <td><button data-exam="${x.id}">${x.paid?'تسجيل كغير مدفوع':'تسجيل كمدفوع'}</button></td>
+  </tr>`).join("") || `<tr><td colspan="7">لا توجد امتحانات مسجلة.</td></tr>`;
+  $("examsBody").querySelectorAll("[data-exam]").forEach(btn => btn.addEventListener("click", async () => {
+    const x = examRows.find(r => String(r.id) === btn.dataset.exam);
+    const paid = !x.paid;
+    const {error} = await db.from("belt_exam_payments").update({paid,paid_at:paid?new Date().toISOString():null}).eq("id",x.id);
+    if (error) { showMessage("examMessage","تعذر التحديث: "+errText(error)); return; }
+    await loadExams();
+  }));
 }
-async function toggleExam(r){
-  const paid=!r.paid;
-  const {error}=await db.from("belt_exam_payments").update({paid,paid_at:paid?new Date().toISOString():null}).eq("id",r.id);
-  if(error){status(t("saveError")+error.message);return}
-  r.paid=paid;r.paid_at=paid?new Date().toISOString():null;renderExams();status(t("saved"));
-}
+$("loadExams").addEventListener("click", loadExams);
 
-function exportCSV(){
-  const headers=[t("name"),...months.map(m=>m[lang==="ar"?1:2]),t("amount")];
-  const rows=[headers];
-  athletes.forEach(a=>{
-    const s=subscriptions.find(x=>x.athlete_id===a.id);
-    if(!s)return;
-    rows.push([a.first_name+" "+a.last_name,...months.map(m=>s[m[0]]?t("paid"):t("unpaid")),months.filter(m=>s[m[0]]).length*1000]);
-  });
-  const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
-  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
-  const url=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=url;a.download=t("csvName")+"_"+document.getElementById("season").value+".csv";
-  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+function csvExport(filename, rows) {
+  if (!rows.length) { alert("لا توجد بيانات للتصدير."); return; }
+  const cols = Object.keys(rows[0]);
+  const csv = "\uFEFF" + [cols.join(","), ...rows.map(r => cols.map(c =>
+    `"${String(r[c] ?? "").replace(/"/g,'""')}"`
+  ).join(","))].join("\r\n");
+  const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
 }
+$("exportAthletes").addEventListener("click", () => csvExport("athletes.csv",athletes.map(a=>({name:fullName(a)}))));
+$("exportSubscriptions").addEventListener("click", () => csvExport("subscriptions.csv",subscriptions.map(s=>{
+  const r={name:fullName(s.athletes||{}),season:s.season_start_year};
+  months.forEach(([k,label])=>r[label]=s[k]?"مدفوع":"غير مدفوع");
+  r.paid_dzd=months.filter(([k])=>s[k]).length*1000;
+  r.debt_dzd=(11-months.filter(([k])=>s[k]).length)*1000;
+  return r;
+})));
+$("exportInsurance").addEventListener("click", () => csvExport("insurance.csv",insuranceRows.map(x=>({name:fullName(x.athletes||{}),year:x.insurance_year,amount_dzd:x.amount,status:x.paid?"مدفوع":"غير مدفوع"}))));
+$("exportExams").addEventListener("click", () => csvExport("belt-exams.csv",examRows.map(x=>({name:fullName(x.athletes||{}),year:x.exam_year,exam:x.exam_number,belt:x.belt_name,amount_dzd:x.amount,status:x.paid?"مدفوع":"غير مدفوع"}))));
 
+checkSession();
 </script>
 </body>
 </html>
