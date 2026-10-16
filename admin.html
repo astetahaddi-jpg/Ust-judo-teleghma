@@ -181,270 +181,548 @@ const months = [
  ["december","ديسمبر"],["january","جانفي"],["february","فيفري"],
  ["march","مارس"],["april","أفريل"],["may","ماي"],["june","جوان"],["july","جويلية"]
 ];
+
 const $ = id => document.getElementById(id);
-let athletes=[], subscriptions=[], insuranceRows=[], examRows=[];
+let athletes = [], subscriptions = [], insuranceRows = [], examRows = [];
+
 const yearNow = new Date().getFullYear();
-$("seasonYear").value=yearNow;
-$("insuranceYear").value=yearNow;
-$("examSearch").value="";
+$("seasonYear").value = yearNow;
+$("insuranceYear").value = yearNow;
 
-function msg(id,text){$(id).textContent=text||"";}
-function fullName(a){return `${a?.first_name||""} ${a?.last_name||""}`.trim();}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function errorText(e){return e?.message||String(e||"Unknown error");}
-function csvExport(filename,rows){
- if(!rows.length){alert("لا توجد بيانات للتصدير.");return;}
- const cols=Object.keys(rows[0]);
- const csv="\uFEFF"+[cols.join(","),...rows.map(r=>cols.map(c=>`"${String(r[c]??"").replace(/"/g,'""')}"`).join(","))].join("\r\n");
- const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");a.href=url;a.download=filename;a.click();
- URL.revokeObjectURL(url);
-}
-function setTab(name){
- document.querySelectorAll('[id^="tab-"]').forEach(e=>e.classList.add("hidden"));
- $("tab-"+name).classList.remove("hidden");
-}
-document.querySelectorAll("nav [data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
-
-async function enterDashboard(user){
- $("loginCard").classList.add("hidden");
- $("dashboard").classList.remove("hidden");
- $("who").textContent=user.email||"Admin";
- await loadAthletes();
- await loadSubscriptions();
-}
-$("loginBtn").addEventListener("click",async()=>{
- msg("loginMessage","جارٍ تسجيل الدخول...");
- const email=$("email").value.trim(),password=$("password").value;
- if(!email||!password){msg("loginMessage","أدخل البريد وكلمة المرور.");return;}
- const {data,error}=await db.auth.signInWithPassword({email,password});
- if(error){msg("loginMessage","تعذر الدخول: "+errorText(error));return;}
- msg("loginMessage","");
- await enterDashboard(data.user);
-});
-$("logoutBtn").addEventListener("click",async()=>{
- await db.auth.signOut();
- $("dashboard").classList.add("hidden");
- $("loginCard").classList.remove("hidden");
- $("password").value="";
- msg("loginMessage","تم تسجيل الخروج.");
-});
-async function checkSession(){
- const {data,error}=await db.auth.getSession();
- if(error){msg("loginMessage",errorText(error));return;}
- if(data.session)await enterDashboard(data.session.user);
+function msg(id, text) {
+  $(id).textContent = text || "";
 }
 
-async function loadAthletes(){
- const {data,error}=await db.from("athletes").select("*").order("last_name");
- if(error){msg("athleteMessage","تعذر تحميل الرياضيين: "+errorText(error));return;}
- athletes=data||[];
- renderAthletes();
- fillExamAthletes();
+function fullName(a) {
+  return `${a?.first_name || ""} ${a?.last_name || ""}`.trim();
 }
-function renderAthletes(){
- const q=$("athleteSearch").value.trim().toLowerCase();
- const rows=athletes.filter(a=>fullName(a).toLowerCase().includes(q));
- $("athletesBody").innerHTML=rows.map(a=>`<tr><td>${esc(fullName(a))}</td><td><button data-edit="${a.id}">تعديل | Edit</button></td></tr>`).join("")||'<tr><td colspan="2">لا يوجد رياضيون.</td></tr>';
- $("athletesBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>{
-  const a=athletes.find(x=>String(x.id)===b.dataset.edit);if(!a)return;
-  $("athleteId").value=a.id;$("firstName").value=a.first_name;$("lastName").value=a.last_name;
-  $("cancelEdit").classList.remove("hidden");
- }));
-}
-$("athleteSearch").addEventListener("input",renderAthletes);
-$("refreshAthletes").addEventListener("click",loadAthletes);
-$("cancelEdit").addEventListener("click",()=>{
- $("athleteId").value="";$("firstName").value="";$("lastName").value="";
- $("cancelEdit").classList.add("hidden");msg("athleteMessage","");
-});
-$("saveAthlete").addEventListener("click",async()=>{
- const first_name=$("firstName").value.trim(),last_name=$("lastName").value.trim(),id=$("athleteId").value;
- if(!first_name||!last_name){msg("athleteMessage","أدخل الاسم واللقب.");return;}
- const result=id
-  ? await db.from("athletes").update({first_name,last_name}).eq("id",id)
-  : await db.from("athletes").insert({first_name,last_name});
- if(result.error){msg("athleteMessage","تعذر الحفظ: "+errorText(result.error));return;}
- $("athleteId").value="";$("firstName").value="";$("lastName").value="";
- $("cancelEdit").classList.add("hidden");
- msg("athleteMessage","تم الحفظ بنجاح.");
- await loadAthletes();await loadSubscriptions();
-});
-$("exportAthletes").addEventListener("click",()=>csvExport("athletes.csv",athletes.map(a=>({name:fullName(a)}))));
 
-async function ensureSubscriptions(){
- const season=Number($("seasonYear").value);
- for(const a of athletes){
-  const {error}=await db.from("season_subscriptions").upsert(
-   {athlete_id:a.id,season_start_year:season,monthly_fee:1000},
-   {onConflict:"athlete_id,season_start_year",ignoreDuplicates:true}
-  );
-  if(error)throw error;
- }
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[c]));
 }
-async function ensureInsurance(year){
- for(const a of athletes){
-  const {error}=await db.from("annual_insurance").upsert(
-   {athlete_id:a.id,insurance_year:year,amount:1000},
-   {onConflict:"athlete_id,insurance_year",ignoreDuplicates:true}
-  );
-  if(error)throw error;
- }
+
+function errorText(e) {
+  return e?.message || String(e || "Unknown error");
 }
-async function getSeasonData(){
- const season=Number($("seasonYear").value);
- const paymentYear=season+1;
- await ensureSubscriptions();
- await ensureInsurance(paymentYear);
- const s=await db.from("season_subscriptions").select("*,athletes(id,first_name,last_name)").eq("season_start_year",season);
- if(s.error)throw s.error;
- const i=await db.from("annual_insurance").select("*,athletes(id,first_name,last_name)").eq("insurance_year",paymentYear);
- if(i.error)throw i.error;
- const e=await db.from("belt_exam_payments").select("*,athletes(id,first_name,last_name)").eq("exam_year",paymentYear);
- if(e.error)throw e.error;
- subscriptions=s.data||[];insuranceRows=i.data||[];examRows=e.data||[];
-}
-async function loadSubscriptions(){
- msg("subMessage","جارٍ تحميل الجدول...");
- try{
-  await loadAthletes();
-  await getSeasonData();
-  renderSubscriptions();
-  msg("subMessage","");
- }catch(e){msg("subMessage","تعذر تحميل الجدول: "+errorText(e));}
-}
-function paidButton(paid,attrs){
- return `<button class="status-btn ${paid?'paid':'unpaid'}" ${attrs}>${paid?'مدفوع':'غير مدفوع'}</button>`;
-}
-function renderSubscriptions(){
- const q=$("subSearch").value.trim().toLowerCase();
- const season=Number($("seasonYear").value),paymentYear=season+1;
- const rows=subscriptions.filter(s=>fullName(s.athletes).toLowerCase().includes(q));
- let totalSub=0,totalIns=0,totalExam=0;
- $("subsBody").innerHTML=rows.map(s=>{
-  const athleteId=s.athlete_id;
-  const insurance=insuranceRows.find(x=>Number(x.athlete_id)===Number(athleteId)&&Number(x.insurance_year)===paymentYear);
-  const e1=examRows.find(x=>Number(x.athlete_id)===Number(athleteId)&&Number(x.exam_year)===paymentYear&&Number(x.exam_number)===1);
-  const e2=examRows.find(x=>Number(x.athlete_id)===Number(athleteId)&&Number(x.exam_year)===paymentYear&&Number(x.exam_number)===2);
-  const monthsPaid=months.filter(([key])=>s[key]).length;
-  totalSub+=monthsPaid*1000;
-  if(insurance?.paid)totalIns+=Number(insurance.amount||1000);
-  if(e1?.paid)totalExam+=Number(e1.amount||0);
-  if(e2?.paid)totalExam+=Number(e2.amount||0);
-  const monthCells=months.map(([key,label])=>`<td>${paidButton(!!s[key],`data-month="${key}" data-row="${s.id}" title="${label}"`)}</td>`).join("");
-  return `<tr><td>${esc(fullName(s.athletes))}</td>${monthCells}
-   <td>${paidButton(!!insurance?.paid,`data-insurance="${athleteId}" title="التأمين السنوي"`)}</td>
-   <td>${paidButton(!!e1?.paid,`data-exam="${athleteId}" data-number="1" title="الامتحان الأول"`)}</td>
-   <td>${paidButton(!!e2?.paid,`data-exam="${athleteId}" data-number="2" title="الامتحان الثاني"`)}</td>
-   <td>${monthsPaid*1000} دج</td><td>${(11-monthsPaid)*1000} دج</td></tr>`;
- }).join("")||'<tr><td colspan="17">لا توجد بيانات لهذا الموسم.</td></tr>';
- $("totalSub").textContent=totalSub.toLocaleString("fr-FR")+" دج";
- $("totalIns").textContent=totalIns.toLocaleString("fr-FR")+" دج";
- $("totalExam").textContent=totalExam.toLocaleString("fr-FR")+" دج";
- $("subsBody").querySelectorAll("[data-month]").forEach(b=>b.addEventListener("click",async()=>{
-  const s=subscriptions.find(x=>String(x.id)===b.dataset.row);if(!s)return;
-  const key=b.dataset.month;
-  const {error}=await db.from("season_subscriptions").update({[key]:!s[key]}).eq("id",s.id);
-  if(error){msg("subMessage","تعذر تحديث الاشتراك: "+errorText(error));return;}
-  await loadSubscriptions();
- }));
- $("subsBody").querySelectorAll("[data-insurance]").forEach(b=>b.addEventListener("click",async()=>{
-  const athleteId=Number(b.dataset.insurance),year=Number($("seasonYear").value)+1;
-  const current=insuranceRows.find(x=>Number(x.athlete_id)===athleteId&&Number(x.insurance_year)===year);
-  const paid=!current?.paid;
-  const payload={athlete_id:athleteId,insurance_year:year,amount:1000,paid,paid_at:paid?new Date().toISOString():null};
-  const {error}=await db.from("annual_insurance").upsert(payload,{onConflict:"athlete_id,insurance_year"});
-  if(error){msg("subMessage","تعذر تحديث التأمين: "+errorText(error));return;}
-  await loadSubscriptions();
- }));
- $("subsBody").querySelectorAll("[data-exam]").forEach(b=>b.addEventListener("click",async()=>{
-  const athleteId=Number(b.dataset.exam),number=Number(b.dataset.number),year=Number($("seasonYear").value)+1;
-  const current=examRows.find(x=>Number(x.athlete_id)===athleteId&&Number(x.exam_year)===year&&Number(x.exam_number)===number);
-  if(current?.paid){
-   const {error}=await db.from("belt_exam_payments").update({paid:false,paid_at:null}).eq("id",current.id);
-   if(error){msg("subMessage","تعذر تغيير حالة الامتحان: "+errorText(error));return;}
-  }else{
-   const belt=prompt("أدخل اسم الحزام | Belt name:",current?.belt_name||"");
-   if(belt===null)return;
-   if(!belt.trim()){alert("يجب إدخال اسم الحزام.");return;}
-   const raw=prompt("أدخل رسوم الامتحان بين 700 و1500 دج:",String(current?.amount||700));
-   if(raw===null)return;
-   const amount=Number(raw);
-   if(!Number.isInteger(amount)||amount<700||amount>1500){alert("المبلغ يجب أن يكون بين 700 و1500 دج.");return;}
-   const payload={athlete_id:athleteId,exam_year:year,exam_number:number,belt_name:belt.trim(),amount,paid:true,paid_at:new Date().toISOString()};
-   const {error}=await db.from("belt_exam_payments").upsert(payload,{onConflict:"athlete_id,exam_year,exam_number"});
-   if(error){msg("subMessage","تعذر حفظ رسوم الامتحان: "+errorText(error));return;}
+
+function csvExport(filename, rows) {
+  if (!rows.length) {
+    alert("لا توجد بيانات للتصدير.");
+    return;
   }
-  await loadSubscriptions();
- }));
+  const cols = Object.keys(rows[0]);
+  const csv = "\uFEFF" + [
+    cols.join(","),
+    ...rows.map(r => cols.map(c =>
+      `"${String(r[c] ?? "").replace(/"/g, '""')}"`
+    ).join(","))
+  ].join("\r\n");
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }
-$("loadSubscriptions").addEventListener("click",loadSubscriptions);
-$("subSearch").addEventListener("input",renderSubscriptions);
-$("exportSubscriptions").addEventListener("click",()=>{
- const rows=subscriptions.map(s=>{
-  const year=Number($("seasonYear").value)+1;
-  const ins=insuranceRows.find(x=>Number(x.athlete_id)===Number(s.athlete_id)&&Number(x.insurance_year)===year);
-  const ex1=examRows.find(x=>Number(x.athlete_id)===Number(s.athlete_id)&&Number(x.exam_year)===year&&Number(x.exam_number)===1);
-  const ex2=examRows.find(x=>Number(x.athlete_id)===Number(s.athlete_id)&&Number(x.exam_year)===year&&Number(x.exam_number)===2);
-  const r={"اسم الرياضي":fullName(s.athletes)};
-  months.forEach(([key,label])=>r[label]=s[key]?"مدفوع":"غير مدفوع");
-  r["التأمينات"]=ins?.paid?"مدفوع":"غير مدفوع";
-  r["الامتحان الأول"]=ex1?.paid?"مدفوع":"غير مدفوع";
-  r["الامتحان الثاني"]=ex2?.paid?"مدفوع":"غير مدفوع";
-  r["الاشتراك المدفوع"]=months.filter(([key])=>s[key]).length*1000;
-  r["دين الاشتراك"]=(11-months.filter(([key])=>s[key]).length)*1000;
-  return r;
- });
- csvExport("club-subscriptions.csv",rows);
+
+function setTab(name) {
+  document.querySelectorAll('[id^="tab-"]').forEach(e => e.classList.add("hidden"));
+  $("tab-" + name).classList.remove("hidden");
+}
+
+document.querySelectorAll("nav [data-tab]").forEach(b => {
+  b.addEventListener("click", () => setTab(b.dataset.tab));
 });
 
-async function loadInsurance(){
- msg("insuranceMessage","جارٍ التحميل...");
- try{
-  const year=Number($("insuranceYear").value);
-  await loadAthletes();
-  await ensureInsurance(year);
-  const {data,error}=await db.from("annual_insurance").select("*,athletes(id,first_name,last_name)").eq("insurance_year",year).eq("paid",true).order("id");
-  if(error)throw error;
-  insuranceRows=data||[];
-  renderInsurance();
-  msg("insuranceMessage","");
- }catch(e){msg("insuranceMessage","تعذر تحميل التأمينات: "+errorText(e));}
+async function enterDashboard(user) {
+  $("loginCard").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+  $("who").textContent = user.email || "Admin";
+  await loadSubscriptions();
 }
-function renderInsurance(){
- const q=$("insuranceSearch").value.trim().toLowerCase();
- const rows=insuranceRows.filter(x=>x.paid&&fullName(x.athletes).toLowerCase().includes(q));
- $("insuranceBody").innerHTML=rows.map(x=>`<tr><td>${esc(fullName(x.athletes))}</td><td>${x.insurance_year}</td><td>${x.amount} دج</td><td class="paid">مدفوع</td></tr>`).join("")||'<tr><td colspan="4">لا يوجد رياضيون دفعوا التأمين في هذه السنة.</td></tr>';
-}
-$("loadInsurance").addEventListener("click",loadInsurance);
-$("insuranceSearch").addEventListener("input",renderInsurance);
-$("exportInsurance").addEventListener("click",()=>csvExport("paid-insurance.csv",insuranceRows.filter(x=>x.paid).map(x=>({name:fullName(x.athletes),year:x.insurance_year,amount_dzd:x.amount,status:"Paid"}))));
 
-async function loadExams(){
- msg("examMessage","جارٍ التحميل...");
- const year=Number($("seasonYear").value)+1;
- const {data,error}=await db.from("belt_exam_payments").select("*,athletes(id,first_name,last_name)").eq("exam_year",year).eq("paid",true).order("exam_number");
- if(error){msg("examMessage","تعذر تحميل الامتحانات: "+errorText(error));return;}
- examRows=data||[];
- renderExams();
- msg("examMessage","");
-}
-function renderExams(){
- const q=$("examSearch").value.trim().toLowerCase(),f=$("examFilter").value;
- const rows=examRows.filter(x=>x.paid&&fullName(x.athletes).toLowerCase().includes(q)&&(f==="all"||String(x.exam_number)===f));
- $("examsBody").innerHTML=rows.map(x=>`<tr><td>${esc(fullName(x.athletes))}</td><td>${x.exam_year}</td><td>${x.exam_number===1?"الأول (فيفري–مارس)":"الثاني (بعد جويلية)"}</td><td>${esc(x.belt_name)}</td><td>${x.amount} دج</td><td class="paid">مدفوع</td></tr>`).join("")||'<tr><td colspan="6">لا يوجد رياضيون دفعوا حقوق الامتحان المحدد.</td></tr>';
-}
-$("loadExams").addEventListener("click",loadExams);
-$("examSearch").addEventListener("input",renderExams);
-$("examFilter").addEventListener("change",renderExams);
-$("exportExams").addEventListener("click",()=>csvExport("paid-belt-exams.csv",examRows.filter(x=>x.paid).map(x=>({name:fullName(x.athletes),year:x.exam_year,exam:x.exam_number,belt:x.belt_name,amount_dzd:x.amount,status:"Paid"}))));
+$("loginBtn").addEventListener("click", async () => {
+  msg("loginMessage", "جارٍ تسجيل الدخول...");
+  const email = $("email").value.trim();
+  const password = $("password").value;
 
-async function init(){
- const {data,error}=await db.auth.getSession();
- if(error){msg("loginMessage",errorText(error));return;}
- if(data.session)await enterDashboard(data.session.user);
+  if (!email || !password) {
+    msg("loginMessage", "أدخل البريد وكلمة المرور.");
+    return;
+  }
+
+  const {data, error} = await db.auth.signInWithPassword({email, password});
+  if (error) {
+    msg("loginMessage", "تعذر الدخول: " + errorText(error));
+    return;
+  }
+
+  msg("loginMessage", "");
+  await enterDashboard(data.user);
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  await db.auth.signOut();
+  $("dashboard").classList.add("hidden");
+  $("loginCard").classList.remove("hidden");
+  $("password").value = "";
+  msg("loginMessage", "تم تسجيل الخروج.");
+});
+
+async function loadAthletes() {
+  const {data, error} = await db.from("athletes").select("*").order("last_name");
+  if (error) {
+    msg("athleteMessage", "تعذر تحميل الرياضيين: " + errorText(error));
+    throw error;
+  }
+  athletes = data || [];
+  renderAthletes();
 }
+
+function renderAthletes() {
+  const q = $("athleteSearch").value.trim().toLowerCase();
+  const rows = athletes.filter(a => fullName(a).toLowerCase().includes(q));
+
+  $("athletesBody").innerHTML = rows.map(a => `
+    <tr>
+      <td>${esc(fullName(a))}</td>
+      <td><button data-edit="${a.id}">تعديل | Edit</button></td>
+    </tr>
+  `).join("") || '<tr><td colspan="2">لا يوجد رياضيون.</td></tr>';
+
+  $("athletesBody").querySelectorAll("[data-edit]").forEach(b => {
+    b.addEventListener("click", () => {
+      const a = athletes.find(x => String(x.id) === b.dataset.edit);
+      if (!a) return;
+      $("athleteId").value = a.id;
+      $("firstName").value = a.first_name;
+      $("lastName").value = a.last_name;
+      $("cancelEdit").classList.remove("hidden");
+      setTab("athletes");
+    });
+  });
+}
+
+$("athleteSearch").addEventListener("input", renderAthletes);
+$("refreshAthletes").addEventListener("click", loadAthletes);
+
+$("cancelEdit").addEventListener("click", () => {
+  $("athleteId").value = "";
+  $("firstName").value = "";
+  $("lastName").value = "";
+  $("cancelEdit").classList.add("hidden");
+  msg("athleteMessage", "");
+});
+
+$("saveAthlete").addEventListener("click", async () => {
+  const first_name = $("firstName").value.trim();
+  const last_name = $("lastName").value.trim();
+  const id = $("athleteId").value;
+
+  if (!first_name || !last_name) {
+    msg("athleteMessage", "أدخل الاسم واللقب.");
+    return;
+  }
+
+  const result = id
+    ? await db.from("athletes").update({first_name, last_name}).eq("id", id)
+    : await db.from("athletes").insert({first_name, last_name});
+
+  if (result.error) {
+    msg("athleteMessage", "تعذر الحفظ: " + errorText(result.error));
+    return;
+  }
+
+  $("athleteId").value = "";
+  $("firstName").value = "";
+  $("lastName").value = "";
+  $("cancelEdit").classList.add("hidden");
+  msg("athleteMessage", "تم الحفظ بنجاح.");
+
+  await loadSubscriptions();
+});
+
+$("exportAthletes").addEventListener("click", () =>
+  csvExport("athletes.csv", athletes.map(a => ({name:fullName(a)})))
+);
+
+async function ensureSubscriptions() {
+  const season = Number($("seasonYear").value);
+
+  for (const a of athletes) {
+    const {error} = await db.from("season_subscriptions").upsert(
+      {athlete_id:a.id, season_start_year:season, monthly_fee:1000},
+      {onConflict:"athlete_id,season_start_year", ignoreDuplicates:true}
+    );
+    if (error) throw error;
+  }
+}
+
+async function ensureInsurance(year) {
+  for (const a of athletes) {
+    const {error} = await db.from("annual_insurance").upsert(
+      {athlete_id:a.id, insurance_year:year, amount:1000},
+      {onConflict:"athlete_id,insurance_year", ignoreDuplicates:true}
+    );
+    if (error) throw error;
+  }
+}
+
+async function getSeasonData() {
+  const season = Number($("seasonYear").value);
+  const paymentYear = season + 1;
+
+  await ensureSubscriptions();
+  await ensureInsurance(paymentYear);
+
+  const s = await db.from("season_subscriptions")
+    .select("*,athletes(id,first_name,last_name)")
+    .eq("season_start_year", season);
+  if (s.error) throw s.error;
+
+  const i = await db.from("annual_insurance")
+    .select("*,athletes(id,first_name,last_name)")
+    .eq("insurance_year", paymentYear);
+  if (i.error) throw i.error;
+
+  const e = await db.from("belt_exam_payments")
+    .select("*,athletes(id,first_name,last_name)")
+    .eq("exam_year", paymentYear);
+  if (e.error) throw e.error;
+
+  subscriptions = s.data || [];
+  insuranceRows = i.data || [];
+  examRows = e.data || [];
+}
+
+async function loadSubscriptions() {
+  msg("subMessage", "جارٍ تحميل الجدول...");
+  try {
+    await loadAthletes();
+    await getSeasonData();
+    renderSubscriptions();
+    msg("subMessage", "");
+  } catch (e) {
+    msg("subMessage", "تعذر تحميل الجدول: " + errorText(e));
+  }
+}
+
+function paidButton(paid, attrs) {
+  return `<button class="status-btn ${paid ? "paid" : "unpaid"}" ${attrs}>${paid ? "مدفوع" : "غير مدفوع"}</button>`;
+}
+
+function renderSubscriptions() {
+  const q = $("subSearch").value.trim().toLowerCase();
+  const season = Number($("seasonYear").value);
+  const paymentYear = season + 1;
+  const rows = subscriptions.filter(s => fullName(s.athletes).toLowerCase().includes(q));
+
+  let totalSub = 0, totalIns = 0, totalExam = 0;
+
+  $("subsBody").innerHTML = rows.map(s => {
+    const athleteId = s.athlete_id;
+
+    const insurance = insuranceRows.find(x =>
+      Number(x.athlete_id) === Number(athleteId) &&
+      Number(x.insurance_year) === paymentYear
+    );
+
+    const e1 = examRows.find(x =>
+      Number(x.athlete_id) === Number(athleteId) &&
+      Number(x.exam_year) === paymentYear &&
+      Number(x.exam_number) === 1
+    );
+
+    const e2 = examRows.find(x =>
+      Number(x.athlete_id) === Number(athleteId) &&
+      Number(x.exam_year) === paymentYear &&
+      Number(x.exam_number) === 2
+    );
+
+    const monthsPaid = months.filter(([key]) => s[key]).length;
+    totalSub += monthsPaid * 1000;
+    if (insurance?.paid) totalIns += Number(insurance.amount || 1000);
+    if (e1?.paid) totalExam += Number(e1.amount || 0);
+    if (e2?.paid) totalExam += Number(e2.amount || 0);
+
+    const monthCells = months.map(([key, label]) =>
+      `<td>${paidButton(!!s[key], `data-month="${key}" data-row="${s.id}" title="${label}"`)}</td>`
+    ).join("");
+
+    return `<tr>
+      <td>${esc(fullName(s.athletes))}</td>
+      ${monthCells}
+      <td>${paidButton(!!insurance?.paid, `data-insurance="${athleteId}" title="التأمين السنوي"`)}</td>
+      <td>${paidButton(!!e1?.paid, `data-exam="${athleteId}" data-number="1" title="الامتحان الأول"`)}</td>
+      <td>${paidButton(!!e2?.paid, `data-exam="${athleteId}" data-number="2" title="الامتحان الثاني"`)}</td>
+      <td>${monthsPaid * 1000} دج</td>
+      <td>${(11 - monthsPaid) * 1000} دج</td>
+    </tr>`;
+  }).join("") || '<tr><td colspan="17">لا توجد بيانات لهذا الموسم.</td></tr>';
+
+  $("totalSub").textContent = totalSub.toLocaleString("fr-FR") + " دج";
+  $("totalIns").textContent = totalIns.toLocaleString("fr-FR") + " دج";
+  $("totalExam").textContent = totalExam.toLocaleString("fr-FR") + " دج";
+
+  $("subsBody").querySelectorAll("[data-month]").forEach(b => {
+    b.addEventListener("click", async () => {
+      const s = subscriptions.find(x => String(x.id) === b.dataset.row);
+      if (!s) return;
+
+      const key = b.dataset.month;
+      const {error} = await db.from("season_subscriptions")
+        .update({[key]:!s[key]})
+        .eq("id", s.id);
+
+      if (error) {
+        msg("subMessage", "تعذر تحديث الاشتراك: " + errorText(error));
+        return;
+      }
+      await loadSubscriptions();
+    });
+  });
+
+  $("subsBody").querySelectorAll("[data-insurance]").forEach(b => {
+    b.addEventListener("click", async () => {
+      const athleteId = Number(b.dataset.insurance);
+      const year = Number($("seasonYear").value) + 1;
+      const current = insuranceRows.find(x =>
+        Number(x.athlete_id) === athleteId && Number(x.insurance_year) === year
+      );
+
+      const paid = !current?.paid;
+      const payload = {
+        athlete_id:athleteId,
+        insurance_year:year,
+        amount:1000,
+        paid,
+        paid_at:paid ? new Date().toISOString() : null
+      };
+
+      const {error} = await db.from("annual_insurance").upsert(payload, {
+        onConflict:"athlete_id,insurance_year"
+      });
+
+      if (error) {
+        msg("subMessage", "تعذر تحديث التأمين: " + errorText(error));
+        return;
+      }
+      await loadSubscriptions();
+    });
+  });
+
+  $("subsBody").querySelectorAll("[data-exam]").forEach(b => {
+    b.addEventListener("click", async () => {
+      const athleteId = Number(b.dataset.exam);
+      const number = Number(b.dataset.number);
+      const year = Number($("seasonYear").value) + 1;
+
+      const current = examRows.find(x =>
+        Number(x.athlete_id) === athleteId &&
+        Number(x.exam_year) === year &&
+        Number(x.exam_number) === number
+      );
+
+      if (current?.paid) {
+        const {error} = await db.from("belt_exam_payments")
+          .update({paid:false, paid_at:null})
+          .eq("id", current.id);
+
+        if (error) {
+          msg("subMessage", "تعذر تغيير حالة الامتحان: " + errorText(error));
+          return;
+        }
+      } else {
+        const belt = prompt("أدخل اسم الحزام | Belt name:", current?.belt_name || "");
+        if (belt === null) return;
+        if (!belt.trim()) {
+          alert("يجب إدخال اسم الحزام.");
+          return;
+        }
+
+        const raw = prompt("أدخل رسوم الامتحان بين 700 و1500 دج:", String(current?.amount || 700));
+        if (raw === null) return;
+
+        const amount = Number(raw);
+        if (!Number.isInteger(amount) || amount < 700 || amount > 1500) {
+          alert("المبلغ يجب أن يكون بين 700 و1500 دج.");
+          return;
+        }
+
+        const payload = {
+          athlete_id:athleteId,
+          exam_year:year,
+          exam_number:number,
+          belt_name:belt.trim(),
+          amount,
+          paid:true,
+          paid_at:new Date().toISOString()
+        };
+
+        const {error} = await db.from("belt_exam_payments").upsert(payload, {
+          onConflict:"athlete_id,exam_year,exam_number"
+        });
+
+        if (error) {
+          msg("subMessage", "تعذر حفظ رسوم الامتحان: " + errorText(error));
+          return;
+        }
+      }
+      await loadSubscriptions();
+    });
+  });
+}
+
+$("loadSubscriptions").addEventListener("click", loadSubscriptions);
+$("subSearch").addEventListener("input", renderSubscriptions);
+
+$("exportSubscriptions").addEventListener("click", () => {
+  const rows = subscriptions.map(s => {
+    const year = Number($("seasonYear").value) + 1;
+    const ins = insuranceRows.find(x =>
+      Number(x.athlete_id) === Number(s.athlete_id) &&
+      Number(x.insurance_year) === year
+    );
+    const ex1 = examRows.find(x =>
+      Number(x.athlete_id) === Number(s.athlete_id) &&
+      Number(x.exam_year) === year && Number(x.exam_number) === 1
+    );
+    const ex2 = examRows.find(x =>
+      Number(x.athlete_id) === Number(s.athlete_id) &&
+      Number(x.exam_year) === year && Number(x.exam_number) === 2
+    );
+
+    const r = {"اسم الرياضي":fullName(s.athletes)};
+    months.forEach(([key, label]) => r[label] = s[key] ? "مدفوع" : "غير مدفوع");
+    r["التأمينات"] = ins?.paid ? "مدفوع" : "غير مدفوع";
+    r["الامتحان الأول"] = ex1?.paid ? "مدفوع" : "غير مدفوع";
+    r["الامتحان الثاني"] = ex2?.paid ? "مدفوع" : "غير مدفوع";
+    r["الاشتراك المدفوع"] = months.filter(([key]) => s[key]).length * 1000;
+    r["دين الاشتراك"] = (11 - months.filter(([key]) => s[key]).length) * 1000;
+    return r;
+  });
+  csvExport("club-subscriptions.csv", rows);
+});
+
+async function loadInsurance() {
+  msg("insuranceMessage", "جارٍ التحميل...");
+  try {
+    const year = Number($("insuranceYear").value);
+    await loadAthletes();
+    await ensureInsurance(year);
+
+    const {data, error} = await db.from("annual_insurance")
+      .select("*,athletes(id,first_name,last_name)")
+      .eq("insurance_year", year)
+      .eq("paid", true)
+      .order("id");
+
+    if (error) throw error;
+    insuranceRows = data || [];
+    renderInsurance();
+    msg("insuranceMessage", "");
+  } catch (e) {
+    msg("insuranceMessage", "تعذر تحميل التأمينات: " + errorText(e));
+  }
+}
+
+function renderInsurance() {
+  const q = $("insuranceSearch").value.trim().toLowerCase();
+  const rows = insuranceRows.filter(x =>
+    x.paid && fullName(x.athletes).toLowerCase().includes(q)
+  );
+
+  $("insuranceBody").innerHTML = rows.map(x => `
+    <tr>
+      <td>${esc(fullName(x.athletes))}</td>
+      <td>${x.insurance_year}</td>
+      <td>${x.amount} دج</td>
+      <td class="paid">مدفوع</td>
+    </tr>
+  `).join("") || '<tr><td colspan="4">لا يوجد رياضيون دفعوا التأمين في هذه السنة.</td></tr>';
+}
+
+$("loadInsurance").addEventListener("click", loadInsurance);
+$("insuranceSearch").addEventListener("input", renderInsurance);
+
+$("exportInsurance").addEventListener("click", () =>
+  csvExport("paid-insurance.csv", insuranceRows.filter(x => x.paid).map(x => ({
+    name:fullName(x.athletes),
+    year:x.insurance_year,
+    amount_dzd:x.amount,
+    status:"Paid"
+  })))
+);
+
+async function loadExams() {
+  msg("examMessage", "جارٍ التحميل...");
+  try {
+    const year = Number($("seasonYear").value) + 1;
+    const {data, error} = await db.from("belt_exam_payments")
+      .select("*,athletes(id,first_name,last_name)")
+      .eq("exam_year", year)
+      .eq("paid", true)
+      .order("exam_number");
+
+    if (error) throw error;
+    examRows = data || [];
+    renderExams();
+    msg("examMessage", "");
+  } catch (e) {
+    msg("examMessage", "تعذر تحميل الامتحانات: " + errorText(e));
+  }
+}
+
+function renderExams() {
+  const q = $("examSearch").value.trim().toLowerCase();
+  const f = $("examFilter").value;
+
+  const rows = examRows.filter(x =>
+    x.paid &&
+    fullName(x.athletes).toLowerCase().includes(q) &&
+    (f === "all" || String(x.exam_number) === f)
+  );
+
+  $("examsBody").innerHTML = rows.map(x => `
+    <tr>
+      <td>${esc(fullName(x.athletes))}</td>
+      <td>${x.exam_year}</td>
+      <td>${Number(x.exam_number) === 1 ? "الأول (فيفري–مارس)" : "الثاني (بعد جويلية)"}</td>
+      <td>${esc(x.belt_name)}</td>
+      <td>${x.amount} دج</td>
+      <td class="paid">مدفوع</td>
+    </tr>
+  `).join("") || '<tr><td colspan="6">لا يوجد رياضيون دفعوا حقوق الامتحان المحدد.</td></tr>';
+}
+
+$("loadExams").addEventListener("click", loadExams);
+$("examSearch").addEventListener("input", renderExams);
+$("examFilter").addEventListener("change", renderExams);
+
+$("exportExams").addEventListener("click", () =>
+  csvExport("paid-belt-exams.csv", examRows.filter(x => x.paid).map(x => ({
+    name:fullName(x.athletes),
+    year:x.exam_year,
+    exam:x.exam_number,
+    belt:x.belt_name,
+    amount_dzd:x.amount,
+    status:"Paid"
+  })))
+);
+
+async function init() {
+  const {data, error} = await db.auth.getSession();
+  if (error) {
+    msg("loginMessage", errorText(error));
+    return;
+  }
+  if (data.session) await enterDashboard(data.session.user);
+}
+
 init();
 </script>
 </body>
