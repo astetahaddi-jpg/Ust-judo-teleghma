@@ -3,241 +3,571 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>إدارة التسجيلات | نادي الجودو</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102c46">
+  <title>لوحة الإدارة | UST JUDO TELEGHMA</title>
+
   <style>
+    :root {
+      --navy: #102c46;
+      --red: #d62839;
+      --gold: #f2bd54;
+      --light: #f4f7fa;
+      --green: #198754;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      color: #172033;
+      font-family: Arial, Tahoma, sans-serif;
+      background: var(--light);
+      color: #172435;
     }
-    .container {
-      max-width: 1000px;
+
+    header {
+      background: var(--navy);
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      border-bottom: 5px solid var(--gold);
+    }
+
+    header h1 { margin: 0 0 8px; font-size: 25px; }
+    header p { margin: 0; line-height: 1.8; }
+
+    main {
+      width: min(1150px, 94%);
       margin: 25px auto;
     }
-    .card {
+
+    .panel {
       background: white;
       padding: 22px;
       margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 12px #0000000d;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px #102c4610;
     }
-    h1, h2 { color: #142b4a; }
+
+    h2 { color: var(--navy); margin-top: 0; }
+
     input, button {
-      box-sizing: border-box;
-      width: 100%;
+      font: inherit;
+      border-radius: 8px;
       padding: 12px;
-      margin: 8px 0;
-      border-radius: 7px;
-      font-size: 16px;
     }
-    input { border: 1px solid #cbd5e1; }
+
+    input {
+      width: 100%;
+      border: 1px solid #cbd5df;
+      margin: 7px 0 12px;
+      background: white;
+    }
+
     button {
       border: 0;
-      background: #17365d;
-      color: white;
       cursor: pointer;
+      font-weight: bold;
+      margin: 4px 2px;
     }
-    button.secondary { background: #64748b; }
-    #status { white-space: pre-wrap; }
-    .table-wrap { overflow-x: auto; }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .primary { background: var(--navy); color: white; }
+    .excel { background: var(--green); color: white; }
+    .danger { background: var(--red); color: white; }
+    .secondary { background: #e6edf4; color: var(--navy); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .actions button { flex: 1 1 170px; }
+
+    .message {
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 8px;
+      background: #edf2f7;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .error { background: #fff0f0; color: #a51d2d; }
+    .success { background: #e9f8ef; color: #176a39; }
+
+    .hidden { display: none !important; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e0e6ed;
+      border-radius: 10px;
+    }
+
     table {
-      border-collapse: collapse;
       width: 100%;
-      min-width: 850px;
+      min-width: 1100px;
+      border-collapse: collapse;
+      background: white;
     }
+
     th, td {
-      border: 1px solid #e2e8f0;
-      padding: 10px;
+      padding: 12px;
+      border-bottom: 1px solid #e6ebf0;
       text-align: right;
+      vertical-align: middle;
+      line-height: 1.7;
     }
-    th { background: #eaf0f7; }
-    .hidden { display: none; }
-    .note { color: #64748b; font-size: 14px; }
+
+    th {
+      background: var(--navy);
+      color: white;
+      white-space: nowrap;
+    }
+
+    tr:hover td { background: #f8fafc; }
+
+    .delete-btn {
+      background: var(--red);
+      color: white;
+      white-space: nowrap;
+    }
+
+    .count {
+      display: inline-block;
+      background: #e9eff6;
+      color: var(--navy);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #657386;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 21px; }
+      .panel { padding: 15px; }
+      main { width: 96%; margin-top: 15px; }
+    }
   </style>
 </head>
+
 <body>
-<div class="container">
-  <div class="card">
-    <h1>لوحة إدارة نادي الجودو</h1>
-    <p>تسجيل دخول المدير للاطلاع على طلبات التسجيل.</p>
+<header>
+  <h1>UST JUDO TELEGHMA</h1>
+  <p>لوحة الإدارة — النادي الرياضي الهاوي الاتحاد الرياضي التلاغمة</p>
+  <p>إدارة طلبات الانضمام وتصدير قائمة المنخرطين</p>
+</header>
+
+<main>
+  <section id="loginPanel" class="panel">
+    <h2>تسجيل دخول المدير (Admin Login)</h2>
+    <p>أدخل بيانات حساب المدير المسجل في Supabase Authentication.</p>
 
     <form id="loginForm">
-      <label for="email">البريد الإلكتروني للمدير</label>
+      <label for="email">البريد الإلكتروني (Email)</label>
       <input id="email" type="email" autocomplete="username"
-             required placeholder="البريد الإلكتروني">
+             placeholder="البريد الإلكتروني للمدير" required>
 
-      <label for="password">كلمة المرور</label>
-      <input id="password" type="password"
-             autocomplete="current-password" required
-             placeholder="كلمة المرور">
+      <label for="password">كلمة المرور (Password)</label>
+      <input id="password" type="password" autocomplete="current-password"
+             placeholder="كلمة المرور" required>
 
-      <button type="submit">تسجيل الدخول</button>
+      <button class="primary" id="loginButton" type="submit">
+        تسجيل الدخول
+      </button>
     </form>
 
-    <button id="logoutBtn" class="secondary hidden" type="button">
-      تسجيل الخروج
-    </button>
-    <p id="status" role="status"></p>
-  </div>
+    <div id="loginMessage" class="message hidden" role="status"></div>
+  </section>
 
-  <div id="recordsPanel" class="card hidden">
-    <h2>طلبات التسجيل</h2>
-    <button id="refreshBtn" type="button">تحديث الطلبات</button>
-    <p id="count"></p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>تاريخ الطلب</th>
-            <th>اسم الرياضي</th>
-            <th>تاريخ الميلاد</th>
-            <th>مكان الميلاد</th>
-            <th>الجنس</th>
-            <th>الإقامة</th>
-            <th>سبق له ممارسة الجودو؟</th>
-            <th>الحزام</th>
-            <th>اسم الولي</th>
-            <th>هاتف الولي</th>
-          </tr>
-        </thead>
-        <tbody id="recordsBody"></tbody>
-      </table>
+  <section id="dashboard" class="hidden">
+    <div class="panel">
+      <h2>إدارة طلبات الانضمام</h2>
+      <p>يمكنك البحث في الطلبات، وتصديرها إلى Excel، أو حذف طلب بعد تأكيد العملية.</p>
+
+      <div class="actions">
+        <button id="refreshButton" class="primary">تحديث الطلبات</button>
+        <button id="exportButton" class="excel">تحميل قائمة المنخرطين Excel</button>
+        <button id="logoutButton" class="secondary">تسجيل الخروج</button>
+      </div>
+
+      <label for="searchInput">البحث عن رياضي أو ولي أمر أو رقم هاتف</label>
+      <input id="searchInput" type="search"
+             placeholder="اكتب الاسم أو رقم الهاتف للبحث...">
+
+      <div id="statusMessage" class="message hidden" role="status"></div>
+      <div id="count" class="count">عدد الطلبات: 0</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>تاريخ الطلب</th>
+              <th>اسم الرياضي</th>
+              <th>تاريخ الميلاد</th>
+              <th>مكان الميلاد</th>
+              <th>الجنس</th>
+              <th>الإقامة</th>
+              <th>سبق له ممارسة الجودو</th>
+              <th>الحزام الحالي</th>
+              <th>اسم الولي</th>
+              <th>هاتف الولي</th>
+              <th>الإجراء</th>
+            </tr>
+          </thead>
+          <tbody id="registrationsBody">
+            <tr><td colspan="11">سجّل الدخول لعرض الطلبات.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-  <p class="note">
-    هذه الصفحة تعرض البيانات فقط، ولا توفر حذف التسجيلات أو تعديلها.
-  </p>
-</div>
+  </section>
+</main>
+
+<footer>
+  UST JUDO TELEGHMA — الانضباط يبني الأبطال.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
 (() => {
+  "use strict";
+
   const SUPABASE_URL = "https://jtvorszomguszvygbxbs.supabase.co";
   const SUPABASE_KEY = "sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6";
 
-  const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const $ = id => document.getElementById(id);
-  const loginForm = $("loginForm");
-  const status = $("status");
-  const recordsPanel = $("recordsPanel");
-  const logoutBtn = $("logoutBtn");
+  const $ = (id) => document.getElementById(id);
 
-  function showStatus(message) {
-    status.textContent = message;
+  const loginPanel = $("loginPanel");
+  const dashboard = $("dashboard");
+  const loginMessage = $("loginMessage");
+  const statusMessage = $("statusMessage");
+  const tbody = $("registrationsBody");
+  const count = $("count");
+
+  let registrations = [];
+  let busy = false;
+
+  function showMessage(element, message, type = "") {
+    element.textContent = message;
+    element.className = "message" + (type ? " " + type : "");
+    element.classList.remove("hidden");
   }
 
-  function setLoggedIn(loggedIn) {
-    loginForm.classList.toggle("hidden", loggedIn);
-    logoutBtn.classList.toggle("hidden", !loggedIn);
-    recordsPanel.classList.toggle("hidden", !loggedIn);
+  function hideMessage(element) {
+    element.textContent = "";
+    element.classList.add("hidden");
+  }
+
+  function cellText(value) {
+    return value === null || value === undefined || value === ""
+      ? "—"
+      : String(value);
+  }
+
+  function formatDate(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? String(value)
+      : date.toLocaleString("ar-DZ");
+  }
+
+  function practiceText(value) {
+    if (value === true || value === "true") return "نعم";
+    if (value === false || value === "false") return "لا";
+    return "—";
+  }
+
+  function setBusy(value) {
+    busy = value;
+    $("refreshButton").disabled = value;
+    $("exportButton").disabled = value;
+    $("logoutButton").disabled = value;
   }
 
   function addCell(row, value) {
-    const cell = document.createElement("td");
-    cell.textContent = value == null || value === "" ? "—" : String(value);
-    row.appendChild(cell);
+    const td = document.createElement("td");
+    td.textContent = cellText(value);
+    row.appendChild(td);
   }
 
-  async function loadRecords() {
-    $("refreshBtn").disabled = true;
-    showStatus("جارٍ تحميل التسجيلات...");
-    $("recordsBody").replaceChildren();
+  function renderRows() {
+    const term = $("searchInput").value.trim().toLocaleLowerCase();
+    const filtered = registrations.filter((item) => {
+      const text = [
+        item.athlete_name,
+        item.guardian_name,
+        item.guardian_phone,
+        item.residence,
+        item.birthplace
+      ].map(cellText).join(" ").toLocaleLowerCase();
+
+      return text.includes(term);
+    });
+
+    tbody.replaceChildren();
+    count.textContent = "عدد الطلبات المعروضة: " + filtered.length +
+      " — إجمالي الطلبات: " + registrations.length;
+
+    if (!filtered.length) {
+      const row = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 11;
+      td.textContent = "لا توجد طلبات مطابقة للبحث.";
+      row.appendChild(td);
+      tbody.appendChild(row);
+      return;
+    }
+
+    filtered.forEach((item) => {
+      const row = document.createElement("tr");
+
+      addCell(row, formatDate(item.created_at));
+      addCell(row, item.athlete_name);
+      addCell(row, item.date_of_birth);
+      addCell(row, item.birthplace);
+      addCell(row, item.gender);
+      addCell(row, item.residence);
+      addCell(row, practiceText(item.practiced_judo));
+      addCell(row, item.current_belt);
+      addCell(row, item.guardian_name);
+      addCell(row, item.guardian_phone);
+
+      const actionCell = document.createElement("td");
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "delete-btn";
+      deleteButton.textContent = "حذف الطلب";
+
+      if (item.id === undefined || item.id === null) {
+        deleteButton.disabled = true;
+        deleteButton.title = "هذا السجل لا يحتوي على عمود id";
+      } else {
+        deleteButton.addEventListener("click", () => deleteRegistration(item));
+      }
+
+      actionCell.appendChild(deleteButton);
+      row.appendChild(actionCell);
+      tbody.appendChild(row);
+    });
+  }
+
+  async function loadRegistrations() {
+    if (busy) return;
+
+    setBusy(true);
+    hideMessage(statusMessage);
+    showMessage(statusMessage, "جارٍ تحميل الطلبات...");
 
     try {
+      const { data: { user }, error: userError } = await db.auth.getUser();
+      if (userError || !user) {
+        loginPanel.classList.remove("hidden");
+        dashboard.classList.add("hidden");
+        showMessage(loginMessage, "انتهت جلسة الدخول. سجّل الدخول مجددًا.", "error");
+        return;
+      }
+
       const { data, error } = await db
         .from("registrations")
-        .select(
-          "created_at,athlete_name,date_of_birth,birthplace,gender,residence,practiced_judo,current_belt,guardian_name,guardian_phone"
-        )
+        .select("id,created_at,athlete_name,date_of_birth,birthplace,gender,residence,practiced_judo,current_belt,guardian_name,guardian_phone")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      for (const item of data || []) {
-        const row = document.createElement("tr");
-        let created = "—";
+      registrations = data || [];
+      renderRows();
 
-        if (item.created_at) {
-          created = new Date(item.created_at).toLocaleString("ar-DZ");
-        }
-
-        addCell(row, created);
-        addCell(row, item.athlete_name);
-        addCell(row, item.date_of_birth);
-        addCell(row, item.birthplace);
-        addCell(row, item.gender);
-        addCell(row, item.residence);
-        addCell(row, item.practiced_judo ? "نعم" : "لا");
-        addCell(row, item.current_belt);
-        addCell(row, item.guardian_name);
-        addCell(row, item.guardian_phone);
-        $("recordsBody").appendChild(row);
+      if (registrations.length === 0) {
+        showMessage(statusMessage, "لا توجد طلبات انضمام حاليًا.", "success");
+      } else {
+        showMessage(statusMessage, "تم تحميل الطلبات بنجاح.", "success");
       }
-
-      $("count").textContent =
-        "عدد طلبات التسجيل: " + (data || []).length;
-      showStatus("تم تحميل التسجيلات بنجاح.");
     } catch (error) {
-      showStatus("تعذر تحميل التسجيلات. تأكد من تسجيل الدخول وصلاحيات الحساب.");
-      console.error(error);
+      showMessage(
+        statusMessage,
+        "تعذّر تحميل الطلبات: " + (error.message || "خطأ غير معروف") +
+        ". تحقق من اتصال Supabase وصلاحيات قراءة البيانات.",
+        "error"
+      );
     } finally {
-      $("refreshBtn").disabled = false;
+      setBusy(false);
     }
   }
 
-  loginForm.addEventListener("submit", async event => {
-    event.preventDefault();
-    showStatus("جارٍ تسجيل الدخول...");
+  async function deleteRegistration(item) {
+    if (busy) return;
 
-    const { error } = await db.auth.signInWithPassword({
-      email: $("email").value.trim(),
-      password: $("password").value
-    });
+    const name = cellText(item.athlete_name);
+    const confirmed = window.confirm(
+      "هل أنت متأكد من حذف طلب الانضمام الخاص بالرياضي: " + name + "؟\n\n" +
+      "سيتم حذف السجل من قاعدة البيانات، ولا يمكن التراجع عن العملية من هذه الصفحة."
+    );
 
-    if (error) {
-      showStatus("تعذر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.");
+    if (!confirmed) return;
+
+    setBusy(true);
+    hideMessage(statusMessage);
+
+    try {
+      const { data: { user }, error: userError } = await db.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error("يجب تسجيل الدخول بحساب المدير أولًا.");
+      }
+
+      const { data, error } = await db
+        .from("registrations")
+        .delete()
+        .eq("id", item.id)
+        .select("id");
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        throw new Error(
+          "لم يُحذف الطلب. قد لا تسمح سياسة Supabase بالحذف لهذا الحساب، " +
+          "أو أن السجل غير موجود."
+        );
+      }
+
+      registrations = registrations.filter(
+        (registration) => String(registration.id) !== String(item.id)
+      );
+
+      renderRows();
+      showMessage(statusMessage, "تم حذف طلب " + name + " بنجاح.", "success");
+    } catch (error) {
+      showMessage(
+        statusMessage,
+        "تعذّر حذف الطلب: " + (error.message || "خطأ غير معروف"),
+        "error"
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function exportExcel() {
+    if (!registrations.length) {
+      showMessage(statusMessage, "لا توجد طلبات لتصديرها.", "error");
       return;
     }
 
-    $("password").value = "";
-    setLoggedIn(true);
-    await loadRecords();
+    if (!window.XLSX) {
+      showMessage(statusMessage, "تعذّر تحميل مكتبة Excel. تحقق من اتصال الإنترنت ثم أعد المحاولة.", "error");
+      return;
+    }
+
+    const rows = registrations.map((item, index) => ({
+      "الرقم": index + 1,
+      "تاريخ الطلب": formatDate(item.created_at),
+      "اسم الرياضي": cellText(item.athlete_name),
+      "تاريخ الميلاد": cellText(item.date_of_birth),
+      "مكان الميلاد": cellText(item.birthplace),
+      "الجنس": cellText(item.gender),
+      "مكان الإقامة": cellText(item.residence),
+      "سبق له ممارسة الجودو": practiceText(item.practiced_judo),
+      "الحزام الحالي": cellText(item.current_belt),
+      "اسم الولي": cellText(item.guardian_name),
+      "هاتف الولي": cellText(item.guardian_phone)
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    worksheet["!cols"] = [
+      { wch: 8 }, { wch: 22 }, { wch: 26 }, { wch: 16 },
+      { wch: 20 }, { wch: 12 }, { wch: 24 }, { wch: 24 },
+      { wch: 18 }, { wch: 26 }, { wch: 20 }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "طلبات الانضمام");
+
+    const date = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, "UST-JUDO-TELEGHMA-" + date + ".xlsx");
+
+    showMessage(statusMessage, "تم تجهيز ملف Excel.", "success");
+  }
+
+  $("loginForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy) return;
+
+    hideMessage(loginMessage);
+    $("loginButton").disabled = true;
+
+    try {
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      loginPanel.classList.add("hidden");
+      dashboard.classList.remove("hidden");
+      await loadRegistrations();
+    } catch (error) {
+      showMessage(
+        loginMessage,
+        "تعذّر تسجيل الدخول: " + (error.message || "تحقق من البريد الإلكتروني وكلمة المرور."),
+        "error"
+      );
+    } finally {
+      $("loginButton").disabled = false;
+    }
   });
 
-  logoutBtn.addEventListener("click", async () => {
-    await db.auth.signOut();
-    setLoggedIn(false);
-    $("recordsBody").replaceChildren();
-    $("count").textContent = "";
-    showStatus("تم تسجيل الخروج.");
-  });
+  $("refreshButton").addEventListener("click", loadRegistrations);
+  $("exportButton").addEventListener("click", exportExcel);
+  $("searchInput").addEventListener("input", renderRows);
 
-  $("refreshBtn").addEventListener("click", loadRecords);
+  $("logoutButton").addEventListener("click", async () => {
+    if (busy) return;
 
-  async function initialize() {
-    const { data, error } = await db.auth.getSession();
+    const { error } = await db.auth.signOut();
+
+    registrations = [];
+    tbody.replaceChildren();
+    dashboard.classList.add("hidden");
+    loginPanel.classList.remove("hidden");
 
     if (error) {
-      showStatus("تعذر التحقق من جلسة الدخول.");
+      showMessage(loginMessage, "تم إخفاء لوحة الإدارة، لكن تعذّر إنهاء الجلسة: " + error.message, "error");
+    } else {
+      $("loginForm").reset();
+      showMessage(loginMessage, "تم تسجيل الخروج بنجاح.", "success");
+    }
+  });
+
+  db.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      showMessage(loginMessage, "تعذّر التحقق من الجلسة: " + error.message, "error");
       return;
     }
 
     if (data.session) {
-      setLoggedIn(true);
-      await loadRecords();
-    } else {
-      setLoggedIn(false);
+      loginPanel.classList.add("hidden");
+      dashboard.classList.remove("hidden");
+      loadRegistrations();
     }
-  }
-
-  initialize();
+  });
 })();
 </script>
 </body>
