@@ -1,303 +1,545 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f4f8ff">
-<title>UST JUDO TELEGHMA | Admin Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root{--navy:#123b70;--blue:#2584e8;--blue2:#eaf4ff;--red:#ef4b55;--redbg:#fff0f1;--green:#169b62;--greenbg:#eafaf1;--gold:#a86a00;--goldbg:#fff5df;--purple:#7654d6;--purplebg:#f2edff;--ink:#20344d;--muted:#718198;--line:#e2ebf5;--bg:#f4f8fd;--white:#fff}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Tahoma",sans-serif}
-button,input,select{font:inherit}
-button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;cursor:pointer;font-weight:700;transition:.15s}
-button:hover{filter:brightness(.96)}
-button:disabled{opacity:.55;cursor:not-allowed}
-.btn-red{background:var(--red)}.btn-green{background:var(--green)}
-.btn-light{background:#eef5ff;color:var(--navy);border:1px solid #d9e8fa}
-.btn-gold{background:#fff0ce;color:#855500}
-.btn-purple{background:var(--purple)}
-input,select{width:100%;padding:11px 12px;border:1px solid #d6e1ef;border-radius:10px;background:#fff;color:var(--ink);outline:none}
-input:focus,select:focus{border-color:#69aaf0;box-shadow:0 0 0 3px #2584e81a}
-label{font-size:13px;color:var(--muted);display:block;margin:5px 0}
-header{background:linear-gradient(115deg,#fff,#eef6ff);border-bottom:1px solid var(--line);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;top:0;z-index:5;box-shadow:0 4px 18px #244a7510}
-.brand h1{font-size:23px;margin:0;color:var(--navy);letter-spacing:.3px}
-.brand p{margin:6px 0 0;color:#45658b;font-weight:700}
-.userbox{display:flex;align-items:center;gap:10px}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#19b36d;margin-left:5px}
-.layout{max-width:1600px;margin:auto;display:grid;grid-template-columns:235px minmax(0,1fr);gap:16px;padding:16px}
-.sidebar{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;height:max-content;position:sticky;top:112px}
-.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:right;margin:4px 0;background:transparent;color:#526782;padding:13px 12px;border-radius:11px}
-.navbtn.active,.navbtn:hover{background:linear-gradient(90deg,#e6f2ff,#f4f9ff);color:var(--blue)}
-.navicon{width:30px;height:30px;display:inline-grid;place-items:center;background:#f0f6ff;border-radius:9px;font-size:17px}
-.content{min-width:0}
-.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px;margin-bottom:15px;box-shadow:0 5px 18px #244a7506}
-.panel h2{font-size:19px;color:var(--navy);margin:0 0 13px}
-.muted{color:var(--muted);font-size:13px;line-height:1.7}
-.hidden{display:none!important}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px}
-.stat{border:1px solid var(--line);border-radius:15px;padding:15px;background:linear-gradient(145deg,#fff,#f9fbff);min-height:112px}
-.stat .label{font-size:13px;color:#667b95}
-.stat .value{font-size:26px;font-weight:800;color:var(--navy);margin-top:10px}
-.stat.blue{background:linear-gradient(145deg,#fff,#eef6ff);border-color:#d8eaff}
-.stat.green{background:linear-gradient(145deg,#fff,#edfff5);border-color:#d8f4e5}
-.stat.red{background:linear-gradient(145deg,#fff,#fff1f2);border-color:#ffe0e2}
-.stat.purple{background:linear-gradient(145deg,#fff,#f5f1ff);border-color:#e6dcff}
-.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0}
-.toolbar input,.toolbar select{max-width:300px;flex:1;min-width:150px}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
-table{width:100%;border-collapse:collapse;min-width:760px;background:#fff}
-th,td{padding:11px 10px;text-align:center;border-bottom:1px solid #eaf0f7;white-space:nowrap;font-size:13px}
-th{background:#f2f7fd;color:#355273;font-weight:800;position:sticky;top:0}
-tr:hover td{background:#fbfdff}
-.pill{display:inline-block;border-radius:30px;padding:5px 9px;font-size:12px;font-weight:700}
-.pill.green{background:var(--greenbg);color:var(--green)}
-.pill.red{background:var(--redbg);color:var(--red)}
-.pill.gold{background:var(--goldbg);color:var(--gold)}
-.pill.blue{background:var(--blue2);color:var(--blue)}
-.pill.gray{background:#eef2f6;color:#64748b}
-.smallbtn{padding:7px 9px;font-size:12px;border-radius:8px;margin:2px}
-.notice{background:#fff8e8;border:1px solid #f4e1b3;color:#79531a;border-radius:11px;padding:12px;margin:10px 0;font-size:13px;line-height:1.7}
-.monthgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin:12px 0}
-.monthbox{border:1px solid var(--line);border-radius:12px;padding:12px;background:#f8fbff;text-align:center}
-.monthbox strong{display:block;color:var(--navy);font-size:17px;margin:7px 0}
-.monthbox span{font-size:12px;color:var(--muted)}
-.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.message{font-size:13px;line-height:1.7;margin-top:8px;color:var(--navy)}
-.login{max-width:450px;margin:8vh auto;padding:24px}
-.login h2{margin-top:0}
-.empty{padding:25px;text-align:center;color:var(--muted)}
-.status-off{opacity:.62}
-.footer{text-align:center;color:#8796a9;font-size:12px;padding:10px}
-@media(max-width:900px){
-.layout{grid-template-columns:1fr;padding:9px}
-.sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
-.navbtn{font-size:12px;padding:10px 7px}
-.navicon{display:none}
-header{padding:14px;position:static}
-.brand h1{font-size:18px}.brand p{font-size:12px}
-.panel{padding:12px}
-.userbox{flex-wrap:wrap;justify-content:flex-end}
-}
-@media(max-width:520px){
-.sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
-.userbox{font-size:12px}
-.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.stat .value{font-size:21px}
-.toolbar button{flex:1}
-.brand p{max-width:230px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102c46">
+  <title>Admin Dashboard | UST JUDO TELEGHMA</title>
+
+  <style>
+    :root {
+      --navy: #102c46;
+      --red: #d62839;
+      --gold: #f2bd54;
+      --light: #f4f7fa;
+      --white: #fff;
+      --border: #dce3ea;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--light);
+      color: #203040;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: var(--navy);
+      color: white;
+      text-align: center;
+      padding: 22px 12px;
+      border-bottom: 5px solid var(--gold);
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 23px;
+    }
+
+    header p { margin: 0; }
+
+    main {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 14px;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 14px #102c4610;
+    }
+
+    h2 { color: var(--navy); margin-top: 0; }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+    }
+
+    input, button {
+      font: inherit;
+      border-radius: 7px;
+      padding: 12px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: white;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .primary {
+      background: var(--navy);
+      color: white;
+    }
+
+    .danger {
+      background: var(--red);
+      color: white;
+    }
+
+    .gold {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .message {
+      margin-top: 14px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .hidden { display: none !important; }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: right;
+      vertical-align: top;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      background: var(--navy);
+      color: white;
+    }
+
+    .muted { color: #5c6b78; }
+    .count { font-weight: bold; color: var(--navy); }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #5c6b78;
+    }
+  </style>
 </head>
+
 <body>
-
-<section id="loginCard" class="panel login">
-  <h2>🔐 دخول المدير | Admin Login</h2>
-  <p class="muted">لوحة إدارة نادي UST JUDO TELEGHMA</p>
-  <label for="email">البريد الإلكتروني | Email</label>
-  <input id="email" type="email" autocomplete="username">
-  <label for="password">كلمة المرور | Password</label>
-  <input id="password" type="password" autocomplete="current-password">
-  <button id="loginBtn" style="width:100%;margin-top:12px">تسجيل الدخول | Login</button>
-  <p id="loginMessage" class="message" role="status"></p>
-</section>
-
-<div id="app" class="hidden">
 <header>
- <div class="brand">
   <h1>UST JUDO TELEGHMA</h1>
+  <p>لوحة الإدارة | Admin Dashboard</p>
   <p>النادي الرياضي الهاوي الاتحاد الرياضي التلاغمة</p>
- </div>
- <div class="userbox">
-  <span><span class="dot"></span><b id="who">Admin</b></span>
-  <button id="logoutBtn" class="btn-red">تسجيل الخروج ↗</button>
- </div>
 </header>
 
-<div class="layout">
-<aside class="sidebar">
- <button class="navbtn active" data-tab="home"><span class="navicon">⌂</span>الرئيسية</button>
- <button class="navbtn" data-tab="requests"><span class="navicon">♙</span>طلبات الانخراط <span id="requestBadge" class="pill red">0</span></button>
- <button class="navbtn" data-tab="athletes"><span class="navicon">♧</span>الرياضيون</button>
- <button class="navbtn" data-tab="subscriptions"><span class="navicon">▤</span>الاشتراكات والمداخيل</button>
- <button class="navbtn" data-tab="insurance"><span class="navicon">◇</span>التأمينات المدفوعة</button>
- <button class="navbtn" data-tab="exams"><span class="navicon">♜</span>حقوق الامتحانات المدفوعة</button>
-</aside>
+<main>
+  <section id="loginPanel" class="panel">
+    <h2>تسجيل دخول المدير | Admin Login</h2>
 
-<main class="content">
+    <form id="loginForm">
+      <label for="email">البريد الإلكتروني | Email</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="username"
+        required
+        placeholder="admin@example.com"
+      >
 
-<section id="tab-home">
- <div class="grid">
-  <div class="stat red">
-   <div class="label">طلبات الانخراط الجديدة</div>
-   <div class="value" id="homeRequests">—</div>
-   <button class="btn-light smallbtn" data-goto="requests">عرض الطلبات ←</button>
-  </div>
-  <div class="stat blue">
-   <div class="label">عدد الرياضيين النشطين</div>
-   <div class="value" id="homeAthletes">—</div>
-   <button class="btn-light smallbtn" data-goto="athletes">عرض الرياضيين ←</button>
-  </div>
-  <div class="stat green">
-   <div class="label">اشتراكات الموسم المدفوعة</div>
-   <div class="value" id="homeSubIncome">0 دج</div>
-   <button class="btn-light smallbtn" data-goto="subscriptions">عرض التفاصيل ←</button>
-  </div>
-  <div class="stat purple">
-   <div class="label">التأمينات المدفوعة</div>
-   <div class="value" id="homeInsIncome">0 دج</div>
-   <button class="btn-light smallbtn" data-goto="insurance">عرض التفاصيل ←</button>
-  </div>
- </div>
+      <label for="password">كلمة المرور | Password</label>
+      <input
+        id="password"
+        type="password"
+        autocomplete="current-password"
+        required
+        placeholder="Password"
+      >
 
- <div class="panel" style="margin-top:15px">
-  <h2>📅 الموسم الرياضي الحالي</h2>
-  <div class="formgrid">
-   <div><label>سنة بداية الموسم</label><input id="seasonYear" type="number" min="2000" max="2100" value="2026"></div>
-   <div><label>الموسم المختار</label><input id="seasonLabel" readonly value="2026–2027"></div>
-   <div style="align-self:end"><button id="applySeason">تطبيق الموسم وإعادة تحميل البيانات</button></div>
-  </div>
-  <p class="muted">الموسم المعتمد: سبتمبر 2026 إلى جوان 2027. الاشتراك الشهري 1000 دج. الموسم الكامل 10,000 دج.</p>
- </div>
+      <div class="actions">
+        <button id="loginBtn" class="primary" type="submit">
+          تسجيل الدخول | Login
+        </button>
+      </div>
+    </form>
 
- <div class="panel">
-  <h2>✨ ملاحظات الإدارة</h2>
-  <p class="muted">اقبل طلب الانخراط لإضافة الرياضي إلى جدول الاشتراكات. يُحذف الطلب من قائمة الطلبات فقط بعد نجاح الإضافة. يمكنك إيقاف الرياضي مؤقتًا أو إعادة تفعيله، أو حذفه نهائيًا بعد تأكيد صريح.</p>
- </div>
-</section>
+    <p id="loginMessage" class="message" role="status"></p>
+  </section>
 
-<section id="tab-requests" class="hidden">
- <div class="panel">
-  <h2>طلبات الانخراط الجديدة | Registration Requests</h2>
-  <p class="muted">عند القبول، تُضاف بيانات الرياضي إلى جدول الرياضيين واشتراكات الموسم المحدد. لا تُسجّل أي دفعة مدفوعة تلقائيًا.</p>
-  <div class="toolbar">
-   <input id="requestSearch" placeholder="ابحث بالاسم أو هاتف الولي">
-   <button id="refreshRequests" class="btn-light">تحديث الطلبات</button>
-   <button id="exportRequests" class="btn-light">تصدير CSV</button>
-  </div>
-  <p id="requestMessage" class="message"></p>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>الاسم واللقب</th><th>تاريخ الطلب</th><th>تاريخ الميلاد</th><th>الجنس</th><th>الإقامة</th><th>ولي الأمر</th><th>الهاتف</th><th>الحالة</th><th>الإجراء</th></tr></thead>
-    <tbody id="requestsBody"></tbody>
-   </table>
-  </div>
- </div>
-</section>
+  <section id="dashboard" class="hidden">
+    <div class="panel">
+      <h2>لوحة التحكم | Dashboard</h2>
+      <p>تم تسجيل الدخول بنجاح.</p>
+      <p id="adminEmail" class="muted"></p>
 
-<section id="tab-athletes" class="hidden">
- <div class="panel">
-  <h2>الرياضيون | Athletes</h2>
-  <p class="muted">الإيقاف المؤقت لا يحذف السجلات المالية. الحذف النهائي يزيل سجلات الرياضي المرتبطة به من جداول المدفوعات والاشتراكات.</p>
-  <div class="formgrid">
-   <div><label>الاسم</label><input id="firstName"></div>
-   <div><label>اللقب</label><input id="lastName"></div>
-   <div style="align-self:end"><button id="saveAthlete">إضافة رياضي</button></div>
-  </div>
-  <p id="athleteMessage" class="message"></p>
-  <div class="toolbar">
-   <input id="athleteSearch" placeholder="البحث عن رياضي">
-   <select id="athleteStatus">
-    <option value="all">كل الرياضيين</option>
-    <option value="active">النشطون فقط</option>
-    <option value="inactive">الموقوفون مؤقتًا فقط</option>
-   </select>
-   <button id="refreshAthletes" class="btn-light">تحديث</button>
-   <button id="exportAthletes" class="btn-light">تصدير CSV</button>
-  </div>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>اسم الرياضي</th><th>الحالة</th><th>الإجراء</th></tr></thead>
-    <tbody id="athletesBody"></tbody>
-   </table>
-  </div>
- </div>
-</section>
+      <div class="actions">
+        <button id="refreshBtn" class="primary" type="button">
+          تحديث الطلبات | Refresh
+        </button>
+        <button id="exportBtn" class="gold" type="button">
+          تصدير Excel/CSV
+        </button>
+        <button id="logoutBtn" class="danger" type="button">
+          تسجيل الخروج | Logout
+        </button>
+      </div>
 
-<section id="tab-subscriptions" class="hidden">
- <div class="panel">
-  <h2>الاشتراكات والمداخيل الشهرية</h2>
-  <p class="muted">يُحسب الدخل من الاشتراكات المسجلة كمدفوعة فقط، لكل شهر على حدة.</p>
-  <div class="toolbar">
-   <input id="subSearch" placeholder="ابحث عن رياضي">
-   <button id="loadSubscriptions">تحديث الجدول</button>
-   <button id="exportSubscriptions" class="btn-light">تصدير CSV</button>
-  </div>
-  <p id="subMessage" class="message"></p>
-  <div class="grid">
-   <div class="stat blue"><div class="label">مجموع مداخيل الاشتراكات</div><div id="seasonSubIncome" class="value">0 دج</div></div>
-   <div class="stat green"><div class="label">عدد الدفعات الشهرية</div><div id="seasonSubPayments" class="value">0</div></div>
-   <div class="stat red"><div class="label">الاشتراكات غير المحصلة</div><div id="subDebt" class="value">0 دج</div></div>
-  </div>
-  <div id="monthIncomeGrid" class="monthgrid"></div>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>الرياضي</th><th>سبتمبر</th><th>أكتوبر</th><th>نوفمبر</th><th>ديسمبر</th><th>جانفي</th><th>فيفري</th><th>مارس</th><th>أفريل</th><th>ماي</th><th>جوان</th><th>مدفوع</th><th>الدين</th><th>الإجراء</th></tr></thead>
-    <tbody id="subsBody"></tbody>
-   </table>
-  </div>
- </div>
-</section>
+      <p id="dashboardMessage" class="message" role="status"></p>
+    </div>
 
-<section id="tab-insurance" class="hidden">
- <div class="panel">
-  <h2>التأمينات المدفوعة فقط</h2>
-  <p class="muted">قيمة التأمين السنوي الافتراضية 1000 دج.</p>
-  <div class="toolbar">
-   <input id="insuranceSearch" placeholder="البحث عن رياضي">
-   <button id="loadInsurance">تحديث</button>
-   <button id="exportInsurance" class="btn-light">تصدير CSV</button>
-  </div>
-  <p id="insuranceMessage" class="message"></p>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>الرياضي</th><th>الموسم</th><th>المبلغ</th><th>الحالة</th></tr></thead>
-    <tbody id="insuranceBody"></tbody>
-   </table>
-  </div>
- </div>
-</section>
+    <div class="panel">
+      <h2>طلبات التسجيل | Registration Requests</h2>
+      <p>عدد الطلبات: <span id="requestCount" class="count">0</span></p>
 
-<section id="tab-exams" class="hidden">
- <div class="panel">
-  <h2>حقوق امتحانات الأحزمة المدفوعة فقط</h2>
-  <div class="toolbar">
-   <input id="examSearch" placeholder="البحث عن رياضي">
-   <select id="examFilter">
-    <option value="all">كل الامتحانات</option>
-    <option value="1">الامتحان الأول</option>
-    <option value="2">الامتحان الثاني</option>
-   </select>
-   <button id="loadExams">تحديث</button>
-   <button id="exportExams" class="btn-light">تصدير CSV</button>
-  </div>
-  <p id="examMessage" class="message"></p>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>الرياضي</th><th>الموسم</th><th>الامتحان</th><th>الحزام</th><th>المبلغ</th><th>الحالة</th></tr></thead>
-    <tbody id="examsBody"></tbody>
-   </table>
-  </div>
- </div>
-</section>
+      <label for="searchInput">البحث | Search</label>
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="ابحث في طلبات التسجيل..."
+      >
 
-<div class="footer">UST JUDO TELEGHMA · Admin Dashboard</div>
+      <div class="table-wrap">
+        <table>
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 </main>
-</div>
-</div>
+
+<footer>
+  UST JUDO TELEGHMA — Official Administration
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const SUPABASE_URL="https://jtvorszomguszvygbxbs.supabase.co";
-const SUPABASE_PUBLIC_KEY="sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6";
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLIC_KEY);
+"use strict";
 
-const months=[
- ["september","سبتمبر"],["october","أكتوبر"],["november","نوفمبر"],
- ["december","ديسمبر"],["january","جانفي"],["february","فيفري"],
- ["march","مارس"],["april","أفريل"],["may","ماي"],["june","جوان"]
-];
+/*
+  Supabase connection
+  لا تضع service_role key في هذا الملف.
+*/
+const SUPABASE_URL =
+  "https://jtvorszomguszvygbxbs.supabase.co";
 
-const MONTHLY_FEE=1000,INSURANCE_FEE=1000;
-const $=id=>document.getElementById(id);
-let requests=[],athletes=[],subscriptions=[],insurance
+const SUPABASE_PUBLIC_KEY =
+  "sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLIC_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+);
+
+const $ = id => document.getElementById(id);
+
+let requests = [];
+let visibleRequests = [];
+
+function showMessage(element, message, isError = false) {
+  element.textContent = message;
+  element.style.color = isError ? "#c62828" : "#176b3a";
+}
+
+function setBusy(button, busy, normalText, busyText) {
+  button.disabled = busy;
+  button.textContent = busy ? busyText : normalText;
+}
+
+function showLogin() {
+  $("loginPanel").classList.remove("hidden");
+  $("dashboard").classList.add("hidden");
+}
+
+function showDashboard(user) {
+  $("loginPanel").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+  $("adminEmail").textContent =
+    "Signed in as: " + (user.email || "Admin");
+}
+
+/*
+  تحميل طلبات التسجيل فقط.
+  لا يتم حذف الطلبات أو تغييرها في قاعدة البيانات.
+*/
+async function loadRegistrations() {
+  showMessage($("dashboardMessage"), "جاري تحميل الطلبات...");
+
+  $("refreshBtn").disabled = true;
+
+  try {
+    const { data, error } = await db
+      .from("registrations")
+      .select("*")
+      .limit(1000);
+
+    if (error) throw error;
+
+    requests = Array.isArray(data) ? data : [];
+    renderTable();
+
+    showMessage(
+      $("dashboardMessage"),
+      "تم تحميل الطلبات بنجاح."
+    );
+  } catch (error) {
+    requests = [];
+    renderTable();
+
+    showMessage(
+      $("dashboardMessage"),
+      "تعذر تحميل الطلبات: " +
+        (error.message || "حدث خطأ غير معروف") +
+        ". تحقق من صلاحيات Supabase وRLS.",
+      true
+    );
+  } finally {
+    $("refreshBtn").disabled = false;
+  }
+}
+
+function renderTable() {
+  const query = $("searchInput").value
+    .trim()
+    .toLocaleLowerCase();
+
+  visibleRequests = requests.filter(row =>
+    JSON.stringify(row)
+      .toLocaleLowerCase()
+      .includes(query)
+  );
+
+  $("requestCount").textContent = visibleRequests.length;
+
+  const head = $("tableHead");
+  const body = $("tableBody");
+
+  head.replaceChildren();
+  body.replaceChildren();
+
+  if (visibleRequests.length === 0) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+
+    td.colSpan = Math.max(
+      1,
+      requests.length ? Object.keys(requests[0]).length : 1
+    );
+
+    td.textContent = requests.length
+      ? "لا توجد نتائج مطابقة."
+      : "لا توجد طلبات للعرض، أو لم يتم تحميلها.";
+
+    tr.appendChild(td);
+    body.appendChild(tr);
+    return;
+  }
+
+  const columns = Object.keys(visibleRequests[0]);
+  const headerRow = document.createElement("tr");
+
+  columns.forEach(column => {
+    const th = document.createElement("th");
+    th.textContent = column;
+    headerRow.appendChild(th);
+  });
+
+  head.appendChild(headerRow);
+
+  visibleRequests.forEach(row => {
+    const tr = document.createElement("tr");
+
+    columns.forEach(column => {
+      const td = document.createElement("td");
+      const value = row[column];
+
+      td.textContent =
+        value === null || value === undefined
+          ? ""
+          : typeof value === "object"
+            ? JSON.stringify(value)
+            : String(value);
+
+      tr.appendChild(td);
+    });
+
+    body.appendChild(tr);
+  });
+}
+
+function exportCSV() {
+  if (!visibleRequests.length) {
+    showMessage(
+      $("dashboardMessage"),
+      "لا توجد بيانات لتصديرها.",
+      true
+    );
+    return;
+  }
+
+  const columns = Object.keys(visibleRequests[0]);
+
+  const escapeCSV = value => {
+    const text = value === null || value === undefined
+      ? ""
+      : typeof value === "object"
+        ? JSON.stringify(value)
+        : String(value);
+
+    return '"' + text.replace(/"/g, '""') + '"';
+  };
+
+  const rows = [
+    columns.map(escapeCSV).join(","),
+    ...visibleRequests.map(row =>
+      columns.map(column => escapeCSV(row[column])).join(",")
+    )
+  ];
+
+  // BOM للمحافظة على العربية عند فتح CSV في Excel.
+  const blob = new Blob(
+    ["\uFEFF" + rows.join("\r\n")],
+    { type: "text/csv;charset=utf-8;" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "UST-JUDO-registrations.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const button = $("loginBtn");
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  showMessage($("loginMessage"), "");
+  setBusy(button, true, "تسجيل الدخول | Login", "جاري الدخول...");
+
+  try {
+    const { data, error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    if (!data.user) {
+      throw new Error("لم يتم العثور على حساب المستخدم.");
+    }
+
+    showDashboard(data.user);
+    $("password").value = "";
+
+    await loadRegistrations();
+  } catch (error) {
+    showMessage(
+      $("loginMessage"),
+      "تعذر تسجيل الدخول: " +
+        (error.message || "تحقق من البريد الإلكتروني وكلمة المرور."),
+      true
+    );
+  } finally {
+    setBusy(button, false, "تسجيل الدخول | Login", "");
+  }
+});
+
+$("refreshBtn").addEventListener("click", loadRegistrations);
+
+$("exportBtn").addEventListener("click", exportCSV);
+
+$("searchInput").addEventListener("input", renderTable);
+
+$("logoutBtn").addEventListener("click", async () => {
+  const button = $("logoutBtn");
+  button.disabled = true;
+
+  try {
+    const { error } = await db.auth.signOut();
+    if (error) throw error;
+
+    requests = [];
+    renderTable();
+    showLogin();
+
+    showMessage(
+      $("loginMessage"),
+      "تم تسجيل الخروج بنجاح."
+    );
+  } catch (error) {
+    showMessage(
+      $("dashboardMessage"),
+      "تعذر تسجيل الخروج: " + error.message,
+      true
+    );
+  } finally {
+    button.disabled = false;
+  }
+});
+
+/*
+  استعادة الجلسة إذا سبق تسجيل الدخول.
+*/
+async function initialize() {
+  try {
+    const { data, error } = await db.auth.getSession();
+    if (error) throw error;
+
+    if (data.session && data.session.user) {
+      showDashboard(data.session.user);
+      await loadRegistrations();
+    } else {
+      showLogin();
+    }
+  } catch (error) {
+    showLogin();
+    showMessage(
+      $("loginMessage"),
+      "تعذر التحقق من الجلسة: " + error.message,
+      true
+    );
+  }
+}
+
+initialize();
+</script>
+</body>
+</html>
