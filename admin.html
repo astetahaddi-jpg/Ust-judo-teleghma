@@ -1,729 +1,303 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#102c46">
-<title>UST JUDO TELEGHMA | Admin</title>
+<meta name="theme-color" content="#f4f8ff">
+<title>UST JUDO TELEGHMA | Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--navy:#102c46;--red:#d62839;--gold:#f2bd54;--bg:#f3f6fa;--green:#167344}
+:root{--navy:#123b70;--blue:#2584e8;--blue2:#eaf4ff;--red:#ef4b55;--redbg:#fff0f1;--green:#169b62;--greenbg:#eafaf1;--gold:#a86a00;--goldbg:#fff5df;--purple:#7654d6;--purplebg:#f2edff;--ink:#20344d;--muted:#718198;--line:#e2ebf5;--bg:#f4f8fd;--white:#fff}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:#182b3a;font-family:Arial,sans-serif}
-header{background:var(--navy);color:white;padding:22px 12px;text-align:center}
-header h1{margin:0 0 8px}
-main{max-width:1400px;margin:auto;padding:14px}
-.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:15px;box-shadow:0 2px 10px #0000000b}
-h2{color:var(--navy);font-size:21px}
-input,select,button{font:inherit;padding:10px;border-radius:7px;border:1px solid #ccd5df;margin:4px 0}
-input,select{width:100%;max-width:100%}
-button{background:var(--navy);color:white;border:0;cursor:pointer}
-button:hover{opacity:.88}
-button.red{background:var(--red)}
-button.gold{background:#986600}
-button.green{background:var(--green)}
-.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-nav{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:15px}
-nav button{flex:1;min-width:125px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Tahoma",sans-serif}
+button,input,select{font:inherit}
+button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;cursor:pointer;font-weight:700;transition:.15s}
+button:hover{filter:brightness(.96)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.btn-red{background:var(--red)}.btn-green{background:var(--green)}
+.btn-light{background:#eef5ff;color:var(--navy);border:1px solid #d9e8fa}
+.btn-gold{background:#fff0ce;color:#855500}
+.btn-purple{background:var(--purple)}
+input,select{width:100%;padding:11px 12px;border:1px solid #d6e1ef;border-radius:10px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus{border-color:#69aaf0;box-shadow:0 0 0 3px #2584e81a}
+label{font-size:13px;color:var(--muted);display:block;margin:5px 0}
+header{background:linear-gradient(115deg,#fff,#eef6ff);border-bottom:1px solid var(--line);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;top:0;z-index:5;box-shadow:0 4px 18px #244a7510}
+.brand h1{font-size:23px;margin:0;color:var(--navy);letter-spacing:.3px}
+.brand p{margin:6px 0 0;color:#45658b;font-weight:700}
+.userbox{display:flex;align-items:center;gap:10px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#19b36d;margin-left:5px}
+.layout{max-width:1600px;margin:auto;display:grid;grid-template-columns:235px minmax(0,1fr);gap:16px;padding:16px}
+.sidebar{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;height:max-content;position:sticky;top:112px}
+.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:right;margin:4px 0;background:transparent;color:#526782;padding:13px 12px;border-radius:11px}
+.navbtn.active,.navbtn:hover{background:linear-gradient(90deg,#e6f2ff,#f4f9ff);color:var(--blue)}
+.navicon{width:30px;height:30px;display:inline-grid;place-items:center;background:#f0f6ff;border-radius:9px;font-size:17px}
+.content{min-width:0}
+.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px;margin-bottom:15px;box-shadow:0 5px 18px #244a7506}
+.panel h2{font-size:19px;color:var(--navy);margin:0 0 13px}
+.muted{color:var(--muted);font-size:13px;line-height:1.7}
 .hidden{display:none!important}
-.table-wrap{overflow:auto;width:100%}
-table{border-collapse:collapse;width:100%;background:white;min-width:850px}
-th,td{border:1px solid #dce3e9;padding:8px;text-align:center;white-space:nowrap}
-th{background:var(--navy);color:white}
-.paid{background:#d9f5e3;color:#126b38}
-.unpaid{background:#ffe0e0;color:#9b1c1c}
-.status-btn{font-size:12px;padding:7px 9px}
-.notice{padding:12px;background:#fff3cd;border-radius:8px;margin:10px 0}
-.small{font-size:13px;color:#667585}
-.stat{background:#edf3f9;padding:12px;border-radius:8px;text-align:center}
-.stat strong{display:block;font-size:20px;color:var(--navy);margin-top:5px}
-@media(max-width:600px){main{padding:7px}.card{padding:10px}header h1{font-size:21px}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px}
+.stat{border:1px solid var(--line);border-radius:15px;padding:15px;background:linear-gradient(145deg,#fff,#f9fbff);min-height:112px}
+.stat .label{font-size:13px;color:#667b95}
+.stat .value{font-size:26px;font-weight:800;color:var(--navy);margin-top:10px}
+.stat.blue{background:linear-gradient(145deg,#fff,#eef6ff);border-color:#d8eaff}
+.stat.green{background:linear-gradient(145deg,#fff,#edfff5);border-color:#d8f4e5}
+.stat.red{background:linear-gradient(145deg,#fff,#fff1f2);border-color:#ffe0e2}
+.stat.purple{background:linear-gradient(145deg,#fff,#f5f1ff);border-color:#e6dcff}
+.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0}
+.toolbar input,.toolbar select{max-width:300px;flex:1;min-width:150px}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:760px;background:#fff}
+th,td{padding:11px 10px;text-align:center;border-bottom:1px solid #eaf0f7;white-space:nowrap;font-size:13px}
+th{background:#f2f7fd;color:#355273;font-weight:800;position:sticky;top:0}
+tr:hover td{background:#fbfdff}
+.pill{display:inline-block;border-radius:30px;padding:5px 9px;font-size:12px;font-weight:700}
+.pill.green{background:var(--greenbg);color:var(--green)}
+.pill.red{background:var(--redbg);color:var(--red)}
+.pill.gold{background:var(--goldbg);color:var(--gold)}
+.pill.blue{background:var(--blue2);color:var(--blue)}
+.pill.gray{background:#eef2f6;color:#64748b}
+.smallbtn{padding:7px 9px;font-size:12px;border-radius:8px;margin:2px}
+.notice{background:#fff8e8;border:1px solid #f4e1b3;color:#79531a;border-radius:11px;padding:12px;margin:10px 0;font-size:13px;line-height:1.7}
+.monthgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin:12px 0}
+.monthbox{border:1px solid var(--line);border-radius:12px;padding:12px;background:#f8fbff;text-align:center}
+.monthbox strong{display:block;color:var(--navy);font-size:17px;margin:7px 0}
+.monthbox span{font-size:12px;color:var(--muted)}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.message{font-size:13px;line-height:1.7;margin-top:8px;color:var(--navy)}
+.login{max-width:450px;margin:8vh auto;padding:24px}
+.login h2{margin-top:0}
+.empty{padding:25px;text-align:center;color:var(--muted)}
+.status-off{opacity:.62}
+.footer{text-align:center;color:#8796a9;font-size:12px;padding:10px}
+@media(max-width:900px){
+.layout{grid-template-columns:1fr;padding:9px}
+.sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+.navbtn{font-size:12px;padding:10px 7px}
+.navicon{display:none}
+header{padding:14px;position:static}
+.brand h1{font-size:18px}.brand p{font-size:12px}
+.panel{padding:12px}
+.userbox{flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:520px){
+.sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
+.userbox{font-size:12px}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.stat .value{font-size:21px}
+.toolbar button{flex:1}
+.brand p{max-width:230px}
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>UST JUDO TELEGHMA</h1>
-  <div>النادي الرياضي الهاوي الاتحاد الرياضي التلاغمة</div>
-  <div style="margin-top:7px">Admin Dashboard | لوحة الإدارة</div>
-</header>
 
-<main>
-<section id="loginCard" class="card">
-  <h2>دخول المدير | Admin Login</h2>
+<section id="loginCard" class="panel login">
+  <h2>🔐 دخول المدير | Admin Login</h2>
+  <p class="muted">لوحة إدارة نادي UST JUDO TELEGHMA</p>
   <label for="email">البريد الإلكتروني | Email</label>
   <input id="email" type="email" autocomplete="username">
   <label for="password">كلمة المرور | Password</label>
   <input id="password" type="password" autocomplete="current-password">
-  <button id="loginBtn">دخول | Login</button>
-  <p id="loginMessage" role="status"></p>
+  <button id="loginBtn" style="width:100%;margin-top:12px">تسجيل الدخول | Login</button>
+  <p id="loginMessage" class="message" role="status"></p>
 </section>
 
-<section id="dashboard" class="hidden">
-  <div class="card">
-    <div class="row" style="align-items:center">
-      <div><strong>لوحة إدارة النادي</strong><div id="who" class="small"></div></div>
-      <button id="logoutBtn" class="red">تسجيل الخروج | Logout</button>
-    </div>
+<div id="app" class="hidden">
+<header>
+ <div class="brand">
+  <h1>UST JUDO TELEGHMA</h1>
+  <p>النادي الرياضي الهاوي الاتحاد الرياضي التلاغمة</p>
+ </div>
+ <div class="userbox">
+  <span><span class="dot"></span><b id="who">Admin</b></span>
+  <button id="logoutBtn" class="btn-red">تسجيل الخروج ↗</button>
+ </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+ <button class="navbtn active" data-tab="home"><span class="navicon">⌂</span>الرئيسية</button>
+ <button class="navbtn" data-tab="requests"><span class="navicon">♙</span>طلبات الانخراط <span id="requestBadge" class="pill red">0</span></button>
+ <button class="navbtn" data-tab="athletes"><span class="navicon">♧</span>الرياضيون</button>
+ <button class="navbtn" data-tab="subscriptions"><span class="navicon">▤</span>الاشتراكات والمداخيل</button>
+ <button class="navbtn" data-tab="insurance"><span class="navicon">◇</span>التأمينات المدفوعة</button>
+ <button class="navbtn" data-tab="exams"><span class="navicon">♜</span>حقوق الامتحانات المدفوعة</button>
+</aside>
+
+<main class="content">
+
+<section id="tab-home">
+ <div class="grid">
+  <div class="stat red">
+   <div class="label">طلبات الانخراط الجديدة</div>
+   <div class="value" id="homeRequests">—</div>
+   <button class="btn-light smallbtn" data-goto="requests">عرض الطلبات ←</button>
   </div>
+  <div class="stat blue">
+   <div class="label">عدد الرياضيين النشطين</div>
+   <div class="value" id="homeAthletes">—</div>
+   <button class="btn-light smallbtn" data-goto="athletes">عرض الرياضيين ←</button>
+  </div>
+  <div class="stat green">
+   <div class="label">اشتراكات الموسم المدفوعة</div>
+   <div class="value" id="homeSubIncome">0 دج</div>
+   <button class="btn-light smallbtn" data-goto="subscriptions">عرض التفاصيل ←</button>
+  </div>
+  <div class="stat purple">
+   <div class="label">التأمينات المدفوعة</div>
+   <div class="value" id="homeInsIncome">0 دج</div>
+   <button class="btn-light smallbtn" data-goto="insurance">عرض التفاصيل ←</button>
+  </div>
+ </div>
 
-  <nav>
-    <button data-tab="subscriptions">الاشتراكات والمدفوعات</button>
-    <button data-tab="athletes">الرياضيون | Athletes</button>
-    <button data-tab="insurance">التأمينات المدفوعة فقط</button>
-    <button data-tab="exams">حقوق الامتحان المدفوعة فقط</button>
-  </nav>
+ <div class="panel" style="margin-top:15px">
+  <h2>📅 الموسم الرياضي الحالي</h2>
+  <div class="formgrid">
+   <div><label>سنة بداية الموسم</label><input id="seasonYear" type="number" min="2000" max="2100" value="2026"></div>
+   <div><label>الموسم المختار</label><input id="seasonLabel" readonly value="2026–2027"></div>
+   <div style="align-self:end"><button id="applySeason">تطبيق الموسم وإعادة تحميل البيانات</button></div>
+  </div>
+  <p class="muted">الموسم المعتمد: سبتمبر 2026 إلى جوان 2027. الاشتراك الشهري 1000 دج. الموسم الكامل 10,000 دج.</p>
+ </div>
 
-  <section id="tab-subscriptions" class="card">
-    <h2>جدول الاشتراكات والمدفوعات</h2>
-    <p>الاشتراك الشهري: 1000 دج. الموسم من سبتمبر إلى جويلية: 11000 دج.</p>
-    <p>الامتحان الأول: فيفري–مارس. الامتحان الثاني: بعد جويلية.</p>
-    <div class="row">
-      <div>
-        <label for="seasonYear">سنة بداية الموسم | Season start year</label>
-        <input id="seasonYear" type="number" min="2000" max="2100">
-      </div>
-      <div>
-        <label for="subSearch">البحث عن رياضي | Search</label>
-        <input id="subSearch" placeholder="الاسم أو اللقب">
-      </div>
-    </div>
-    <button id="loadSubscriptions">تحميل الجدول | Load</button>
-    <button id="exportSubscriptions">تصدير Excel (CSV)</button>
-    <div id="subMessage" role="status"></div>
-    <div class="row" style="margin:12px 0">
-      <div class="stat">مجموع الاشتراكات المدفوعة<strong id="totalSub">0 دج</strong></div>
-      <div class="stat">مجموع التأمين المدفوع<strong id="totalIns">0 دج</strong></div>
-      <div class="stat">مجموع حقوق الامتحان المدفوعة<strong id="totalExam">0 دج</strong></div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>اسم ولقب الرياضي</th>
-          <th>سبتمبر</th><th>أكتوبر</th><th>نوفمبر</th><th>ديسمبر</th>
-          <th>جانفي</th><th>فيفري</th><th>مارس</th><th>أفريل</th>
-          <th>ماي</th><th>جوان</th><th>جويلية</th>
-          <th>التأمينات</th><th>الامتحان الأول</th><th>الامتحان الثاني</th>
-          <th>الاشتراك المدفوع</th><th>دين الاشتراك</th>
-        </tr></thead>
-        <tbody id="subsBody"></tbody>
-      </table>
-    </div>
-    <p class="small">انقر على حالة الدفع لتغييرها. عند تسجيل امتحان مدفوع لأول مرة، سيُطلب منك اسم الحزام ومبلغ الرسوم.</p>
-  </section>
-
-  <section id="tab-athletes" class="card hidden">
-    <h2>إدارة الرياضيين | Athletes</h2>
-    <input id="athleteId" type="hidden">
-    <div class="row">
-      <div><label for="firstName">الاسم | First name</label><input id="firstName"></div>
-      <div><label for="lastName">اللقب | Last name</label><input id="lastName"></div>
-    </div>
-    <button id="saveAthlete">حفظ الرياضي | Save</button>
-    <button id="cancelEdit" class="gold hidden">إلغاء | Cancel</button>
-    <p id="athleteMessage" role="status"></p>
-    <div class="row">
-      <input id="athleteSearch" placeholder="البحث عن رياضي">
-      <button id="refreshAthletes">تحديث القائمة</button>
-      <button id="exportAthletes">تصدير CSV</button>
-    </div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>اسم ولقب الرياضي</th><th>إجراء</th></tr></thead>
-      <tbody id="athletesBody"></tbody>
-    </table></div>
-  </section>
-
-  <section id="tab-insurance" class="card hidden">
-    <h2>التأمينات المدفوعة فقط | Paid Insurance</h2>
-    <p>قيمة التأمين السنوي 1000 دج.</p>
-    <div class="row">
-      <input id="insuranceYear" type="number" min="2000" max="2100">
-      <input id="insuranceSearch" placeholder="البحث عن رياضي">
-    </div>
-    <button id="loadInsurance">عرض التأمينات المدفوعة</button>
-    <button id="exportInsurance">تصدير CSV</button>
-    <p id="insuranceMessage" role="status"></p>
-    <div class="table-wrap"><table>
-      <thead><tr><th>اسم ولقب الرياضي</th><th>السنة</th><th>المبلغ</th><th>الحالة</th></tr></thead>
-      <tbody id="insuranceBody"></tbody>
-    </table></div>
-  </section>
-
-  <section id="tab-exams" class="card hidden">
-    <h2>حقوق الامتحان المدفوعة فقط | Paid Belt Exams</h2>
-    <div class="row">
-      <input id="examSearch" placeholder="البحث عن رياضي">
-      <select id="examFilter">
-        <option value="all">كل الامتحانات</option>
-        <option value="1">الامتحان الأول</option>
-        <option value="2">الامتحان الثاني</option>
-      </select>
-    </div>
-    <button id="loadExams">عرض حقوق الامتحان المدفوعة</button>
-    <button id="exportExams">تصدير CSV</button>
-    <p id="examMessage" role="status"></p>
-    <div class="table-wrap"><table>
-      <thead><tr><th>اسم ولقب الرياضي</th><th>السنة</th><th>الامتحان</th><th>الحزام</th><th>المبلغ</th><th>الحالة</th></tr></thead>
-      <tbody id="examsBody"></tbody>
-    </table></div>
-  </section>
-  <div class="card small">تظهر في الصفحات المستقلة عمليات الدفع المؤكدة فقط. تبقى صلاحيات قاعدة البيانات محمية بسياسات Supabase.</div>
+ <div class="panel">
+  <h2>✨ ملاحظات الإدارة</h2>
+  <p class="muted">اقبل طلب الانخراط لإضافة الرياضي إلى جدول الاشتراكات. يُحذف الطلب من قائمة الطلبات فقط بعد نجاح الإضافة. يمكنك إيقاف الرياضي مؤقتًا أو إعادة تفعيله، أو حذفه نهائيًا بعد تأكيد صريح.</p>
+ </div>
 </section>
+
+<section id="tab-requests" class="hidden">
+ <div class="panel">
+  <h2>طلبات الانخراط الجديدة | Registration Requests</h2>
+  <p class="muted">عند القبول، تُضاف بيانات الرياضي إلى جدول الرياضيين واشتراكات الموسم المحدد. لا تُسجّل أي دفعة مدفوعة تلقائيًا.</p>
+  <div class="toolbar">
+   <input id="requestSearch" placeholder="ابحث بالاسم أو هاتف الولي">
+   <button id="refreshRequests" class="btn-light">تحديث الطلبات</button>
+   <button id="exportRequests" class="btn-light">تصدير CSV</button>
+  </div>
+  <p id="requestMessage" class="message"></p>
+  <div class="tablewrap">
+   <table>
+    <thead><tr><th>الاسم واللقب</th><th>تاريخ الطلب</th><th>تاريخ الميلاد</th><th>الجنس</th><th>الإقامة</th><th>ولي الأمر</th><th>الهاتف</th><th>الحالة</th><th>الإجراء</th></tr></thead>
+    <tbody id="requestsBody"></tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section id="tab-athletes" class="hidden">
+ <div class="panel">
+  <h2>الرياضيون | Athletes</h2>
+  <p class="muted">الإيقاف المؤقت لا يحذف السجلات المالية. الحذف النهائي يزيل سجلات الرياضي المرتبطة به من جداول المدفوعات والاشتراكات.</p>
+  <div class="formgrid">
+   <div><label>الاسم</label><input id="firstName"></div>
+   <div><label>اللقب</label><input id="lastName"></div>
+   <div style="align-self:end"><button id="saveAthlete">إضافة رياضي</button></div>
+  </div>
+  <p id="athleteMessage" class="message"></p>
+  <div class="toolbar">
+   <input id="athleteSearch" placeholder="البحث عن رياضي">
+   <select id="athleteStatus">
+    <option value="all">كل الرياضيين</option>
+    <option value="active">النشطون فقط</option>
+    <option value="inactive">الموقوفون مؤقتًا فقط</option>
+   </select>
+   <button id="refreshAthletes" class="btn-light">تحديث</button>
+   <button id="exportAthletes" class="btn-light">تصدير CSV</button>
+  </div>
+  <div class="tablewrap">
+   <table>
+    <thead><tr><th>اسم الرياضي</th><th>الحالة</th><th>الإجراء</th></tr></thead>
+    <tbody id="athletesBody"></tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section id="tab-subscriptions" class="hidden">
+ <div class="panel">
+  <h2>الاشتراكات والمداخيل الشهرية</h2>
+  <p class="muted">يُحسب الدخل من الاشتراكات المسجلة كمدفوعة فقط، لكل شهر على حدة.</p>
+  <div class="toolbar">
+   <input id="subSearch" placeholder="ابحث عن رياضي">
+   <button id="loadSubscriptions">تحديث الجدول</button>
+   <button id="exportSubscriptions" class="btn-light">تصدير CSV</button>
+  </div>
+  <p id="subMessage" class="message"></p>
+  <div class="grid">
+   <div class="stat blue"><div class="label">مجموع مداخيل الاشتراكات</div><div id="seasonSubIncome" class="value">0 دج</div></div>
+   <div class="stat green"><div class="label">عدد الدفعات الشهرية</div><div id="seasonSubPayments" class="value">0</div></div>
+   <div class="stat red"><div class="label">الاشتراكات غير المحصلة</div><div id="subDebt" class="value">0 دج</div></div>
+  </div>
+  <div id="monthIncomeGrid" class="monthgrid"></div>
+  <div class="tablewrap">
+   <table>
+    <thead><tr><th>الرياضي</th><th>سبتمبر</th><th>أكتوبر</th><th>نوفمبر</th><th>ديسمبر</th><th>جانفي</th><th>فيفري</th><th>مارس</th><th>أفريل</th><th>ماي</th><th>جوان</th><th>مدفوع</th><th>الدين</th><th>الإجراء</th></tr></thead>
+    <tbody id="subsBody"></tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section id="tab-insurance" class="hidden">
+ <div class="panel">
+  <h2>التأمينات المدفوعة فقط</h2>
+  <p class="muted">قيمة التأمين السنوي الافتراضية 1000 دج.</p>
+  <div class="toolbar">
+   <input id="insuranceSearch" placeholder="البحث عن رياضي">
+   <button id="loadInsurance">تحديث</button>
+   <button id="exportInsurance" class="btn-light">تصدير CSV</button>
+  </div>
+  <p id="insuranceMessage" class="message"></p>
+  <div class="tablewrap">
+   <table>
+    <thead><tr><th>الرياضي</th><th>الموسم</th><th>المبلغ</th><th>الحالة</th></tr></thead>
+    <tbody id="insuranceBody"></tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section id="tab-exams" class="hidden">
+ <div class="panel">
+  <h2>حقوق امتحانات الأحزمة المدفوعة فقط</h2>
+  <div class="toolbar">
+   <input id="examSearch" placeholder="البحث عن رياضي">
+   <select id="examFilter">
+    <option value="all">كل الامتحانات</option>
+    <option value="1">الامتحان الأول</option>
+    <option value="2">الامتحان الثاني</option>
+   </select>
+   <button id="loadExams">تحديث</button>
+   <button id="exportExams" class="btn-light">تصدير CSV</button>
+  </div>
+  <p id="examMessage" class="message"></p>
+  <div class="tablewrap">
+   <table>
+    <thead><tr><th>الرياضي</th><th>الموسم</th><th>الامتحان</th><th>الحزام</th><th>المبلغ</th><th>الحالة</th></tr></thead>
+    <tbody id="examsBody"></tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<div class="footer">UST JUDO TELEGHMA · Admin Dashboard</div>
 </main>
+</div>
+</div>
 
 <script>
-const SUPABASE_URL = "https://jtvorszomguszvygbxbs.supabase.co";
-const SUPABASE_PUBLIC_KEY = "sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+const SUPABASE_URL="https://jtvorszomguszvygbxbs.supabase.co";
+const SUPABASE_PUBLIC_KEY="sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLIC_KEY);
 
-const months = [
+const months=[
  ["september","سبتمبر"],["october","أكتوبر"],["november","نوفمبر"],
  ["december","ديسمبر"],["january","جانفي"],["february","فيفري"],
- ["march","مارس"],["april","أفريل"],["may","ماي"],["june","جوان"],["july","جويلية"]
+ ["march","مارس"],["april","أفريل"],["may","ماي"],["june","جوان"]
 ];
 
-const $ = id => document.getElementById(id);
-let athletes = [], subscriptions = [], insuranceRows = [], examRows = [];
-
-const yearNow = new Date().getFullYear();
-$("seasonYear").value = yearNow;
-$("insuranceYear").value = yearNow;
-
-function msg(id, text) {
-  $(id).textContent = text || "";
-}
-
-function fullName(a) {
-  return `${a?.first_name || ""} ${a?.last_name || ""}`.trim();
-}
-
-function esc(v) {
-  return String(v ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }[c]));
-}
-
-function errorText(e) {
-  return e?.message || String(e || "Unknown error");
-}
-
-function csvExport(filename, rows) {
-  if (!rows.length) {
-    alert("لا توجد بيانات للتصدير.");
-    return;
-  }
-  const cols = Object.keys(rows[0]);
-  const csv = "\uFEFF" + [
-    cols.join(","),
-    ...rows.map(r => cols.map(c =>
-      `"${String(r[c] ?? "").replace(/"/g, '""')}"`
-    ).join(","))
-  ].join("\r\n");
-
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function setTab(name) {
-  document.querySelectorAll('[id^="tab-"]').forEach(e => e.classList.add("hidden"));
-  $("tab-" + name).classList.remove("hidden");
-}
-
-document.querySelectorAll("nav [data-tab]").forEach(b => {
-  b.addEventListener("click", () => setTab(b.dataset.tab));
-});
-
-async function enterDashboard(user) {
-  $("loginCard").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
-  $("who").textContent = user.email || "Admin";
-  await loadSubscriptions();
-}
-
-$("loginBtn").addEventListener("click", async () => {
-  msg("loginMessage", "جارٍ تسجيل الدخول...");
-  const email = $("email").value.trim();
-  const password = $("password").value;
-
-  if (!email || !password) {
-    msg("loginMessage", "أدخل البريد وكلمة المرور.");
-    return;
-  }
-
-  const {data, error} = await db.auth.signInWithPassword({email, password});
-  if (error) {
-    msg("loginMessage", "تعذر الدخول: " + errorText(error));
-    return;
-  }
-
-  msg("loginMessage", "");
-  await enterDashboard(data.user);
-});
-
-$("logoutBtn").addEventListener("click", async () => {
-  await db.auth.signOut();
-  $("dashboard").classList.add("hidden");
-  $("loginCard").classList.remove("hidden");
-  $("password").value = "";
-  msg("loginMessage", "تم تسجيل الخروج.");
-});
-
-async function loadAthletes() {
-  const {data, error} = await db.from("athletes").select("*").order("last_name");
-  if (error) {
-    msg("athleteMessage", "تعذر تحميل الرياضيين: " + errorText(error));
-    throw error;
-  }
-  athletes = data || [];
-  renderAthletes();
-}
-
-function renderAthletes() {
-  const q = $("athleteSearch").value.trim().toLowerCase();
-  const rows = athletes.filter(a => fullName(a).toLowerCase().includes(q));
-
-  $("athletesBody").innerHTML = rows.map(a => `
-    <tr>
-      <td>${esc(fullName(a))}</td>
-      <td><button data-edit="${a.id}">تعديل | Edit</button></td>
-    </tr>
-  `).join("") || '<tr><td colspan="2">لا يوجد رياضيون.</td></tr>';
-
-  $("athletesBody").querySelectorAll("[data-edit]").forEach(b => {
-    b.addEventListener("click", () => {
-      const a = athletes.find(x => String(x.id) === b.dataset.edit);
-      if (!a) return;
-      $("athleteId").value = a.id;
-      $("firstName").value = a.first_name;
-      $("lastName").value = a.last_name;
-      $("cancelEdit").classList.remove("hidden");
-      setTab("athletes");
-    });
-  });
-}
-
-$("athleteSearch").addEventListener("input", renderAthletes);
-$("refreshAthletes").addEventListener("click", loadAthletes);
-
-$("cancelEdit").addEventListener("click", () => {
-  $("athleteId").value = "";
-  $("firstName").value = "";
-  $("lastName").value = "";
-  $("cancelEdit").classList.add("hidden");
-  msg("athleteMessage", "");
-});
-
-$("saveAthlete").addEventListener("click", async () => {
-  const first_name = $("firstName").value.trim();
-  const last_name = $("lastName").value.trim();
-  const id = $("athleteId").value;
-
-  if (!first_name || !last_name) {
-    msg("athleteMessage", "أدخل الاسم واللقب.");
-    return;
-  }
-
-  const result = id
-    ? await db.from("athletes").update({first_name, last_name}).eq("id", id)
-    : await db.from("athletes").insert({first_name, last_name});
-
-  if (result.error) {
-    msg("athleteMessage", "تعذر الحفظ: " + errorText(result.error));
-    return;
-  }
-
-  $("athleteId").value = "";
-  $("firstName").value = "";
-  $("lastName").value = "";
-  $("cancelEdit").classList.add("hidden");
-  msg("athleteMessage", "تم الحفظ بنجاح.");
-
-  await loadSubscriptions();
-});
-
-$("exportAthletes").addEventListener("click", () =>
-  csvExport("athletes.csv", athletes.map(a => ({name:fullName(a)})))
-);
-
-async function ensureSubscriptions() {
-  const season = Number($("seasonYear").value);
-
-  for (const a of athletes) {
-    const {error} = await db.from("season_subscriptions").upsert(
-      {athlete_id:a.id, season_start_year:season, monthly_fee:1000},
-      {onConflict:"athlete_id,season_start_year", ignoreDuplicates:true}
-    );
-    if (error) throw error;
-  }
-}
-
-async function ensureInsurance(year) {
-  for (const a of athletes) {
-    const {error} = await db.from("annual_insurance").upsert(
-      {athlete_id:a.id, insurance_year:year, amount:1000},
-      {onConflict:"athlete_id,insurance_year", ignoreDuplicates:true}
-    );
-    if (error) throw error;
-  }
-}
-
-async function getSeasonData() {
-  const season = Number($("seasonYear").value);
-  const paymentYear = season + 1;
-
-  await ensureSubscriptions();
-  await ensureInsurance(paymentYear);
-
-  const s = await db.from("season_subscriptions")
-    .select("*,athletes(id,first_name,last_name)")
-    .eq("season_start_year", season);
-  if (s.error) throw s.error;
-
-  const i = await db.from("annual_insurance")
-    .select("*,athletes(id,first_name,last_name)")
-    .eq("insurance_year", paymentYear);
-  if (i.error) throw i.error;
-
-  const e = await db.from("belt_exam_payments")
-    .select("*,athletes(id,first_name,last_name)")
-    .eq("exam_year", paymentYear);
-  if (e.error) throw e.error;
-
-  subscriptions = s.data || [];
-  insuranceRows = i.data || [];
-  examRows = e.data || [];
-}
-
-async function loadSubscriptions() {
-  msg("subMessage", "جارٍ تحميل الجدول...");
-  try {
-    await loadAthletes();
-    await getSeasonData();
-    renderSubscriptions();
-    msg("subMessage", "");
-  } catch (e) {
-    msg("subMessage", "تعذر تحميل الجدول: " + errorText(e));
-  }
-}
-
-function paidButton(paid, attrs) {
-  return `<button class="status-btn ${paid ? "paid" : "unpaid"}" ${attrs}>${paid ? "مدفوع" : "غير مدفوع"}</button>`;
-}
-
-function renderSubscriptions() {
-  const q = $("subSearch").value.trim().toLowerCase();
-  const season = Number($("seasonYear").value);
-  const paymentYear = season + 1;
-  const rows = subscriptions.filter(s => fullName(s.athletes).toLowerCase().includes(q));
-
-  let totalSub = 0, totalIns = 0, totalExam = 0;
-
-  $("subsBody").innerHTML = rows.map(s => {
-    const athleteId = s.athlete_id;
-
-    const insurance = insuranceRows.find(x =>
-      Number(x.athlete_id) === Number(athleteId) &&
-      Number(x.insurance_year) === paymentYear
-    );
-
-    const e1 = examRows.find(x =>
-      Number(x.athlete_id) === Number(athleteId) &&
-      Number(x.exam_year) === paymentYear &&
-      Number(x.exam_number) === 1
-    );
-
-    const e2 = examRows.find(x =>
-      Number(x.athlete_id) === Number(athleteId) &&
-      Number(x.exam_year) === paymentYear &&
-      Number(x.exam_number) === 2
-    );
-
-    const monthsPaid = months.filter(([key]) => s[key]).length;
-    totalSub += monthsPaid * 1000;
-    if (insurance?.paid) totalIns += Number(insurance.amount || 1000);
-    if (e1?.paid) totalExam += Number(e1.amount || 0);
-    if (e2?.paid) totalExam += Number(e2.amount || 0);
-
-    const monthCells = months.map(([key, label]) =>
-      `<td>${paidButton(!!s[key], `data-month="${key}" data-row="${s.id}" title="${label}"`)}</td>`
-    ).join("");
-
-    return `<tr>
-      <td>${esc(fullName(s.athletes))}</td>
-      ${monthCells}
-      <td>${paidButton(!!insurance?.paid, `data-insurance="${athleteId}" title="التأمين السنوي"`)}</td>
-      <td>${paidButton(!!e1?.paid, `data-exam="${athleteId}" data-number="1" title="الامتحان الأول"`)}</td>
-      <td>${paidButton(!!e2?.paid, `data-exam="${athleteId}" data-number="2" title="الامتحان الثاني"`)}</td>
-      <td>${monthsPaid * 1000} دج</td>
-      <td>${(11 - monthsPaid) * 1000} دج</td>
-    </tr>`;
-  }).join("") || '<tr><td colspan="17">لا توجد بيانات لهذا الموسم.</td></tr>';
-
-  $("totalSub").textContent = totalSub.toLocaleString("fr-FR") + " دج";
-  $("totalIns").textContent = totalIns.toLocaleString("fr-FR") + " دج";
-  $("totalExam").textContent = totalExam.toLocaleString("fr-FR") + " دج";
-
-  $("subsBody").querySelectorAll("[data-month]").forEach(b => {
-    b.addEventListener("click", async () => {
-      const s = subscriptions.find(x => String(x.id) === b.dataset.row);
-      if (!s) return;
-
-      const key = b.dataset.month;
-      const {error} = await db.from("season_subscriptions")
-        .update({[key]:!s[key]})
-        .eq("id", s.id);
-
-      if (error) {
-        msg("subMessage", "تعذر تحديث الاشتراك: " + errorText(error));
-        return;
-      }
-      await loadSubscriptions();
-    });
-  });
-
-  $("subsBody").querySelectorAll("[data-insurance]").forEach(b => {
-    b.addEventListener("click", async () => {
-      const athleteId = Number(b.dataset.insurance);
-      const year = Number($("seasonYear").value) + 1;
-      const current = insuranceRows.find(x =>
-        Number(x.athlete_id) === athleteId && Number(x.insurance_year) === year
-      );
-
-      const paid = !current?.paid;
-      const payload = {
-        athlete_id:athleteId,
-        insurance_year:year,
-        amount:1000,
-        paid,
-        paid_at:paid ? new Date().toISOString() : null
-      };
-
-      const {error} = await db.from("annual_insurance").upsert(payload, {
-        onConflict:"athlete_id,insurance_year"
-      });
-
-      if (error) {
-        msg("subMessage", "تعذر تحديث التأمين: " + errorText(error));
-        return;
-      }
-      await loadSubscriptions();
-    });
-  });
-
-  $("subsBody").querySelectorAll("[data-exam]").forEach(b => {
-    b.addEventListener("click", async () => {
-      const athleteId = Number(b.dataset.exam);
-      const number = Number(b.dataset.number);
-      const year = Number($("seasonYear").value) + 1;
-
-      const current = examRows.find(x =>
-        Number(x.athlete_id) === athleteId &&
-        Number(x.exam_year) === year &&
-        Number(x.exam_number) === number
-      );
-
-      if (current?.paid) {
-        const {error} = await db.from("belt_exam_payments")
-          .update({paid:false, paid_at:null})
-          .eq("id", current.id);
-
-        if (error) {
-          msg("subMessage", "تعذر تغيير حالة الامتحان: " + errorText(error));
-          return;
-        }
-      } else {
-        const belt = prompt("أدخل اسم الحزام | Belt name:", current?.belt_name || "");
-        if (belt === null) return;
-        if (!belt.trim()) {
-          alert("يجب إدخال اسم الحزام.");
-          return;
-        }
-
-        const raw = prompt("أدخل رسوم الامتحان بين 700 و1500 دج:", String(current?.amount || 700));
-        if (raw === null) return;
-
-        const amount = Number(raw);
-        if (!Number.isInteger(amount) || amount < 700 || amount > 1500) {
-          alert("المبلغ يجب أن يكون بين 700 و1500 دج.");
-          return;
-        }
-
-        const payload = {
-          athlete_id:athleteId,
-          exam_year:year,
-          exam_number:number,
-          belt_name:belt.trim(),
-          amount,
-          paid:true,
-          paid_at:new Date().toISOString()
-        };
-
-        const {error} = await db.from("belt_exam_payments").upsert(payload, {
-          onConflict:"athlete_id,exam_year,exam_number"
-        });
-
-        if (error) {
-          msg("subMessage", "تعذر حفظ رسوم الامتحان: " + errorText(error));
-          return;
-        }
-      }
-      await loadSubscriptions();
-    });
-  });
-}
-
-$("loadSubscriptions").addEventListener("click", loadSubscriptions);
-$("subSearch").addEventListener("input", renderSubscriptions);
-
-$("exportSubscriptions").addEventListener("click", () => {
-  const rows = subscriptions.map(s => {
-    const year = Number($("seasonYear").value) + 1;
-    const ins = insuranceRows.find(x =>
-      Number(x.athlete_id) === Number(s.athlete_id) &&
-      Number(x.insurance_year) === year
-    );
-    const ex1 = examRows.find(x =>
-      Number(x.athlete_id) === Number(s.athlete_id) &&
-      Number(x.exam_year) === year && Number(x.exam_number) === 1
-    );
-    const ex2 = examRows.find(x =>
-      Number(x.athlete_id) === Number(s.athlete_id) &&
-      Number(x.exam_year) === year && Number(x.exam_number) === 2
-    );
-
-    const r = {"اسم الرياضي":fullName(s.athletes)};
-    months.forEach(([key, label]) => r[label] = s[key] ? "مدفوع" : "غير مدفوع");
-    r["التأمينات"] = ins?.paid ? "مدفوع" : "غير مدفوع";
-    r["الامتحان الأول"] = ex1?.paid ? "مدفوع" : "غير مدفوع";
-    r["الامتحان الثاني"] = ex2?.paid ? "مدفوع" : "غير مدفوع";
-    r["الاشتراك المدفوع"] = months.filter(([key]) => s[key]).length * 1000;
-    r["دين الاشتراك"] = (11 - months.filter(([key]) => s[key]).length) * 1000;
-    return r;
-  });
-  csvExport("club-subscriptions.csv", rows);
-});
-
-async function loadInsurance() {
-  msg("insuranceMessage", "جارٍ التحميل...");
-  try {
-    const year = Number($("insuranceYear").value);
-    await loadAthletes();
-    await ensureInsurance(year);
-
-    const {data, error} = await db.from("annual_insurance")
-      .select("*,athletes(id,first_name,last_name)")
-      .eq("insurance_year", year)
-      .eq("paid", true)
-      .order("id");
-
-    if (error) throw error;
-    insuranceRows = data || [];
-    renderInsurance();
-    msg("insuranceMessage", "");
-  } catch (e) {
-    msg("insuranceMessage", "تعذر تحميل التأمينات: " + errorText(e));
-  }
-}
-
-function renderInsurance() {
-  const q = $("insuranceSearch").value.trim().toLowerCase();
-  const rows = insuranceRows.filter(x =>
-    x.paid && fullName(x.athletes).toLowerCase().includes(q)
-  );
-
-  $("insuranceBody").innerHTML = rows.map(x => `
-    <tr>
-      <td>${esc(fullName(x.athletes))}</td>
-      <td>${x.insurance_year}</td>
-      <td>${x.amount} دج</td>
-      <td class="paid">مدفوع</td>
-    </tr>
-  `).join("") || '<tr><td colspan="4">لا يوجد رياضيون دفعوا التأمين في هذه السنة.</td></tr>';
-}
-
-$("loadInsurance").addEventListener("click", loadInsurance);
-$("insuranceSearch").addEventListener("input", renderInsurance);
-
-$("exportInsurance").addEventListener("click", () =>
-  csvExport("paid-insurance.csv", insuranceRows.filter(x => x.paid).map(x => ({
-    name:fullName(x.athletes),
-    year:x.insurance_year,
-    amount_dzd:x.amount,
-    status:"Paid"
-  })))
-);
-
-async function loadExams() {
-  msg("examMessage", "جارٍ التحميل...");
-  try {
-    const year = Number($("seasonYear").value) + 1;
-    const {data, error} = await db.from("belt_exam_payments")
-      .select("*,athletes(id,first_name,last_name)")
-      .eq("exam_year", year)
-      .eq("paid", true)
-      .order("exam_number");
-
-    if (error) throw error;
-    examRows = data || [];
-    renderExams();
-    msg("examMessage", "");
-  } catch (e) {
-    msg("examMessage", "تعذر تحميل الامتحانات: " + errorText(e));
-  }
-}
-
-function renderExams() {
-  const q = $("examSearch").value.trim().toLowerCase();
-  const f = $("examFilter").value;
-
-  const rows = examRows.filter(x =>
-    x.paid &&
-    fullName(x.athletes).toLowerCase().includes(q) &&
-    (f === "all" || String(x.exam_number) === f)
-  );
-
-  $("examsBody").innerHTML = rows.map(x => `
-    <tr>
-      <td>${esc(fullName(x.athletes))}</td>
-      <td>${x.exam_year}</td>
-      <td>${Number(x.exam_number) === 1 ? "الأول (فيفري–مارس)" : "الثاني (بعد جويلية)"}</td>
-      <td>${esc(x.belt_name)}</td>
-      <td>${x.amount} دج</td>
-      <td class="paid">مدفوع</td>
-    </tr>
-  `).join("") || '<tr><td colspan="6">لا يوجد رياضيون دفعوا حقوق الامتحان المحدد.</td></tr>';
-}
-
-$("loadExams").addEventListener("click", loadExams);
-$("examSearch").addEventListener("input", renderExams);
-$("examFilter").addEventListener("change", renderExams);
-
-$("exportExams").addEventListener("click", () =>
-  csvExport("paid-belt-exams.csv", examRows.filter(x => x.paid).map(x => ({
-    name:fullName(x.athletes),
-    year:x.exam_year,
-    exam:x.exam_number,
-    belt:x.belt_name,
-    amount_dzd:x.amount,
-    status:"Paid"
-  })))
-);
-
-async function init() {
-  const {data, error} = await db.auth.getSession();
-  if (error) {
-    msg("loginMessage", errorText(error));
-    return;
-  }
-  if (data.session) await enterDashboard(data.session.user);
-}
-
-init();
-</script>
-</body>
-</html>
+const MONTHLY_FEE=1000,INSURANCE_FEE=1000;
+const $=id=>document.getElementById(id);
+let requests=[],athletes=[],subscriptions=[],insurance
