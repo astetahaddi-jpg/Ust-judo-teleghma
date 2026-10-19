@@ -31,6 +31,7 @@
  <button class="navbtn" data-tab="requests"><span class="navicon">♙</span>طلبات الانخراط <span id="requestBadge" class="pill red">0</span></button>
  <button class="navbtn" data-tab="athletes"><span class="navicon">♧</span>الرياضيون</button>
  <button class="navbtn" data-tab="subscriptions"><span class="navicon">▤</span>الاشتراكات والمداخيل</button>
+ <button class="navbtn" data-tab="monthly-analysis"><span class="navicon">▥</span>تحليل الاشتراكات الشهرية</button>
  <button class="navbtn" data-tab="insurance"><span class="navicon">◇</span>التأمينات المدفوعة</button>
  <button class="navbtn" data-tab="exams"><span class="navicon">♜</span>حقوق الامتحانات المدفوعة</button>
 </aside>
@@ -71,6 +72,21 @@
  </div>
 </section>
  
+<section id="tab-monthly-analysis" class="hidden">
+ <div class="panel">
+  <h2>تحليل الاشتراكات الشهرية</h2>
+  <p class="muted">هذه صفحة تحليل مستقلة للقراءة فقط. اختيار الشهر هنا لا يغيّر حالات الدفع ولا يعدّل جدول الاشتراكات الرئيسي. الرياضيون الموقوفون مؤقتًا مستبعدون من حساب المستحقات.</p>
+  <div class="toolbar"><label for="analysisMonth">اختر الشهر</label><select id="analysisMonth" aria-label="اختيار شهر التحليل"></select><button id="refreshMonthlyAnalysis">تحديث التحليل</button><button id="exportMonthlyAnalysis" class="btn-light">تصدير تقرير الشهر CSV</button></div>
+  <p id="analysisMessage" class="message"></p>
+  <div class="grid">
+   <div class="stat blue"><div class="label">إجمالي المداخيل المحصلة</div><div id="analysisIncome" class="value">0 دج</div></div>
+   <div class="stat green"><div class="label">عدد الرياضيين الدافعين</div><div id="analysisPaidCount" class="value">0</div></div>
+   <div class="stat red"><div class="label">عدد الرياضيين غير الدافعين</div><div id="analysisUnpaidCount" class="value">0</div></div>
+   <div class="stat purple"><div class="label">إجمالي المستحقات غير المحصلة</div><div id="analysisDebt" class="value">0 دج</div></div>
+  </div>
+  <div class="tablewrap"><table><thead><tr><th>اسم الرياضي</th><th>حالة الدفع</th><th>المبلغ الشهري</th></tr></thead><tbody id="analysisBody"></tbody></table></div>
+ </div>
+</section>
 <section id="tab-insurance" class="hidden"><div class="panel"><h2>التأمينات المدفوعة فقط</h2><p class="muted">قيمة التأمين السنوي الافتراضية 1000 دج.</p><div class="toolbar"><input id="insuranceSearch" placeholder="البحث عن رياضي"><button id="loadInsurance">تحديث</button><button id="exportInsurance" class="btn-light">تصدير CSV</button></div><p id="insuranceMessage" class="message"></p><div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>الموسم</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody id="insuranceBody"></tbody></table></div></div></section>
 <section id="tab-exams" class="hidden"><div class="panel"><h2>حقوق امتحانات الأحزمة المدفوعة فقط</h2><div class="toolbar"><input id="examSearch" placeholder="البحث عن رياضي"><select id="examFilter"><option value="all">كل الامتحانات</option><option value="1">الامتحان الأول</option><option value="2">الامتحان الثاني</option></select><button id="loadExams">تحديث</button><button id="exportExams" class="btn-light">تصدير CSV</button></div><p id="examMessage" class="message"></p><div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>الموسم</th><th>الامتحان</th><th>الحزام</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody id="examsBody"></tbody></table></div></div></section>
 <div class="footer">UST JUDO TELEGHMA · Admin Dashboard</div>
@@ -90,7 +106,7 @@ const year=()=>Number($("seasonYear").value)||2026;
 const seasonLabel=y=>`${y}–${y+1}`;
 const setMsg=(id,t)=>$(id).textContent=t||"";
 function csvExport(filename,rows){if(!rows.length){alert("لا توجد بيانات للتصدير.");return;}const keys=Object.keys(rows[0]);const csv="\uFEFF"+[keys.join(","),...rows.map(r=>keys.map(k=>`"${String(r[k]??"").replace(/"/g,'""')}"`).join(","))].join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));const a=document.createElement("a");a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
-function showTab(tab){document.querySelectorAll('[id^="tab-"]').forEach(x=>x.classList.add("hidden"));$("tab-"+tab).classList.remove("hidden");document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="requests")loadRequests();if(tab==="athletes")loadAthletes();if(tab==="subscriptions")loadSubscriptions();if(tab==="insurance")loadInsurance();if(tab==="exams")loadExams();}
+function showTab(tab){document.querySelectorAll('[id^="tab-"]').forEach(x=>x.classList.add("hidden"));$("tab-"+tab).classList.remove("hidden");document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="requests")loadRequests();if(tab==="athletes")loadAthletes();if(tab==="subscriptions")loadSubscriptions();if(tab==="monthly-analysis")loadMonthlyAnalysis();if(tab==="insurance")loadInsurance();if(tab==="exams")loadExams();}
 document.querySelectorAll(".navbtn").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.goto)));
 $("loginBtn").onclick=async()=>{setMsg("loginMessage","جارٍ تسجيل الدخول...");const {data,error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){setMsg("loginMessage","تعذر الدخول: "+error.message);return;}await enter(data.user);};
@@ -98,7 +114,7 @@ $("logoutBtn").onclick=async()=>{await db.auth.signOut();$("app").classList.add(
 async function enter(user){$("loginCard").classList.add("hidden");$("app").classList.remove("hidden");$("who").textContent=user.email||"Admin";updateSeasonLabel();await refreshHome();}
 $("seasonYear").addEventListener("input",updateSeasonLabel);
 function updateSeasonLabel(){$("seasonLabel").value=seasonLabel(year());}
-$("applySeason").onclick=async()=>{updateSeasonLabel();await refreshHome();await loadSubscriptions();};
+$("applySeason").onclick=async()=>{updateSeasonLabel();await refreshHome();await loadSubscriptions();if(!$("tab-monthly-analysis").classList.contains("hidden"))renderMonthlyAnalysis();};
 async function refreshHome(){try{const [r,a]=await Promise.all([db.from("registrations").select("id",{count:"exact",head:true}),db.from("athletes").select("id,is_active")]);if(r.error)throw r.error;if(a.error)throw a.error;$("homeRequests").textContent=r.count??0;$("requestBadge").textContent=r.count??0;$("homeAthletes").textContent=(a.data||[]).filter(x=>x.is_active!==false).length;await loadSubscriptions();$("homeSubIncome").textContent=$("seasonSubIncome").textContent;await loadInsurance();$("homeInsIncome").textContent=money(insuranceRows.reduce((s,x)=>s+Number(x.amount||0),0));}catch(e){console.error(e);}}
 async function loadRequests(){setMsg("requestMessage","جارٍ تحميل الطلبات...");try{const {data,error}=await db.from("registrations").select("id,created_at,athlete_name,date_of_birth,birthplace,gender,residence,practiced_judo,current_belt,guardian_name,guardian_phone").order("created_at",{ascending:false});if(error)throw error;requests=data||[];renderRequests();$("requestBadge").textContent=requests.length;$("homeRequests").textContent=requests.length;setMsg("requestMessage","");}catch(e){setMsg("requestMessage","تعذر تحميل الطلبات: "+e.message);}}
 function renderRequests(){const q=$("requestSearch").value.trim().toLowerCase();const rows=requests.filter(r=>`${r.athlete_name||""} ${r.guardian_phone||""} ${r.guardian_name||""}`.toLowerCase().includes(q));$("requestsBody").innerHTML=rows.map(r=>`<tr><td>${esc(r.athlete_name)}</td><td>${esc(r.created_at?new Date(r.created_at).toLocaleDateString("fr-FR"):"—")}</td><td>${esc(r.date_of_birth||"—")}</td><td>${esc(r.gender||"—")}</td><td>${esc(r.residence||"—")}</td><td>${esc(r.guardian_name||"—")}</td><td>${esc(r.guardian_phone||"—")}</td><td><span class="pill gold">في الانتظار</span></td><td><button class="smallbtn btn-green" data-accept="${r.id}">قبول وإضافة</button><button class="smallbtn btn-light" data-details="${r.id}">تفاصيل</button><button class="smallbtn btn-red" data-reject="${r.id}">رفض وحذف</button></td></tr>`).join("")||'<tr><td colspan="9" class="empty">لا توجد طلبات جديدة.</td></tr>';
@@ -188,6 +204,41 @@ function renderSubscriptions(){
    if(error){setMsg("subMessage","تعذر إنشاء سجل الامتحان. تحقق من أعمدة جدول belt_exam_payments: "+error.message);return;}await loadSubscriptions();
  });
 }
+function initializeAnalysisMonths(){
+ const select=$("analysisMonth");if(!select.options.length){select.innerHTML=months.map(([key,label])=>`<option value="${key}">${label}</option>`).join("");select.value="september";}
+}
+function renderMonthlyAnalysis(){
+ initializeAnalysisMonths();
+ const key=$("analysisMonth").value||months[0][0];
+ const monthInfo=months.find(([k])=>k===key)||months[0];
+ const active=athletes.filter(a=>a.is_active!==false).sort((a,b)=>fullName(a).localeCompare(fullName(b),"ar"));
+ const records=active.map(a=>({athlete:a,sub:getSubForAthlete(a.id)}));
+ const paid=records.filter(r=>Boolean(r.sub&&r.sub[key]));
+ const unpaid=records.filter(r=>!(r.sub&&r.sub[key]));
+ const income=paid.reduce((sum,r)=>sum+Number(r.sub?.monthly_fee||MONTHLY_FEE),0);
+ const debt=unpaid.reduce((sum,r)=>sum+Number(r.sub?.monthly_fee||MONTHLY_FEE),0);
+ $("analysisIncome").textContent=money(income);
+ $("analysisPaidCount").textContent=String(paid.length);
+ $("analysisUnpaidCount").textContent=String(unpaid.length);
+ $("analysisDebt").textContent=money(debt);
+ const rows=records.map(r=>`<tr><td>${esc(fullName(r.athlete))}</td><td><span class="pill ${r.sub&&r.sub[key]?'green':'red'}">${r.sub&&r.sub[key]?'مدفوع':'غير مدفوع'}</span></td><td>${money(r.sub?.monthly_fee||MONTHLY_FEE)}</td></tr>`).join("");
+ $("analysisBody").innerHTML=rows||`<tr><td colspan="3" class="empty">لا يوجد رياضيون نشطون لهذا الموسم.</td></tr>`;
+ $("analysisMessage").textContent=`تحليل شهر ${monthInfo[1]} — الموسم ${seasonLabel(year())}. هذه النتائج للعرض فقط ولا تغيّر بيانات الدفع.`;
+}
+async function loadMonthlyAnalysis(){
+ setMsg("analysisMessage","جارٍ تحديث بيانات التحليل...");
+ try{await loadSubscriptions();renderMonthlyAnalysis();}
+ catch(e){setMsg("analysisMessage","تعذر تحميل التحليل: "+e.message);}
+}
+$("analysisMonth").addEventListener("change",renderMonthlyAnalysis);
+$("refreshMonthlyAnalysis").onclick=loadMonthlyAnalysis;
+$("exportMonthlyAnalysis").onclick=()=>{
+ const key=$("analysisMonth").value||months[0][0],label=months.find(([k])=>k===key)?.[1]||key;
+ const active=athletes.filter(a=>a.is_active!==false).sort((a,b)=>fullName(a).localeCompare(fullName(b),"ar"));
+ const rows=active.map(a=>{const sub=getSubForAthlete(a.id),paid=Boolean(sub&&sub[key]);return {"اسم الرياضي":fullName(a),"الشهر":label,"حالة الدفع":paid?"مدفوع":"غير مدفوع","المبلغ":Number(sub?.monthly_fee||MONTHLY_FEE),"الموسم":seasonLabel(year())};});
+ csvExport(`اشتراكات_${label}_${year()}.csv`,rows);
+};
+ 
 $("loadSubscriptions").onclick=loadSubscriptions;
 $("subSearch").addEventListener("input",renderSubscriptions);
 $("exportSubscriptions").onclick=()=>csvExport(`financial-table-${year()}.csv`,athletes.filter(a=>a.is_active!==false).map(a=>{const s=getSubForAthlete(a.id),ins=getInsuranceForAthlete(a.id),e1=getExamForAthlete(a.id,1),e2=getExamForAthlete(a.id,2);const row={athlete:fullName(a)};months.forEach(([key,label])=>row[label]=s?.[key]?'مدفوع':'غير مدفوع');return {...row,insurance_status:ins?.paid?'مدفوع':'غير مدفوع',insurance_amount:ins?.paid?Number(ins.amount||INSURANCE_FEE):0,exam1_status:e1?.paid?'مدفوع':'غير مدفوع',exam1_amount:e1?.paid?Number(e1.amount||0):0,exam2_status:e2?.paid?'مدفوع':'غير مدفوع',exam2_amount:e2?.paid?Number(e2.amount||0):0};}));
