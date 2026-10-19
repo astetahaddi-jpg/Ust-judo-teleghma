@@ -8,15 +8,32 @@
 <title>UST JUDO TELEGHMA | Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--navy:#123b70;--blue:#2584e8;--blue2:#eaf4ff;--red:#ef4b55;--redbg:#fff0f1;--green:#169b62;--greenbg:#eafaf1;--gold:#a86a00;--goldbg:#fff5df;--purple:#7654d6;--purplebg:#f2edff;--ink:#20344d;--muted:#718198;--line:#e2ebf5;--bg:#f4f8fd;--white:#fff}
+:root{
+  --navy:#123b70;
+  --blue:#2584e8;
+  --blue2:#eaf4ff;
+  --red:#dc2626;
+  --redbg:#fff0f0;
+  --green:#16a34a;
+  --greenbg:#e8f8ee;
+  --gold:#a86a00;
+  --goldbg:#fff5df;
+  --purple:#7654d6;
+  --purplebg:#f2edff;
+  --ink:#20344d;
+  --muted:#718198;
+  --line:#e2ebf5;
+  --bg:#f4f8fd;
+  --white:#fff;
+}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Tahoma",sans-serif}
 button,input,select{font:inherit}
 button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;cursor:pointer;font-weight:700;transition:.15s}
 button:hover{filter:brightness(.96);transform:translateY(-1px)}
 button:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.btn-red{background:var(--red)}
-.btn-green{background:var(--green)}
+.btn-red{background:#dc2626!important;color:#fff!important}
+.btn-green{background:#16a34a!important;color:#fff!important}
 .btn-light{background:#eef5ff;color:var(--navy);border:1px solid #d9e8fa}
 .btn-gold{background:#fff0ce;color:#855500}
 .btn-purple{background:var(--purple)}
@@ -54,8 +71,18 @@ th,td{padding:11px 10px;text-align:center;border-bottom:1px solid #eaf0f7;white-
 th{background:#f2f7fd;color:#355273;font-weight:800;position:sticky;top:0}
 tr:hover td{background:#fbfdff}
 .pill{display:inline-block;border-radius:30px;padding:5px 9px;font-size:12px;font-weight:700}
-.pill.green{background:var(--greenbg);color:var(--green)}
-.pill.red{background:var(--redbg);color:var(--red)}
+
+/* حالة الدفع: أخضر للمدفوع وأحمر لغير المدفوع */
+.pill.green{
+  background:#16a34a!important;
+  color:#fff!important;
+  border:1px solid #15803d;
+}
+.pill.red{
+  background:#dc2626!important;
+  color:#fff!important;
+  border:1px solid #b91c1c;
+}
 .pill.gold{background:var(--goldbg);color:var(--gold)}
 .pill.blue{background:var(--blue2);color:var(--blue)}
 .pill.gray{background:#eef2f6;color:#64748b}
@@ -77,29 +104,48 @@ tr:hover td{background:#fbfdff}
 .empty{padding:25px;text-align:center;color:var(--muted)}
 .status-off{opacity:.62}
 .footer{text-align:center;color:#8796a9;font-size:12px;padding:10px}
-.month-cell{min-width:125px}
+.month-cell{min-width:125px;text-align:center;transition:background .15s}
 .month-cell .pill{margin-bottom:5px}
 .month-cell .smallbtn{display:block;margin:5px auto 0;min-width:90px}
 .month-head{min-width:125px}
+
+/* تلوين خانات الأشهر بحسب حالة الدفع */
+.month-cell:has(.pill.green),
+td:has(> .pill.green){
+  background-color:#e8f8ee;
+}
+.month-cell:has(.pill.red),
+td:has(> .pill.red){
+  background-color:#fff0f0;
+}
+/* الحفاظ على لون الحالة حتى عند مرور المؤشر */
+tr:hover td.month-cell:has(.pill.green),
+tr:hover td:has(> .pill.green){
+  background-color:#d5f5df;
+}
+tr:hover td.month-cell:has(.pill.red),
+tr:hover td:has(> .pill.red){
+  background-color:#ffe0e0;
+}
 .athlete-name-link{background:transparent;color:var(--blue);padding:4px 2px;text-decoration:underline;font-weight:700}
 @media(max-width:900px){
-.layout{grid-template-columns:1fr;padding:9px}
-.sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
-.navbtn{font-size:12px;padding:10px 7px}
-.navicon{display:none}
-header{padding:14px;position:static}
-.brand h1{font-size:18px}
-.brand p{font-size:12px}
-.panel{padding:12px}
-.userbox{flex-wrap:wrap;justify-content:flex-end}
+  .layout{grid-template-columns:1fr;padding:9px}
+  .sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+  .navbtn{font-size:12px;padding:10px 7px}
+  .navicon{display:none}
+  header{padding:14px;position:static}
+  .brand h1{font-size:18px}
+  .brand p{font-size:12px}
+  .panel{padding:12px}
+  .userbox{flex-wrap:wrap;justify-content:flex-end}
 }
 @media(max-width:520px){
-.sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
-.userbox{font-size:12px}
-.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.stat .value{font-size:21px}
-.toolbar button{flex:1}
-.brand p{max-width:230px}
+  .sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .userbox{font-size:12px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat .value{font-size:21px}
+  .toolbar button{flex:1}
+  .brand p{max-width:230px}
 }
 </style>
 </head>
@@ -619,7 +665,7 @@ function statusPill(paid){return `<span class="pill ${paid?"green":"red"}">${pai
 
 function monthCell(a,sub,monthKey,monthName){
  const paid=Boolean(sub&&sub[monthKey]);
- return `<td class="month-cell">
+ return `<td class="month-cell ${paid?"payment-paid":"payment-unpaid"}">
  ${statusPill(paid)}
  <div><small>${money(sub?.monthly_fee||MONTHLY_FEE)}</small></div>
  <button class="smallbtn ${paid?"btn-red":"btn-green"}" data-month-payment="${esc(a.id)}" data-month-key="${monthKey}">
@@ -664,17 +710,17 @@ function renderSubscriptions(){
    <div><small class="muted">اضغط للاختيارات</small></div>
   </td>
   ${monthCells}
-  <td>
+  <td class="${ins?.paid?"payment-paid":"payment-unpaid"}">
    ${statusPill(Boolean(ins?.paid))}
    <div><small>${money(ins?.amount||INSURANCE_FEE)}</small></div>
    <button class="smallbtn ${ins?.paid?"btn-red":"btn-green"}" data-insurance-payment="${esc(a.id)}">${ins?.paid?"إلغاء الدفع":"تسجيل الدفع"}</button>
   </td>
-  <td>
+  <td class="${exam1?.paid?"payment-paid":"payment-unpaid"}">
    ${statusPill(Boolean(exam1?.paid))}
    ${exam1?`<div><small>${money(exam1.amount)}</small></div>`:""}
    <button class="smallbtn ${exam1?.paid?"btn-red":"btn-green"}" data-exam-payment="${esc(a.id)}" data-exam-number="1">${exam1?.paid?"إلغاء الدفع":"تسجيل الدفع"}</button>
   </td>
-  <td>
+  <td class="${exam2?.paid?"payment-paid":"payment-unpaid"}">
    ${statusPill(Boolean(exam2?.paid))}
    ${exam2?`<div><small>${money(exam2.amount)}</small></div>`:""}
    <button class="smallbtn ${exam2?.paid?"btn-red":"btn-green"}" data-exam-payment="${esc(a.id)}" data-exam-number="2">${exam2?.paid?"إلغاء الدفع":"تسجيل الدفع"}</button>
