@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10243a">
+<meta name="description" content="فضاء أولياء الرياضيين - UST JUDO TELEGHMA">
+<title>فضاء الأولياء | UST JUDO TELEGHMA</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy:#10243a;
+  --blue:#183b59;
+  --red:#d9273e;
+  --gold:#efb94c;
+  --light:#f4f7fa;
+  --text:#172638;
+  --muted:#687789;
+  --green:#187344;
+  --border:#e4eaf0;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:'Cairo',Tahoma,Arial,sans-serif;
+  background:var(--light);
+  color:var(--text);
+  line-height:1.8;
+}
+a {text-decoration:none;color:inherit}
+button,input {font:inherit}
+.container {width:min(950px,92%);margin:auto}
+
+header {
+  background:white;
+  box-shadow:0 3px 18px #10243a12;
+}
+.header-inner {
+  min-height:82px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.logo {
+  width:58px;
+  height:58px;
+  object-fit:contain;
+}
+.brand strong {
+  display:block;
+  color:var(--navy);
+  font-size:16px;
+  line-height:1.5;
+}
+.brand small {
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+}
+.back {
+  color:var(--navy);
+  font-size:13px;
+  font-weight:800;
+}
+.back:hover {color:var(--red)}
+
+.hero {
+  background:
+    radial-gradient(circle at 80% 25%,#28516b 0,transparent 35%),
+    linear-gradient(120deg,#091a2c,var(--navy),#183b59);
+  color:white;
+  padding:43px 0;
+  text-align:center;
+}
+.hero .eyebrow {
+  color:var(--gold);
+  font-weight:900;
+}
+.hero h1 {
+  margin:8px 0;
+  font-size:clamp(27px,5vw,39px);
+}
+.hero p {
+  color:#dbe5ed;
+  margin:0;
+  font-size:14px;
+}
+
+main {padding:35px 0 60px}
+
+.login-card {
+  width:min(480px,100%);
+  margin:-5px auto 30px;
+  background:white;
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:28px;
+  box-shadow:0 12px 35px #10243a12;
+}
+.login-icon {
+  width:65px;
+  height:65px;
+  margin:0 auto 12px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  background:#eef2f6;
+  color:var(--navy);
+  font-size:30px;
+}
+.login-card h2 {
+  text-align:center;
+  color:var(--navy);
+  margin:5px 0;
+  font-size:22px;
+}
+.login-card .description {
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  margin:0 0 20px;
+}
+.field label {
+  display:block;
+  font-weight:800;
+  font-size:13px;
+  margin-bottom:7px;
+}
+.field input {
+  width:100%;
+  border:1px solid #d7e0e9;
+  background:#fbfcfd;
+  border-radius:11px;
+  padding:14px;
+  text-align:center;
+  direction:ltr;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:5px;
+  color:var(--navy);
+  text-transform:uppercase;
+}
+.field input:focus {
+  outline:2px solid #183b5930;
+  border-color:var(--blue);
+}
+.btn {
+  display:block;
+  width:100%;
+  margin-top:15px;
+  border:0;
+  border-radius:11px;
+  padding:13px;
+  background:var(--red);
+  color:white;
+  font-weight:900;
+  cursor:pointer;
+}
+.btn:hover {background:#b91f34}
+.btn:disabled {opacity:.6;cursor:not-allowed}
+.message {
+  margin-top:13px;
+  text-align:center;
+  font-size:13px;
+  font-weight:800;
+}
+.message.error {color:#b42336}
+.message.success {color:var(--green)}
+.help {
+  margin-top:18px;
+  padding-top:13px;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+  text-align:center;
+  font-size:12px;
+}
+
+#dashboard {display:none}
+.section-title {
+  color:var(--navy);
+  font-size:20px;
+  margin:28px 0 13px;
+  font-weight:900;
+}
+.athlete-card {
+  background:linear-gradient(120deg,var(--navy),var(--blue));
+  color:white;
+  padding:24px;
+  border-radius:18px;
+  box-shadow:0 10px 25px #10243a18;
+}
+.athlete-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.athlete-name {
+  font-size:24px;
+  font-weight:900;
+  margin:0;
+}
+.athlete-label {
+  color:#dbe5ed;
+  font-size:12px;
+}
+.status-badge {
+  display:inline-block;
+  padding:5px 13px;
+  border-radius:30px;
+  background:#ffffff1c;
+  color:white;
+  font-size:12px;
+  font-weight:800;
+}
+.athlete-id {
+  color:#dbe5ed;
+  font-size:12px;
+  margin-top:10px;
+}
+.info-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.info-item {
+  background:#ffffff12;
+  border-radius:11px;
+  padding:12px;
+}
+.info-item span {
+  display:block;
+  color:#dbe5ed;
+  font-size:11px;
+}
+.info-item strong {
+  display:block;
+  font-size:14px;
+}
+.panel {
+  background:white;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:17px;
+  box-shadow:0 6px 20px #10243a08;
+}
+.panel h3 {
+  margin:0 0 15px;
+  color:var(--navy);
+  font-size:17px;
+}
+.table-wrap {overflow-x:auto}
+table {
+  width:100%;
+  border-collapse:collapse;
+  min-width:460px;
+  font-size:13px;
+}
+th,td {
+  padding:11px 9px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+th {
+  background:#f1f4f7;
+  color:var(--navy);
+  font-weight:900;
+}
+tr:last-child td {border-bottom:0}
+.paid {
+  color:var(--green);
+  font-weight:900;
+}
+.unpaid {
+  color:var(--red);
+  font-weight:900;
+}
+.empty {
+  color:var(--muted);
+  text-align:center;
+  padding:18px 8px;
+  font-size:13px;
+}
+.month-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.month {
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:11px 7px;
+  text-align:center;
+  background:#fff;
+}
+.month strong {
+  display:block;
+  color:var(--navy);
+  font-size:13px;
+}
+.month span {
+  display:block;
+  font-size:12px;
+  font-weight:900;
+}
+.month.is-paid {
+  background:#edf8f1;
+  border-color:#c7e8d2;
+}
+.month.is-paid span {color:var(--green)}
+.month.is-unpaid {
+  background:#fff1f1;
+  border-color:#f3d0d4;
+}
+.month.is-unpaid span {color:var(--red)}
+.panel-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.panel-header h3 {margin:0}
+.year-label {
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+}
+.logout {
+  display:block;
+  width:100%;
+  margin-top:25px;
+  padding:12px;
+  border:1px solid #e4b9c0;
+  background:white;
+  color:var(--red);
+  border-radius:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.logout:hover {background:#fff1f1}
+
+footer {
+  background:#081827;
+  color:#dce5ed;
+  text-align:center;
+  padding:22px 10px;
+  font-size:12px;
+}
+footer p {margin:3px}
+
+@media(max-width:600px) {
+  .header-inner {min-height:70px}
+  .logo {width:46px;height:46px}
+  .brand strong {font-size:12px}
+  .brand small {font-size:9px}
+  .back {font-size:11px}
+  .hero {padding:35px 0}
+  main {padding-top:25px}
+  .login-card {padding:23px 17px}
+  .info-grid {grid-template-columns:1fr 1fr}
+  .month-grid {grid-template-columns:repeat(2,1fr)}
+  .athlete-name {font-size:20px}
+  .panel {padding:15px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+    <a class="brand" href="index.html">
+      <img class="logo" src="ei_1791625385714-removebg-preview.png" alt="شعار النادي">
+      <span>
+        <strong>UST JUDO TELEGHMA</strong>
+        <small>الاتحاد الرياضي التلاغمة للجودو</small>
+      </span>
+    </a>
+    <a class="back" href="index.html">← العودة إلى الموقع</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">UST JUDO TELEGHMA</span>
+    <h1>فضاء الأولياء</h1>
+    <p>تابعوا الوضعية الرياضية والاشتراكات الخاصة بأبنائكم بكل سهولة.</p>
+  </div>
+</section>
+
+<main class="container">
+
+  <section class="login-card" id="loginSection">
+    <div class="login-icon">🥋</div>
+    <h2>الدخول إلى فضاء الولي</h2>
+    <p class="description">أدخل رمز الدخول الخاص بالرياضي للاطلاع على معلوماته.</p>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="accessCode">رمز الدخول</label>
+        <input
+          id="accessCode"
+          type="text"
+          maxlength="6"
+          minlength="6"
+          placeholder="XXXXXX"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          required
+        >
+      </div>
+      <button class="btn" id="loginBtn" type="submit">عرض المعلومات ←</button>
+      <div class="message" id="loginMessage" role="status" aria-live="polite"></div>
+    </form>
+
+    <div class="help">
+      في حالة فقدان رمز الدخول، يرجى التواصل مع إدارة النادي.
+    </div>
+  </section>
+
+  <section id="dashboard">
+
+    <div class="athlete-card">
+      <div class="athlete-top">
+        <div>
+          <div class="athlete-label">مرحبًا بكم في فضاء الأولياء</div>
+          <h2 class="athlete-name" id="athleteName">—</h2>
+        </div>
+        <span class="status-badge" id="athleteStatus">—</span>
+      </div>
+
+      <div class="athlete-id" id="athleteId"></div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span>الاسم</span>
+          <strong id="firstName">—</strong>
+        </div>
+        <div class="info-item">
+          <span>اللقب</span>
+          <strong id="lastName">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">الاشتراكات الشهرية</h2>
+    <div id="subscriptionsContainer"></div>
+
+    <h2 class="section-title">التأمين السنوي</h2>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>السنة</th>
+              <th>المبلغ</th>
+              <th>الحالة</th>
+              <th>تاريخ الدفع</th>
+            </tr>
+          </thead>
+          <tbody id="insuranceBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="insuranceEmpty" hidden>لا توجد سجلات تأمين حاليًا.</div>
+    </div>
+
+    <h2 class="section-title">امتحانات الأحزمة</h2>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>السنة</th>
+              <th>رقم الامتحان</th>
+              <th>الحزام</th>
+              <th>المبلغ</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="examsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="examsEmpty" hidden>لا توجد امتحانات مسجلة حاليًا.</div>
+    </div>
+
+    <button class="logout" id="logoutBtn" type="button">تسجيل الخروج</button>
+  </section>
+
+</main>
+
+<footer>
+  <p><strong>UST JUDO TELEGHMA</strong></p>
+  <p>الانضباط يبني الأبطال</p>
+  <p>© <span id="currentYear"></span> جميع الحقوق محفوظة</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+/* =====================================
+   UST SUPABASE CONFIGURATION
+===================================== */
+
+const SUPABASE_URL =
+  'https://jtvorszomguszvygbxbs.supabase.co';
+
+const SUPABASE_PUBLISHABLE_KEY =
+  'sb_publishable_pOctimWy9BOucmbJ11epmw_IkzvhZJ6';
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+/* =====================================
+   ELEMENTS
+===================================== */
+
+const loginForm = document.getElementById('loginForm');
+const codeInput = document.getElementById('accessCode');
+const loginBtn = document.getElementById('loginBtn');
+const loginMessage = document.getElementById('loginMessage');
+
+const loginSection = document.getElementById('loginSection');
+const dashboard = document.getElementById('dashboard');
+
+document.getElementById('currentYear').textContent =
+  new Date().getFullYear();
+
+/* =====================================
+   HELPERS
+===================================== */
+
+function showLoginMessage(message, type = 'error') {
+  loginMessage.textContent = message;
+  loginMessage.className = 'message ' + type;
+}
+
+function escapeText(value) {
+  return String(value ?? '')
+    .replace(/[&<>"']/g, char => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    })[char]);
+}
+
+function formatDate(value) {
+  if (!value) return '—';
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return '—';
+
+  return new Intl.DateTimeFormat('ar-DZ', {
+    year:'numeric',
+    month:'2-digit',
+    day:'2-digit'
+  }).format(date);
+}
+
+function formatAmount(value) {
+  if (value === null || value === undefined) return '—';
+
+  return Number(value).toLocaleString('ar-DZ') + ' دج';
+}
+
+function paymentStatus(paid) {
+  return paid
+    ? '<span class="paid">مدفوع ✓</span>'
+    : '<span class="unpaid">غير مدفوع</span>';
+}
+
+/* =====================================
+   MONTHLY SUBSCRIPTIONS
+===================================== */
+
+const months = [
+  ['september','سبتمبر'],
+  ['october','أكتوبر'],
+  ['november','نوفمبر'],
+  ['december','ديسمبر'],
+  ['january','جانفي'],
+  ['february','فيفري'],
+  ['march','مارس'],
+  ['april','أفريل'],
+  ['may','ماي'],
+  ['june','جوان'],
+  ['july','جويلية']
+];
+
+function renderSubscriptions(records) {
+  const container = document.getElementById('subscriptionsContainer');
+  container.innerHTML = '';
+
+  if (!records || records.length === 0) {
+    container.innerHTML =
+      '<div class="panel empty">لا توجد اشتراكات مسجلة حاليًا.</div>';
+    return;
+  }
+
+  records.forEach(record => {
+    const panel = document.createElement('div');
+    panel.className = 'panel';
+
+    const year = escapeText(record.season_start_year ?? '—');
+    const nextYear = Number(record.season_start_year) + 1;
+    const fee = formatAmount(record.monthly_fee);
+
+    const monthHtml = months.map(([key, label]) => {
+      const paid = record[key] === true;
+
+      return `
+        <div class="month ${paid ? 'is-paid' : 'is-unpaid'}">
+          <strong>${label}</strong>
+          <span>${paid ? 'مدفوع ✓' : 'غير مدفوع'}</span>
+        </div>
+      `;
+    }).join('');
+
+    panel.innerHTML = `
+      <div class="panel-header">
+        <h3>الموسم الرياضي ${year} / ${nextYear}</h3>
+        <span class="year-label">الاشتراك الشهري: ${fee}</span>
+      </div>
+      <div class="month-grid" style="margin-top:15px">
+        ${monthHtml}
+      </div>
+    `;
+
+    container.appendChild(panel);
+  });
+}
+
+/* =====================================
+   INSURANCE
+===================================== */
+
+function renderInsurance(records) {
+  const body = document.getElementById('insuranceBody');
+  const empty = document.getElementById('insuranceEmpty');
+
+  body.innerHTML = '';
+
+  if (!records || records.length === 0) {
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+
+  records.forEach(record => {
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${escapeText(record.insurance_year)}</td>
+      <td>${escapeText(formatAmount(record.amount))}</td>
+      <td>${paymentStatus(record.paid)}</td>
+      <td>${escapeText(formatDate(record.paid_at))}</td>
+    `;
+
+    body.appendChild(row);
+  });
+}
+
+/* =====================================
+   BELT EXAMINATIONS
+===================================== */
+
+function renderExams(records) {
+  const body = document.getElementById('examsBody');
+  const empty = document.getElementById('examsEmpty');
+
+  body.innerHTML = '';
+
+  if (!records || records.length === 0) {
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+
+  records.forEach(record => {
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${escapeText(record.exam_year)}</td>
+      <td>${escapeText(record.exam_number)}</td>
+      <td>${escapeText(record.belt_name || '—')}</td>
+      <td>${escapeText(formatAmount(record.amount))}</td>
+      <td>${paymentStatus(record.paid)}</td>
+    `;
+
+    body.appendChild(row);
+  });
+}
+
+/* =====================================
+   DISPLAY ATHLETE DATA
+===================================== */
+
+function displayAthlete(data) {
+  if (!data || !data.athlete) {
+    throw new Error('لم يتم العثور على بيانات الرياضي.');
+  }
+
+  const athlete = data.athlete;
+
+  document.getElementById('athleteName').textContent =
+    athlete.full_name || '';
+
+  document.getElementById('firstName').textContent =
+    athlete.first_name || '—';
+
+  document.getElementById('lastName').textContent =
+    athlete.last_name || '—';
+
+  document.getElementById('athleteId').textContent =
+    'رقم الرياضي: ' + (athlete.id ?? '—');
+
+  document.getElementById('athleteStatus').textContent =
+    athlete.is_active ? 'رياضي نشط' : 'غير نشط';
+
+  renderSubscriptions(data.subscriptions || []);
+  renderInsurance(data.insurance || []);
+  renderExams(data.exams || []);
+
+  loginSection.style.display = 'none';
+  dashboard.style.display = 'block';
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* =====================================
+   LOGIN
+===================================== */
+
+loginForm.addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const code = codeInput.value.trim().toUpperCase();
+
+  if (!/^[A-Z0-9]{6}$/.test(code)) {
+    showLoginMessage(
+      'يرجى إدخال رمز صحيح مكوّن من 6 أحرف أو أرقام.'
+    );
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'جارٍ التحقق من الرمز...';
+  showLoginMessage('');
+
+  try {
+    const { data, error } = await db.rpc(
+      'get_parent_athlete_portal',
+      {
+        p_access_code: code
+      }
+    );
+
+    if (error) {
+      console.error('UST Parent Portal RPC Error:', error);
+      throw error;
+    }
+
+    console.log('UST Parent Portal Response:', data);
+
+    if (!data || !data.athlete) {
+      showLoginMessage(
+        'رمز الدخول غير صحيح أو غير مفعل. يرجى التحقق منه.'
+      );
+      return;
+    }
+
+    displayAthlete(data);
+
+  } catch (error) {
+    console.error('UST Parent Portal Error:', error);
+
+    showLoginMessage(
+      'حدث خطأ أثناء الاتصال. ' +
+      (error.message || 'يرجى المحاولة مجددًا.')
+    );
+
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'عرض المعلومات ←';
+  }
+});
+
+/* =====================================
+   LOGOUT
+===================================== */
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  dashboard.style.display = 'none';
+  loginSection.style.display = 'block';
+
+  loginForm.reset();
+  showLoginMessage('');
+
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* =====================================
+   INPUT FORMATTING
+===================================== */
+
+codeInput.addEventListener('input', () => {
+  codeInput.value = codeInput.value
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+    .slice(0,6);
+});
+</script>
+
+</body>
+</html>
