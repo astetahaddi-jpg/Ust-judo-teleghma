@@ -338,6 +338,57 @@ tr:last-child td {border-bottom:0}
   font-size:12px;
   font-weight:800;
 }
+
+/* الاشتراك السنوي */
+.annual-subscription-panel {
+  border-right:4px solid var(--gold);
+}
+.annual-subscription-panel h3 {
+  margin:0;
+}
+.annual-subscription-note {
+  color:var(--muted);
+  font-size:12px;
+  margin:5px 0 15px;
+}
+.annual-status {
+  display:inline-block;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:900;
+}
+.annual-status.paid-status {
+  background:#edf8f1;
+  color:var(--green);
+}
+.annual-status.unpaid-status {
+  background:#fff1f1;
+  color:var(--red);
+}
+.annual-info-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.annual-info-item {
+  background:#f5f7fa;
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:12px 9px;
+  text-align:center;
+}
+.annual-info-item span {
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+}
+.annual-info-item strong {
+  display:block;
+  color:var(--navy);
+  font-size:14px;
+  margin-top:3px;
+}
 .logout {
   display:block;
   width:100%;
@@ -374,6 +425,7 @@ footer p {margin:3px}
   .month-grid {grid-template-columns:repeat(2,1fr)}
   .athlete-name {font-size:20px}
   .panel {padding:15px}
+  .annual-info-grid {grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -457,26 +509,8 @@ footer p {margin:3px}
       </div>
     </div>
 
-    <h2 class="section-title">الاشتراكات الشهرية</h2>
+    <h2 class="section-title">الاشتراكات</h2>
     <div id="subscriptionsContainer"></div>
-
-    <h2 class="section-title">التأمين السنوي</h2>
-    <div class="panel">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>السنة</th>
-              <th>المبلغ</th>
-              <th>الحالة</th>
-              <th>تاريخ الدفع</th>
-            </tr>
-          </thead>
-          <tbody id="insuranceBody"></tbody>
-        </table>
-      </div>
-      <div class="empty" id="insuranceEmpty" hidden>لا توجد سجلات تأمين حاليًا.</div>
-    </div>
 
     <h2 class="section-title">امتحانات الأحزمة</h2>
     <div class="panel">
@@ -601,8 +635,7 @@ const months = [
   ['march','مارس'],
   ['april','أفريل'],
   ['may','ماي'],
-  ['june','جوان'],
-  ['july','جويلية']
+  ['june','جوان']
 ];
 
 function renderSubscriptions(records) {
@@ -611,7 +644,7 @@ function renderSubscriptions(records) {
 
   if (!records || records.length === 0) {
     container.innerHTML =
-      '<div class="panel empty">لا توجد اشتراكات مسجلة حاليًا.</div>';
+      '<div class="panel empty">لا توجد اشتراكات شهرية مسجلة حاليًا.</div>';
     return;
   }
 
@@ -636,8 +669,11 @@ function renderSubscriptions(records) {
 
     panel.innerHTML = `
       <div class="panel-header">
-        <h3>الموسم الرياضي ${year} / ${nextYear}</h3>
-        <span class="year-label">الاشتراك الشهري: ${fee}</span>
+        <h3>الاشتراك الشهري</h3>
+        <span class="year-label">الموسم الرياضي ${year} / ${nextYear}</span>
+      </div>
+      <div class="year-label" style="margin-top:8px">
+        قيمة الاشتراك الشهري: ${escapeText(fee)}
       </div>
       <div class="month-grid" style="margin-top:15px">
         ${monthHtml}
@@ -649,34 +685,84 @@ function renderSubscriptions(records) {
 }
 
 /* =====================================
-   INSURANCE
+   ANNUAL SUBSCRIPTION
+   DATA SOURCE: annual_insurance
 ===================================== */
 
 function renderInsurance(records) {
-  const body = document.getElementById('insuranceBody');
-  const empty = document.getElementById('insuranceEmpty');
+  const container = document.getElementById('subscriptionsContainer');
 
-  body.innerHTML = '';
+  const panel = document.createElement('div');
+  panel.className = 'panel annual-subscription-panel';
+
+  let content = '';
 
   if (!records || records.length === 0) {
-    empty.hidden = false;
-    return;
+    content = `
+      <div class="empty">
+        لا توجد معلومات مسجلة عن الاشتراك السنوي حاليًا.
+      </div>
+    `;
+  } else {
+    const sortedRecords = [...records].sort((a, b) =>
+      Number(b.insurance_year || 0) - Number(a.insurance_year || 0)
+    );
+
+    content = sortedRecords.map(record => {
+      const year = escapeText(record.insurance_year ?? '—');
+      const amount = escapeText(formatAmount(record.amount));
+      const paid = record.paid === true;
+
+      const status = paid
+        ? '<span class="annual-status paid-status">مدفوع ✓</span>'
+        : '<span class="annual-status unpaid-status">غير مدفوع</span>';
+
+      const paymentDate = paid
+        ? escapeText(formatDate(record.paid_at))
+        : '—';
+
+      return `
+        <div style="padding:13px 0;border-bottom:1px solid var(--border)">
+          <div class="panel-header">
+            <strong style="color:var(--navy)">
+              السنة الرياضية ${year} / ${Number(record.insurance_year) + 1}
+            </strong>
+            ${status}
+          </div>
+
+          <div class="annual-info-grid" style="margin-top:13px">
+            <div class="annual-info-item">
+              <span>المبلغ السنوي</span>
+              <strong>${amount}</strong>
+            </div>
+
+            <div class="annual-info-item">
+              <span>حالة الدفع</span>
+              <strong>${paid ? 'مدفوع' : 'غير مدفوع'}</strong>
+            </div>
+
+            <div class="annual-info-item">
+              <span>تاريخ الدفع</span>
+              <strong>${paymentDate}</strong>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
-  empty.hidden = true;
+  panel.innerHTML = `
+    <div class="panel-header">
+      <h3>الاشتراك السنوي</h3>
+      <span class="year-label">التأمين السنوي للرياضي</span>
+    </div>
+    <div class="annual-subscription-note">
+      متابعة وضعية دفع التأمين السنوي الخاص بالرياضي.
+    </div>
+    ${content}
+  `;
 
-  records.forEach(record => {
-    const row = document.createElement('tr');
-
-    row.innerHTML = `
-      <td>${escapeText(record.insurance_year)}</td>
-      <td>${escapeText(formatAmount(record.amount))}</td>
-      <td>${paymentStatus(record.paid)}</td>
-      <td>${escapeText(formatDate(record.paid_at))}</td>
-    `;
-
-    body.appendChild(row);
-  });
+  container.appendChild(panel);
 }
 
 /* =====================================
@@ -738,7 +824,10 @@ function displayAthlete(data) {
     athlete.is_active ? 'رياضي نشط' : 'غير نشط';
 
   renderSubscriptions(data.subscriptions || []);
+
+  // إظهار التأمين السنوي داخل قسم الاشتراكات تحت اسم الاشتراك السنوي
   renderInsurance(data.insurance || []);
+
   renderExams(data.exams || []);
 
   loginSection.style.display = 'none';
