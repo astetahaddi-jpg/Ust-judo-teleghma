@@ -88,8 +88,6 @@ tr:hover td{background:#fbfdff}
 .empty{padding:25px;text-align:center;color:var(--muted)}
 .status-off{opacity:.62}
 .footer{text-align:center;color:#8796a9;font-size:12px;padding:10px}
-
-/* نافذة تعديل معلومات الرياضي */
 .modal-overlay{
  position:fixed;inset:0;background:#10243c99;z-index:1000;
  display:flex;align-items:center;justify-content:center;
@@ -104,6 +102,12 @@ tr:hover td{background:#fbfdff}
 .modal-actions button{min-width:110px}
 .modal-close{float:left;background:#eef2f6;color:#475569}
 .insurance-edit-btn{background:#eef5ff;color:var(--navy);border:1px solid #d9e8fa}
+.insurance-season-box{
+ background:#f5f9ff;border:1px solid #dceafa;border-radius:12px;
+ padding:13px;margin:12px 0
+}
+.insurance-season-box label{font-weight:700;color:var(--navy)}
+.insurance-season-box select{max-width:260px}
 
 @media(max-width:900px){
 .layout{grid-template-columns:1fr;padding:9px}
@@ -266,7 +270,7 @@ header{padding:14px;position:static}
   <div class="toolbar">
    <input id="subSearch" placeholder="ابحث عن اسم الرياضي">
    <button id="loadSubscriptions">تحديث الجدول</button>
-   <button id="exportSubscriptions" class="btn-light">تصدير CSV</button>
+   <button id="exportSubscriptions" class="btn-light">تصدير قائمة الاشتراكات</button>
   </div>
   <p id="subMessage" class="message"></p>
   <div class="grid">
@@ -312,29 +316,35 @@ header{padding:14px;position:static}
  </div>
 </section>
 
-<!-- قسم التأمينات بعد التعديل -->
 <section id="tab-insurance" class="hidden">
  <div class="panel">
-  <h2>التأمينات المدفوعة فقط</h2>
-  <p class="muted">يعرض هذا القسم الرياضيين الذين دفعوا التأمين السنوي للموسم المختار فقط. يمكنك تعديل معلوماتهم الشخصية، وسيتم حفظها في سجل الرياضي بجدول athletes.</p>
-  <div class="toolbar">
-   <input id="insuranceSearch" placeholder="البحث عن رياضي">
-   <button id="loadInsurance">تحديث</button>
-   <button id="exportInsurance" class="btn-light">تصدير CSV</button>
+  <h2>قائمة التأمينات المدفوعة</h2>
+  <p class="muted">اختر سنة التأمين لعرض الرياضيين الذين دفعوا التأمين في تلك السنة. يحتوي الجدول على المعلومات الشخصية فقط، بينما تبقى بيانات الدفع محفوظة في قاعدة البيانات.</p>
+
+  <div class="insurance-season-box">
+   <label for="insuranceYear">اختر سنة التأمين</label>
+   <select id="insuranceYear">
+    <option value="2026">2026–2027</option>
+   </select>
+   <p class="muted">كل سنة تأمين لها قائمتها الخاصة والمستقلة.</p>
   </div>
+
+  <div class="toolbar">
+   <input id="insuranceSearch" placeholder="البحث عن الاسم أو اللقب">
+   <button id="loadInsurance">تحديث القائمة</button>
+   <button id="exportInsurance" class="btn-light">تصدير قائمة التأمينات</button>
+  </div>
+
   <p id="insuranceMessage" class="message"></p>
+
   <div class="tablewrap">
    <table>
     <thead>
      <tr>
-      <th>الاسم واللقب</th>
-      <th>تاريخ الميلاد</th>
-      <th>مكان الميلاد</th>
+      <th>الاسم</th>
+      <th>اللقب</th>
+      <th>تاريخ ومكان الازدياد</th>
       <th>اسم الولي</th>
-      <th>الموسم</th>
-      <th>المبلغ</th>
-      <th>الحالة</th>
-      <th>الإجراء</th>
      </tr>
     </thead>
     <tbody id="insuranceBody"></tbody>
@@ -402,7 +412,6 @@ header{padding:14px;position:static}
 </div>
 </div>
 
-<!-- نافذة تعديل معلومات الرياضي -->
 <div id="athleteEditModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="editAthleteTitle">
  <div class="modal-box">
   <button type="button" id="closeAthleteModal" class="modal-close">✕ إغلاق</button>
@@ -417,22 +426,18 @@ header{padding:14px;position:static}
      <label for="editFirstName">الاسم</label>
      <input id="editFirstName" type="text" required>
     </div>
-
     <div>
      <label for="editLastName">اللقب</label>
      <input id="editLastName" type="text" required>
     </div>
-
     <div>
      <label for="editDateOfBirth">تاريخ الميلاد</label>
      <input id="editDateOfBirth" type="date">
     </div>
-
     <div>
      <label for="editBirthplace">مكان الميلاد</label>
      <input id="editBirthplace" type="text">
     </div>
-
     <div style="grid-column:1/-1">
      <label for="editGuardianName">اسم الولي</label>
      <input id="editGuardianName" type="text">
@@ -489,7 +494,13 @@ const $=id=>document.getElementById(id);
 let requests=[];
 let athletes=[];
 let subscriptions=[];
+
+// جميع سجلات التأمين للموسم الرئيسي، سواء مدفوعة أو غير مدفوعة
 let insuranceRows=[];
+
+// سجلات التأمين المدفوعة للسنة المختارة في قسم التأمينات فقط
+let insuranceListRows=[];
+
 let examRows=[];
 let parentAccounts=[];
 
@@ -513,6 +524,9 @@ const money=n=>
 const year=()=>
  Number($("seasonYear").value)||2026;
 
+const insuranceYear=()=>
+ Number($("insuranceYear").value)||year();
+
 const seasonLabel=y=>`${y}–${y+1}`;
 
 const setMsg=(id,t)=>{
@@ -521,35 +535,48 @@ const setMsg=(id,t)=>{
 
 
 // =====================================
-// تصدير CSV
+// تصدير CSV متوافق مع Excel
 // =====================================
 
 function csvExport(filename,rows){
- if(!rows.length){
+ if(!rows||!rows.length){
   alert("لا توجد بيانات للتصدير.");
   return;
  }
 
+ // استعمال الفاصلة المنقوطة لتوافق Excel مع الإعدادات المحلية
  const keys=Object.keys(rows[0]);
 
- const csv="\uFEFF"+[
-  keys.join(","),
-  ...rows.map(r=>
-   keys.map(k=>
-    `"${String(r[k]??"").replace(/"/g,'""')}"`
-   ).join(",")
+ const escapeCSV=value=>{
+  let v=String(value??"");
+
+  // حماية الخلايا من تفسير النصوص كمعادلات في Excel
+  if(/^[\s]*[=+\-@]/.test(v))v="'"+v;
+
+  return `"${v.replace(/"/g,'""')}"`;
+ };
+
+ const csv="\uFEFFsep=;\r\n"+[
+  keys.map(escapeCSV).join(";"),
+  ...rows.map(row=>
+   keys.map(key=>escapeCSV(row[key])).join(";")
   )
  ].join("\r\n");
 
- const url=URL.createObjectURL(
-  new Blob([csv],{type:"text/csv;charset=utf-8;"})
- );
+ const blob=new Blob([csv],{
+  type:"text/csv;charset=utf-8;"
+ });
 
+ const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
+
  a.href=url;
  a.download=filename;
+ document.body.appendChild(a);
  a.click();
- URL.revokeObjectURL(url);
+ a.remove();
+
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 
@@ -615,7 +642,10 @@ async function enter(user){
  $("loginCard").classList.add("hidden");
  $("app").classList.remove("hidden");
  $("who").textContent=user.email||"Admin";
+
  updateSeasonLabel();
+ initializeAnalysisMonths();
+
  await refreshHome();
 }
 
@@ -668,8 +698,9 @@ async function refreshHome(){
   await loadInsurance();
 
   $("homeInsIncome").textContent=money(
-   insuranceRows.reduce((s,x)=>s+Number(x.amount||0),0)
+   insuranceListRows.reduce((s,x)=>s+Number(x.amount||0),0)
   );
+
  }catch(e){
   console.error(e);
  }
@@ -783,7 +814,6 @@ async function acceptRequest(id){
 
  try{
   const parts=splitName(r.athlete_name);
-
   let athlete=null;
 
   const existing=await db.from("athletes")
@@ -796,7 +826,6 @@ async function acceptRequest(id){
   if(existing.data?.length){
    athlete=existing.data[0];
 
-   // تحديث بيانات الرياضي من طلب الانخراط عند قبول الطلب
    const profileUpdate=await db.from("athletes")
     .update({
      date_of_birth:r.date_of_birth||athlete.date_of_birth||null,
@@ -809,6 +838,7 @@ async function acceptRequest(id){
 
    if(profileUpdate.error)throw profileUpdate.error;
    athlete=profileUpdate.data;
+
   }else{
    const ins=await db.from("athletes")
     .insert({
@@ -934,6 +964,7 @@ async function loadAthletes(){
   athletes=data||[];
   renderAthletes();
   setMsg("athleteMessage","");
+
  }catch(e){
   setMsg("athleteMessage","تعذر تحميل الرياضيين: "+e.message);
  }
@@ -1093,13 +1124,24 @@ async function permanentDeleteAthlete(id){
  }
 }
 
-$("exportAthletes").onclick=()=>csvExport(
- "athletes.csv",
- athletes.map(a=>({
-  name:fullName(a),
-  status:a.is_active===false?"موقوف مؤقتًا":"نشط"
- }))
-);
+$("exportAthletes").onclick=async()=>{
+ try{
+  const {data,error}=await db.from("athletes")
+   .select("*")
+   .order("last_name");
+
+  if(error)throw error;
+
+  csvExport("athletes.csv",(data||[]).map(a=>({
+   "الاسم":a.first_name||"",
+   "اللقب":a.last_name||"",
+   "الحالة":a.is_active===false?"موقوف مؤقتًا":"نشط"
+  })));
+
+ }catch(e){
+  alert("تعذر تصدير قائمة الرياضيين: "+e.message);
+ }
+};
 
 
 // =====================================
@@ -1168,7 +1210,10 @@ async function loadSubscriptions(){
   if(e.error)throw e.error;
 
   subscriptions=s.data||[];
+
+  // لا نخلط بين بيانات التأمين في جدول الاشتراكات وقائمة التأمينات المدفوعة
   insuranceRows=i.data||[];
+
   examRows=e.data||[];
 
   renderSubscriptions();
@@ -1273,7 +1318,6 @@ function renderSubscriptions(){
   <tr><td colspan="14" class="empty">لا يوجد رياضيون نشطون مطابقون للبحث.</td></tr>
  `;
 
- // خيارات الرياضي
  $("subsBody").querySelectorAll("[data-athlete-menu]").forEach(b=>b.onclick=async()=>{
   const id=b.dataset.athleteMenu;
   const a=athletes.find(x=>String(x.id)===String(id));
@@ -1303,7 +1347,7 @@ function renderSubscriptions(){
   alert("اختيار غير صحيح. اكتب 1 أو 2.");
  });
 
- // دفع الاشتراك الشهري
+ // الاشتراك الشهري
  $("subsBody").querySelectorAll("[data-month-payment]").forEach(b=>b.onclick=async()=>{
   const id=b.dataset.monthPayment;
   const key=b.dataset.monthKey;
@@ -1361,7 +1405,6 @@ function renderSubscriptions(){
 
   await loadSubscriptions();
 
-  // إذا كان قسم التأمينات مفتوحًا، حدّثه فورًا
   if(!$("tab-insurance").classList.contains("hidden")){
    await loadInsurance();
   }
@@ -1531,49 +1574,158 @@ $("exportMonthlyAnalysis").onclick=()=>{
 
 
 // =====================================
-// أزرار الاشتراكات والتصدير
+// تصدير قائمة الاشتراكات كاملة
 // =====================================
 
 $("loadSubscriptions").onclick=loadSubscriptions;
 $("subSearch").addEventListener("input",renderSubscriptions);
 
-$("exportSubscriptions").onclick=()=>csvExport(
- `financial-table-${year()}.csv`,
- athletes
-  .filter(a=>a.is_active!==false)
-  .map(a=>{
-   const s=getSubForAthlete(a.id);
-   const ins=getInsuranceForAthlete(a.id);
-   const e1=getExamForAthlete(a.id,1);
-   const e2=getExamForAthlete(a.id,2);
+$("exportSubscriptions").onclick=async()=>{
+ const button=$("exportSubscriptions");
+ const originalText=button.textContent;
 
-   const row={athlete:fullName(a)};
-
-   months.forEach(([key,label])=>
-    row[label]=s?.[key]?'مدفوع':'غير مدفوع'
-   );
-
-   return {
-    ...row,
-    insurance_status:ins?.paid?'مدفوع':'غير مدفوع',
-    insurance_amount:ins?.paid?Number(ins.amount||INSURANCE_FEE):0,
-    exam1_status:e1?.paid?'مدفوع':'غير مدفوع',
-    exam1_amount:e1?.paid?Number(e1.amount||0):0,
-    exam2_status:e2?.paid?'مدفوع':'غير مدفوع',
-    exam2_amount:e2?.paid?Number(e2.amount||0):0
-   };
-  })
-);
-
-
-// =====================================
-// التأمينات - القسم المعدل
-// =====================================
-
-async function loadInsurance(){
- setMsg("insuranceMessage","جارٍ تحميل التأمينات المدفوعة...");
+ button.disabled=true;
+ button.textContent="جارٍ تجهيز الملف...";
 
  try{
+  // جلب البيانات من قاعدة البيانات مباشرة قبل التصدير
+  const [athleteResult,subResult,insuranceResult,examResult]=await Promise.all([
+   db.from("athletes")
+    .select("id,first_name,last_name,is_active")
+    .order("last_name"),
+
+   db.from("season_subscriptions")
+    .select("*")
+    .eq("season_start_year",year()),
+
+   db.from("annual_insurance")
+    .select("*")
+    .eq("insurance_year",year()),
+
+   db.from("belt_exam_payments")
+    .select("*")
+    .eq("exam_year",year())
+  ]);
+
+  if(athleteResult.error)throw athleteResult.error;
+  if(subResult.error)throw subResult.error;
+  if(insuranceResult.error)throw insuranceResult.error;
+  if(examResult.error)throw examResult.error;
+
+  const exportAthletes=athleteResult.data||[];
+  const exportSubs=subResult.data||[];
+  const exportInsuranceRows=insuranceResult.data||[];
+  const exportExams=examResult.data||[];
+
+  const rows=exportAthletes
+   .filter(a=>a.is_active!==false)
+   .map(a=>{
+    const s=exportSubs.find(x=>String(x.athlete_id)===String(a.id));
+    const ins=exportInsuranceRows.find(x=>String(x.athlete_id)===String(a.id));
+    const e1=exportExams.find(x=>
+     String(x.athlete_id)===String(a.id)&&Number(x.exam_number)===1
+    );
+    const e2=exportExams.find(x=>
+     String(x.athlete_id)===String(a.id)&&Number(x.exam_number)===2
+    );
+
+    const row={
+     "الاسم":a.first_name||"",
+     "اللقب":a.last_name||"",
+     "الموسم":seasonLabel(year()),
+     "قيمة الاشتراك الشهري":Number(s?.monthly_fee||MONTHLY_FEE)
+    };
+
+    months.forEach(([key,label])=>{
+     const paid=Boolean(s&&s[key]);
+
+     row[`${label} - الحالة`]=paid?"مدفوع":"غير مدفوع";
+     row[`${label} - المبلغ`]=paid?Number(s?.monthly_fee||MONTHLY_FEE):0;
+    });
+
+    row["إجمالي الاشتراكات المدفوعة"]=months.reduce((sum,[key])=>
+     sum+(s&&s[key]?Number(s.monthly_fee||MONTHLY_FEE):0),0
+    );
+
+    row["التأمين - الحالة"]=ins?.paid===true?"مدفوع":"غير مدفوع";
+    row["التأمين - المبلغ"]=ins?.paid===true?Number(ins.amount||0):0;
+    row["التأمين - تاريخ الدفع"]=ins?.paid_at||"";
+
+    row["الامتحان الأول - الحالة"]=e1?.paid===true?"مدفوع":"غير مدفوع";
+    row["الامتحان الأول - الحزام"]=e1?.belt_name||"";
+    row["الامتحان الأول - المبلغ"]=e1?.paid===true?Number(e1.amount||0):0;
+    row["الامتحان الأول - تاريخ الدفع"]=e1?.paid_at||"";
+
+    row["الامتحان الثاني - الحالة"]=e2?.paid===true?"مدفوع":"غير مدفوع";
+    row["الامتحان الثاني - الحزام"]=e2?.belt_name||"";
+    row["الامتحان الثاني - المبلغ"]=e2?.paid===true?Number(e2.amount||0):0;
+    row["الامتحان الثاني - تاريخ الدفع"]=e2?.paid_at||"";
+
+    return row;
+   });
+
+  csvExport(`قائمة_الاشتراكات_${year()}-${year()+1}.csv`,rows);
+
+ }catch(e){
+  console.error(e);
+  alert("تعذر تصدير قائمة الاشتراكات: "+e.message);
+ }finally{
+  button.disabled=false;
+  button.textContent=originalText;
+ }
+};
+
+
+// =====================================
+// التأمينات: اختيار السنة والقائمة
+// =====================================
+
+async function loadInsuranceYears(){
+ const select=$("insuranceYear");
+ const selectedBefore=Number(select.value)||year();
+
+ try{
+  const {data,error}=await db.from("annual_insurance")
+   .select("insurance_year")
+   .order("insurance_year",{ascending:false});
+
+  if(error)throw error;
+
+  const years=new Set([year(),selectedBefore]);
+
+  (data||[]).forEach(x=>{
+   if(x.insurance_year)years.add(Number(x.insurance_year));
+  });
+
+  const sorted=[...years]
+   .filter(Number.isFinite)
+   .sort((a,b)=>b-a);
+
+  select.innerHTML=sorted.map(y=>
+   `<option value="${y}">${seasonLabel(y)}</option>`
+  ).join("");
+
+  select.value=String(
+   sorted.includes(selectedBefore)?selectedBefore:year()
+  );
+
+ }catch(e){
+  console.error("Insurance years loading error:",e);
+
+  if(!select.options.length){
+   select.innerHTML=`<option value="${year()}">${seasonLabel(year())}</option>`;
+  }
+ }
+}
+
+async function loadInsurance(){
+ setMsg("insuranceMessage","جارٍ تحميل قائمة التأمينات...");
+
+ try{
+  await loadInsuranceYears();
+
+  const selectedYear=insuranceYear();
+
   const {data,error}=await db.from("annual_insurance")
    .select(`
     id,
@@ -1591,24 +1743,30 @@ async function loadInsurance(){
      guardian_name
     )
    `)
-   .eq("insurance_year",year())
+   .eq("insurance_year",selectedYear)
    .eq("paid",true)
    .order("id");
 
   if(error)throw error;
 
-  // لا نعرض إلا السجلات المدفوعة
-  insuranceRows=(data||[]).filter(x=>x.paid===true);
+  // قائمة مستقلة عن بيانات التأمين المستخدمة في جدول الاشتراكات
+  insuranceListRows=(data||[]).filter(x=>x.paid===true);
 
   renderInsurance();
 
-  $("homeInsIncome").textContent=money(
-   insuranceRows.reduce((s,x)=>s+Number(x.amount||0),0)
+  const total=insuranceListRows.reduce(
+   (sum,x)=>sum+Number(x.amount||0),0
   );
 
-  setMsg("insuranceMessage",`تم تحميل ${insuranceRows.length} تأمينًا مدفوعًا للموسم ${seasonLabel(year())}.`);
+  $("homeInsIncome").textContent=money(total);
+
+  setMsg(
+   "insuranceMessage",
+   `تم تحميل ${insuranceListRows.length} تأمينًا مدفوعًا لسنة ${seasonLabel(selectedYear)}.`
+  );
 
  }catch(e){
+  console.error(e);
   setMsg("insuranceMessage","تعذر تحميل التأمينات: "+e.message);
  }
 }
@@ -1616,40 +1774,35 @@ async function loadInsurance(){
 function renderInsurance(){
  const q=$("insuranceSearch").value.trim().toLowerCase();
 
- const rows=insuranceRows.filter(x=>
-  fullName(x.athletes).toLowerCase().includes(q)
- );
+ const rows=insuranceListRows.filter(x=>{
+  const a=x.athletes||{};
+  const name=fullName(a).toLowerCase();
+  return name.includes(q);
+ });
 
  $("insuranceBody").innerHTML=rows.map(x=>{
   const a=x.athletes||{};
 
+  const birthInfo=[
+   a.date_of_birth||"",
+   a.birthplace||""
+  ].filter(Boolean).join(" — ");
+
   return `
    <tr>
-    <td>${esc(fullName(a))}</td>
-    <td>${esc(a.date_of_birth||"—")}</td>
-    <td>${esc(a.birthplace||"—")}</td>
+    <td>${esc(a.first_name||"—")}</td>
+    <td>${esc(a.last_name||"—")}</td>
+    <td>${esc(birthInfo||"—")}</td>
     <td>${esc(a.guardian_name||"—")}</td>
-    <td>${seasonLabel(x.insurance_year)}</td>
-    <td>${money(x.amount)}</td>
-    <td><span class="pill green">مدفوع</span></td>
-    <td>
-     <button type="button" class="smallbtn insurance-edit-btn" data-edit-insurance="${esc(a.id)}">
-      تعديل معلومات الرياضي
-     </button>
-    </td>
    </tr>
   `;
  }).join("")||`
-  <tr><td colspan="8" class="empty">لا توجد تأمينات مدفوعة لهذا الموسم أو لا توجد نتائج مطابقة للبحث.</td></tr>
+  <tr><td colspan="4" class="empty">لا توجد تأمينات مدفوعة لهذه السنة أو لا توجد نتائج مطابقة للبحث.</td></tr>
  `;
-
- $("insuranceBody").querySelectorAll("[data-edit-insurance]")
-  .forEach(b=>{
-   b.onclick=()=>openAthleteEdit(b.dataset.editInsurance);
-  });
 }
 
 $("loadInsurance").onclick=loadInsurance;
+$("insuranceYear").addEventListener("change",loadInsurance);
 $("insuranceSearch").addEventListener("input",renderInsurance);
 
 
@@ -1658,7 +1811,7 @@ $("insuranceSearch").addEventListener("input",renderInsurance);
 // =====================================
 
 function openAthleteEdit(athleteId){
- const row=insuranceRows.find(x=>
+ const row=insuranceListRows.find(x=>
   String(x.athlete_id)===String(athleteId)
  );
 
@@ -1734,7 +1887,6 @@ $("editAthleteForm").addEventListener("submit",async e=>{
 
   if(error)throw error;
 
-  // تحديث بيانات الرياضي في الذاكرة المحلية
   const athleteIndex=athletes.findIndex(a=>String(a.id)===String(id));
 
   if(athleteIndex!==-1){
@@ -1744,8 +1896,8 @@ $("editAthleteForm").addEventListener("submit",async e=>{
    };
   }
 
-  // تحديث بيانات الرياضي داخل قائمة التأمينات
-  insuranceRows=insuranceRows.map(x=>{
+  // تحديث قائمة التأمينات المستقلة
+  insuranceListRows=insuranceListRows.map(x=>{
    if(String(x.athlete_id)!==String(id))return x;
 
    return {
@@ -1757,7 +1909,7 @@ $("editAthleteForm").addEventListener("submit",async e=>{
    };
   });
 
-  // تحديث أسماء الرياضيين في بيانات الاشتراكات والامتحانات المحمّلة
+  // تحديث بيانات الاشتراكات والامتحانات المحلية
   subscriptions=subscriptions.map(x=>{
    if(String(x.athlete_id)!==String(id))return x;
 
@@ -1785,8 +1937,6 @@ $("editAthleteForm").addEventListener("submit",async e=>{
   setMsg("editAthleteMessage","تم حفظ معلومات الرياضي بنجاح.");
 
   renderInsurance();
-
-  // تحديث الأقسام الأخرى من قاعدة البيانات عند فتحها
   await loadAthletes();
 
   if(!$("tab-subscriptions").classList.contains("hidden")){
@@ -1804,18 +1954,72 @@ $("editAthleteForm").addEventListener("submit",async e=>{
  }
 });
 
-$("exportInsurance").onclick=()=>csvExport(
- `paid-insurance-${year()}.csv`,
- insuranceRows.map(x=>({
-  "الاسم واللقب":fullName(x.athletes),
-  "تاريخ الميلاد":x.athletes?.date_of_birth||"",
-  "مكان الميلاد":x.athletes?.birthplace||"",
-  "اسم الولي":x.athletes?.guardian_name||"",
-  "الموسم":seasonLabel(x.insurance_year),
-  "المبلغ":x.amount,
-  "الحالة":"مدفوع"
- }))
-);
+
+// =====================================
+// تصدير قائمة التأمينات - أربعة أعمدة فقط
+// =====================================
+
+$("exportInsurance").onclick=async()=>{
+ const button=$("exportInsurance");
+ const originalText=button.textContent;
+
+ button.disabled=true;
+ button.textContent="جارٍ تجهيز الملف...";
+
+ try{
+  // تحميل سجلات السنة المختارة مباشرة من قاعدة البيانات
+  const selectedYear=insuranceYear();
+
+  const {data,error}=await db.from("annual_insurance")
+   .select(`
+    id,
+    athlete_id,
+    insurance_year,
+    paid,
+    athletes(
+     id,
+     first_name,
+     last_name,
+     date_of_birth,
+     birthplace,
+     guardian_name
+    )
+   `)
+   .eq("insurance_year",selectedYear)
+   .eq("paid",true)
+   .order("id");
+
+  if(error)throw error;
+
+  const rows=(data||[])
+   .filter(x=>x.paid===true)
+   .map(x=>{
+    const a=x.athletes||{};
+
+    return {
+     "الاسم":a.first_name||"",
+     "اللقب":a.last_name||"",
+     "تاريخ ومكان الازدياد":[
+      a.date_of_birth||"",
+      a.birthplace||""
+     ].filter(Boolean).join(" — "),
+     "اسم الولي":a.guardian_name||""
+    };
+   });
+
+  csvExport(
+   `قائمة_التأمينات_${selectedYear}-${selectedYear+1}.csv`,
+   rows
+  );
+
+ }catch(e){
+  console.error(e);
+  alert("تعذر تصدير قائمة التأمينات: "+e.message);
+ }finally{
+  button.disabled=false;
+  button.textContent=originalText;
+ }
+};
 
 
 // =====================================
@@ -1837,6 +2041,7 @@ async function loadExams(){
   examRows=data||[];
   renderExams();
   setMsg("examMessage","");
+
  }catch(e){
   setMsg("examMessage","تعذر تحميل الامتحانات: "+e.message);
  }
@@ -1869,17 +2074,33 @@ $("loadExams").onclick=loadExams;
 $("examSearch").addEventListener("input",renderExams);
 $("examFilter").addEventListener("change",renderExams);
 
-$("exportExams").onclick=()=>csvExport(
- "paid-belt-exams.csv",
- examRows.map(x=>({
-  athlete:fullName(x.athletes),
-  season:seasonLabel(x.exam_year),
-  exam:x.exam_number,
-  belt:x.belt_name,
-  amount_dzd:x.amount,
-  status:"Paid"
- }))
-);
+$("exportExams").onclick=async()=>{
+ try{
+  const {data,error}=await db.from("belt_exam_payments")
+   .select("*,athletes(first_name,last_name)")
+   .eq("exam_year",year())
+   .eq("paid",true)
+   .order("exam_number");
+
+  if(error)throw error;
+
+  csvExport(
+   `حقوق_الامتحانات_${year()}.csv`,
+   (data||[]).map(x=>({
+    "الاسم":x.athletes?.first_name||"",
+    "اللقب":x.athletes?.last_name||"",
+    "الموسم":seasonLabel(x.exam_year),
+    "الامتحان":x.exam_number,
+    "الحزام":x.belt_name,
+    "المبلغ":x.amount,
+    "الحالة":"مدفوع"
+   }))
+  );
+
+ }catch(e){
+  alert("تعذر تصدير الامتحانات: "+e.message);
+ }
+};
 
 
 // =====================================
@@ -1901,6 +2122,7 @@ async function loadParents(){
   renderParents();
 
   setMsg("parentMessage",`تم تحميل ${parentAccounts.length} حسابًا بنجاح.`);
+
  }catch(e){
   console.error("Parents loading error:",e);
 
@@ -2028,6 +2250,7 @@ function renderParents(){
 
     await loadParents();
     setMsg("parentMessage",`تم ${action} الرمز بنجاح.`);
+
    }catch(e){
     setMsg("parentMessage","تعذر تحديث الرمز: "+e.message);
     b.disabled=false;
@@ -2069,9 +2292,11 @@ function renderParents(){
      );
 
      setMsg("parentMessage","تم إنشاء الرمز الجديد بنجاح.");
+
     }else{
      setMsg("parentMessage","تم تنفيذ العملية، لكن لم يظهر الرمز في القائمة. حدّث القائمة للتحقق.");
     }
+
    }catch(e){
     setMsg("parentMessage","تعذر إنشاء الرمز: "+e.message);
     b.disabled=false;
