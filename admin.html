@@ -100,6 +100,7 @@ tr:hover td{background:#fbfdff}
 .insurance-season-box{background:#f5f9ff;border:1px solid #dceafa;border-radius:12px;padding:13px;margin:12px 0}
 .insurance-season-box label{font-weight:700;color:var(--navy)}
 .insurance-season-box select{max-width:260px}
+#tab-competitions hr{border-color:var(--line)} #tab-competitions input[type=checkbox]{width:auto;transform:scale(1.15)}
 @media(max-width:900px){
 .layout{grid-template-columns:1fr;padding:9px}
 .sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
@@ -158,6 +159,7 @@ header{padding:14px;position:static}
 <button class="navbtn" data-tab="insurance"><span class="navicon">◇</span>التأمينات المدفوعة</button>
 <button class="navbtn" data-tab="exams"><span class="navicon">♜</span>حقوق الامتحانات المدفوعة</button>
 <button class="navbtn" data-tab="parents"><span class="navicon">👨‍👩‍👧</span>حسابات الأولياء</button>
+<button class="navbtn" data-tab="competitions"><span class="navicon">🏆</span>المنافسات | COMPÉTITIONS</button>
 </aside>
 
 <main class="content">
@@ -330,6 +332,71 @@ header{padding:14px;position:static}
 <tbody id="examsBody"></tbody>
 </table>
 </div>
+</div>
+</section>
+
+
+<section id="tab-competitions" class="hidden">
+<div class="panel">
+<h2>🏆 إدارة المنافسات | COMPÉTITIONS</h2>
+<p class="muted">وحدة مستقلة للمنافسات والنتائج. تعتمد الفئات على سنة بداية الموسم، ولا تغيّر بيانات التسجيل أو الاشتراكات أو التأمين.</p>
+<div class="grid">
+<div class="stat blue"><div class="label">المنافسات في الموسم</div><div class="value" id="cpCount">0</div></div>
+<div class="stat green"><div class="label">المشاركات المسجلة</div><div class="value" id="cpParticipantsCount">0</div></div>
+<div class="stat purple"><div class="label">الميداليات المنشورة</div><div class="value" id="cpMedalsCount">0</div></div>
+<div class="stat red"><div class="label">المستبعدون هذا الموسم</div><div class="value" id="cpExcludedCount">0</div></div>
+</div>
+<div class="toolbar">
+<select id="cpSeason"></select>
+<button id="cpRefresh" class="btn-light">تحديث البيانات</button>
+<button id="cpExport" class="btn-light">تنزيل سجل الموسم Excel</button>
+</div>
+<p id="cpMessage" class="message"></p>
+</div>
+<div class="panel">
+<h2>إنشاء منافسة جديدة</h2>
+<div class="formgrid">
+<div><label>اسم المنافسة</label><input id="cpName" placeholder="مثال: البطولة الولائية" required></div>
+<div><label>النوع</label><select id="cpType"><option value="official">رسمية</option><option value="friendly">ودية</option></select></div>
+<div><label>المستوى</label><select id="cpLevel"><option value="wilaya">ولائي</option><option value="regional">جهوي</option><option value="national">وطني</option><option value="international">دولي</option><option value="other">أخرى</option></select></div>
+<div><label>التاريخ</label><input id="cpDate" type="date"></div>
+<div><label>المكان</label><input id="cpLocation"></div>
+<div><label>الحالة</label><select id="cpStatus"><option value="preparation">قيد التحضير</option><option value="ready">قائمة المشاركين جاهزة</option><option value="ongoing">جارية</option><option value="finished">منتهية</option><option value="archived">مؤرشفة</option></select></div>
+<div style="grid-column:1/-1"><label>ملاحظات</label><input id="cpNotes"></div>
+</div>
+<div class="toolbar"><button id="cpCreate">حفظ المنافسة</button></div>
+</div>
+<div class="panel">
+<h2>المنافسات المسجلة</h2>
+<div class="tablewrap"><table><thead><tr><th>المنافسة</th><th>النوع</th><th>المستوى</th><th>التاريخ</th><th>المكان</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="cpCompetitionsBody"><tr><td colspan="7" class="empty">لا توجد منافسات محملة.</td></tr></tbody></table></div>
+</div>
+<div class="panel">
+<h2>إضافة المشاركين وإدارة النتائج</h2>
+<div class="formgrid">
+<div><label>المنافسة</label><select id="cpParticipantCompetition"></select></div>
+<div><label>الفئة العمرية</label><select id="cpCategory"><option value="Poussins">-9 Poussins</option><option value="Benjamins">-11 Benjamins</option><option value="Minimes">-13 Minimes</option><option value="Cadets">-16 Cadets</option><option value="Juniors">-18 Juniors</option><option value="Seniors">+18 Seniors</option></select></div>
+<div><label>الجنس</label><select id="cpGender"><option value="ذكر">ذكور</option><option value="أنثى">إناث</option></select></div>
+<div><label>بحث عن الرياضي</label><input id="cpAthleteSearch" placeholder="اكتب الاسم أو اللقب"></div>
+</div>
+<div class="toolbar"><button id="cpFindAthletes" class="btn-light">عرض الرياضيين المطابقين</button></div>
+<div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>تاريخ الميلاد</th><th>الفئة التلقائية</th><th>الوزن الأساسي</th><th>وزن المشاركة (كغ)</th><th>الإجراء</th></tr></thead><tbody id="cpAthletesBody"><tr><td colspan="6" class="empty">اختر الفئة والجنس ثم اعرض الرياضيين.</td></tr></tbody></table></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+<h2>المشاركون والنتائج</h2>
+<div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>الفئة</th><th>الجنس</th><th>وزن المشاركة</th><th>المركز</th><th>الميدالية</th><th>النشر</th><th>إجراءات</th></tr></thead><tbody id="cpEntriesBody"><tr><td colspan="8" class="empty">اختر منافسة.</td></tr></tbody></table></div>
+</div>
+<div class="panel">
+<h2>ملف الرياضي في المنافسات / الاستبعاد الموسمي</h2>
+<div class="formgrid">
+<div><label>الرياضي</label><select id="cpProfileAthlete"></select></div>
+<div><label>الوزن الأساسي (كغ) — اختياري</label><input id="cpBaseWeight" type="number" min="1" step="0.1" placeholder="يُترك فارغًا إن لم يُعرف"></div>
+<div><label>سبب الاستبعاد (اختياري)</label><input id="cpExclusionReason"></div>
+</div>
+<div class="toolbar"><button id="cpSaveProfile" class="btn-light">حفظ الوزن الأساسي</button><button id="cpExclude" class="btn-red">استبعاد من هذا الموسم</button><button id="cpRestore" class="btn-green">إعادة الأهلية</button></div>
+<p class="muted">الاستبعاد يخص وحدة المنافسات والموسم المحدد فقط، وتعود الأهلية تلقائيًا في الموسم التالي. لا يؤثر على حالة الرياضي أو ملفه المالي.</p>
+</div>
+<div class="panel">
+<h2>PALMARÈS DU CLUB | سجل التتويجات المنشورة</h2>
+<div class="tablewrap"><table><thead><tr><th>الموسم</th><th>المنافسة</th><th>التاريخ</th><th>الرياضي</th><th>الفئة</th><th>الميدالية</th></tr></thead><tbody id="cpPalmaresBody"><tr><td colspan="6" class="empty">لا توجد نتائج منشورة.</td></tr></tbody></table></div>
 </div>
 </section>
 
@@ -586,6 +653,7 @@ if(tab==="monthly-analysis")loadMonthlyAnalysis();
 if(tab==="insurance")loadInsurance();
 if(tab==="exams")loadExams();
 if(tab==="parents")loadParents();
+if(tab==="competitions")loadCompetitions();
 }
 
 document.querySelectorAll(".navbtn").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
@@ -1770,6 +1838,80 @@ b.disabled=false;
 $("parentSearch").addEventListener("input",renderParents);
 $("parentFilter").addEventListener("change",renderParents);
 $("refreshParents").onclick=loadParents;
+
+
+// =====================================
+// COMPETITIONS - UST (جداول مستقلة)
+// =====================================
+const cpCategories=[
+{code:"Poussins",label:"-9 Poussins",min:8,max:9},
+{code:"Benjamins",label:"-11 Benjamins",min:10,max:11},
+{code:"Minimes",label:"-13 Minimes",min:12,max:13},
+{code:"Cadets",label:"-16 Cadets",min:14,max:16},
+{code:"Juniors",label:"-18 Juniors",min:17,max:18},
+{code:"Seniors",label:"+18 Seniors",min:19,max:99}
+];
+let cpCompetitions=[],cpParticipants=[],cpResults=[],cpExcluded=[],cpWeightClasses=[],cpProfiles=[];
+const cpTypeLabel=v=>({official:"رسمية",friendly:"ودية"}[v]||v||"—");
+const cpLevelLabel=v=>({wilaya:"ولائي",regional:"جهوي",national:"وطني",international:"دولي",other:"أخرى"}[v]||v||"—");
+const cpStatusLabel=v=>({preparation:"قيد التحضير",ready:"قائمة المشاركين جاهزة",ongoing:"جارية",finished:"منتهية",archived:"مؤرشفة"}[v]||v||"—");
+const cpGenderValue=v=>{let x=String(v||"").trim().toLowerCase();if(["female","f","أنثى","انثى","girl","girls"].includes(x))return "أنثى";if(["male","m","ذكر","ذكور","boy","boys"].includes(x))return "ذكر";return String(v||"");};
+function cpSeason(){return Number($("cpSeason").value)||year();}
+function cpAge(a){if(!a?.date_of_birth)return null;let y=Number(String(a.date_of_birth).slice(0,4));return Number.isFinite(y)?cpSeason()-y:null;}
+function cpCategoryFor(a){let age=cpAge(a);return age===null?null:cpCategories.find(c=>age>=c.min&&age<=c.max)||null;}
+function cpAthleteName(id){let a=athletes.find(x=>String(x.id)===String(id));return a?fullName(a):"رياضي غير موجود";}
+function cpMedal(place){return ({1:"ذهبية",2:"فضية",3:"برونزية"})[Number(place)]||"";}
+async function cpEnsureSeason(y){let {error}=await db.from("ust_competition_seasons").upsert({season_start_year:y,label:`${y}–${y+1}`},{onConflict:"season_start_year",ignoreDuplicates:true});if(error)throw error;}
+async function loadCompetitions(){
+ setMsg("cpMessage","جارٍ تحميل بيانات المنافسات...");
+ const y=year();
+ try{
+ await cpEnsureSeason(y);
+ const [c,p,r,e,w,pr,a]=await Promise.all([
+ db.from("ust_competitions").select("*").eq("season_start_year",y).order("competition_date",{ascending:false}),
+ db.from("ust_competition_participants").select("*"),
+ db.from("ust_competition_results").select("*"),
+ db.from("ust_athlete_competition_exclusions").select("*").eq("season_start_year",y),
+ db.from("ust_competition_weight_classes").select("*").eq("enabled",true).order("sort_order"),
+ db.from("ust_athlete_competition_profiles").select("*"),
+ db.from("athletes").select("*").order("last_name")
+ ]);
+ for(const x of [c,p,r,e,w,pr,a])if(x.error)throw x.error;
+ cpCompetitions=c.data||[];cpParticipants=p.data||[];cpResults=r.data||[];cpExcluded=e.data||[];cpWeightClasses=w.data||[];cpProfiles=pr.data||[];athletes=a.data||[];
+ const seasons=[...new Set([y,...cpCompetitions.map(x=>x.season_start_year)])].sort((a,b)=>b-a);
+ $("cpSeason").innerHTML=seasons.map(v=>`<option value="${v}" ${v===y?"selected":""}>${v}–${v+1}</option>`).join("");
+ renderCpCompetitions();renderCpPalmares();cpRenderProfileSelect();
+ $("cpCount").textContent=cpCompetitions.length;
+ $("cpParticipantsCount").textContent=cpParticipants.filter(x=>cpCompetitions.some(c=>c.id===x.competition_id)).length;
+ $("cpMedalsCount").textContent=cpResults.filter(x=>x.published&&x.medal).length;
+ $("cpExcludedCount").textContent=cpExcluded.length;
+ setMsg("cpMessage","تم تحميل بيانات المنافسات بنجاح.");
+ }catch(err){console.error(err);setMsg("cpMessage","تعذر تحميل بيانات المنافسات: "+err.message);}
+}
+function renderCpCompetitions(){
+ $("cpCompetitionsBody").innerHTML=cpCompetitions.length?cpCompetitions.map(c=>`<tr><td>${esc(c.name)}</td><td>${cpTypeLabel(c.competition_type)}</td><td>${cpLevelLabel(c.level)}</td><td>${esc(c.competition_date||"—")}</td><td>${esc(c.location||"—")}</td><td>${cpStatusLabel(c.status)}</td><td><button class="smallbtn" onclick="cpSelectCompetition('${c.id}')">إدارة المشاركين</button><button class="smallbtn btn-light" onclick="cpChangeStatus('${c.id}')">تغيير الحالة</button><button class="smallbtn btn-red" onclick="cpDeleteCompetition('${c.id}')">حذف</button></td></tr>`).join(""):'<tr><td colspan="7" class="empty">لا توجد منافسات في هذا الموسم.</td></tr>';
+ $("cpParticipantCompetition").innerHTML=cpCompetitions.map(c=>`<option value="${c.id}">${esc(c.name)} — ${esc(c.competition_date||"")}</option>`).join("");
+ if(cpCompetitions.length)cpLoadEntries();else $("cpEntriesBody").innerHTML='<tr><td colspan="8" class="empty">أنشئ منافسة أولاً.</td></tr>';
+}
+window.cpSelectCompetition=id=>{$("cpParticipantCompetition").value=id;cpLoadEntries();};
+window.cpChangeStatus=async id=>{let c=cpCompetitions.find(x=>x.id===id);let v=prompt("أدخل الحالة: preparation / ready / ongoing / finished / archived",c?.status||"preparation");if(!v)return;let {error}=await db.from("ust_competitions").update({status:v,updated_at:new Date().toISOString()}).eq("id",id);if(error)alert(error.message);else loadCompetitions();};
+window.cpDeleteCompetition=async id=>{if(!confirm("حذف المنافسة؟ يجب حذف المشاركين ونتائجهم أولاً إذا كانت هناك قيود مرتبطة."))return;let {error}=await db.from("ust_competitions").delete().eq("id",id);if(error)alert("تعذر الحذف: "+error.message);else loadCompetitions();};
+$("cpCreate").onclick=async()=>{let name=$("cpName").value.trim();if(!name){setMsg("cpMessage","أدخل اسم المنافسة.");return;}let y=cpSeason();let payload={season_start_year:y,name,competition_type:$("cpType").value,level:$("cpLevel").value,location:$("cpLocation").value.trim(),competition_date:$("cpDate").value||null,status:$("cpStatus").value,notes:$("cpNotes").value.trim()};let {error}=await db.from("ust_competitions").insert(payload);if(error){setMsg("cpMessage","تعذر الحفظ: "+error.message);return;}["cpName","cpLocation","cpDate","cpNotes"].forEach(id=>$(id).value="");await loadCompetitions();};
+$("cpFindAthletes").onclick=()=>{let category=$("cpCategory").value,gender=$("cpGender").value,search=$("cpAthleteSearch").value.trim().toLowerCase();let matches=athletes.filter(a=>a.is_active!==false&&cpGenderValue(a.gender)===gender&&cpCategoryFor(a)?.code===category&&(!search||fullName(a).toLowerCase().includes(search)));let ids=cpExcluded.map(x=>String(x.athlete_id));matches=matches.filter(a=>!ids.includes(String(a.id)));$("cpAthletesBody").innerHTML=matches.length?matches.map(a=>{let prof=cpProfiles.find(x=>String(x.athlete_id)===String(a.id));return `<tr><td>${esc(fullName(a))}</td><td>${esc(a.date_of_birth||"—")}</td><td>${cpCategoryFor(a)?.label||"—"}</td><td>${prof?.base_weight??"—"}</td><td><input id="cpWeight_${a.id}" type="number" min="1" step="0.1" placeholder="إلزامي" style="width:105px"></td><td><button class="smallbtn" onclick="cpAddParticipant('${a.id}')">إضافة</button></td></tr>`}).join(""):'<tr><td colspan="6" class="empty">لا يوجد رياضيون مطابقون. تحقق من الجنس وتاريخ الميلاد والفئة.</td></tr>';};
+window.cpAddParticipant=async athleteId=>{let competitionId=$("cpParticipantCompetition").value;if(!competitionId){alert("أنشئ واختر منافسة أولاً.");return;}let a=athletes.find(x=>String(x.id)===String(athleteId));let weight=Number($("cpWeight_"+athleteId).value);if(!weight||weight<=0){alert("وزن المشاركة إلزامي قبل تأكيد المشاركة.");return;}let cat=$("cpCategory").value,gender=$("cpGender").value;let classRow=cpWeightClasses.find(x=>x.category_code===cat&&cpGenderValue(x.gender)===gender&&x.enabled);let weightLabel=classRow?.weight_label||`${weight} كغ`;let {error}=await db.from("ust_competition_participants").insert({competition_id:competitionId,athlete_id:Number(athleteId),category_code:cat,gender,competition_weight:weight,weight_label:weightLabel});if(error){alert("تعذر إضافة المشارك: "+error.message);return;}await cpLoadEntries();};
+async function cpLoadEntries(){let id=$("cpParticipantCompetition").value;if(!id){$("cpEntriesBody").innerHTML='<tr><td colspan="8" class="empty">اختر منافسة.</td></tr>';return;}let rows=cpParticipants.filter(p=>p.competition_id===id);let ids=rows.map(p=>p.id);let resultRows=cpResults.filter(r=>ids.includes(r.participant_id));$("cpEntriesBody").innerHTML=rows.length?rows.map(p=>{let r=resultRows.find(x=>x.participant_id===p.id);return `<tr><td>${esc(cpAthleteName(p.athlete_id))}</td><td>${esc(cpCategories.find(c=>c.code===p.category_code)?.label||p.category_code)}</td><td>${esc(p.gender)}</td><td>${p.competition_weight??"—"} كغ</td><td><input id="cpPlace_${p.id}" type="number" min="1" max="99" value="${r?.place??""}" style="width:70px"></td><td><select id="cpMedal_${p.id}" style="width:105px"><option value="">—</option><option value="ذهبية" ${r?.medal==="ذهبية"?"selected":""}>ذهبية</option><option value="فضية" ${r?.medal==="فضية"?"selected":""}>فضية</option><option value="برونزية" ${r?.medal==="برونزية"?"selected":""}>برونزية</option></select></td><td><input type="checkbox" id="cpPub_${p.id}" ${r?.published?"checked":""} style="width:auto"></td><td><button class="smallbtn" onclick="cpSaveResult('${p.id}')">حفظ النتيجة</button><button class="smallbtn btn-red" onclick="cpRemoveParticipant('${p.id}')">إزالة</button></td></tr>`}).join(""):'<tr><td colspan="8" class="empty">لا يوجد مشاركون في هذه المنافسة.</td></tr>';}
+window.cpSaveResult=async participantId=>{let old=cpResults.find(x=>x.participant_id===participantId);let place=Number($("cpPlace_"+participantId).value)||null;let medal=$("cpMedal_"+participantId).value||null;let published=$("cpPub_"+participantId).checked;let payload={participant_id:participantId,place,medal,published,updated_at:new Date().toISOString()};let q=old?db.from("ust_competition_results").update(payload).eq("id",old.id):db.from("ust_competition_results").insert(payload);let {error}=await q;if(error){alert("تعذر حفظ النتيجة: "+error.message);return;}let {data}=await db.from("ust_competition_results").select("*");cpResults=data||[];renderCpPalmares();alert("تم حفظ النتيجة.");};
+window.cpRemoveParticipant=async id=>{if(!confirm("إزالة هذا المشارك؟"))return;let {error}=await db.from("ust_competition_results").delete().eq("participant_id",id);if(error){alert(error.message);return;}let x=await db.from("ust_competition_participants").delete().eq("id",id);if(x.error)alert(x.error.message);else{let q=await db.from("ust_competition_participants").select("*");cpParticipants=q.data||[];cpResults=(await db.from("ust_competition_results").select("*")).data||[];cpLoadEntries();renderCpPalmares();}};
+function cpRenderProfileSelect(){$("cpProfileAthlete").innerHTML=athletes.map(a=>`<option value="${a.id}">${esc(fullName(a))}</option>`).join("");}
+$("cpSaveProfile").onclick=async()=>{let id=Number($("cpProfileAthlete").value),v=$("cpBaseWeight").value;let payload={athlete_id:id,base_weight:v===""?null:Number(v),updated_at:new Date().toISOString()};let {error}=await db.from("ust_athlete_competition_profiles").upsert(payload,{onConflict:"athlete_id"});if(error)alert(error.message);else{cpProfiles=(await db.from("ust_athlete_competition_profiles").select("*")).data||[];alert("تم حفظ الوزن الأساسي.");}};
+$("cpProfileAthlete").onchange=()=>{let p=cpProfiles.find(x=>String(x.athlete_id)===$("cpProfileAthlete").value);$("cpBaseWeight").value=p?.base_weight??"";};
+$("cpExclude").onclick=async()=>{let id=Number($("cpProfileAthlete").value);if(!id)return;let y=cpSeason();let {error}=await db.from("ust_athlete_competition_exclusions").upsert({athlete_id:id,season_start_year:y,reason:$("cpExclusionReason").value.trim(),excluded_at:new Date().toISOString()},{onConflict:"athlete_id,season_start_year"});if(error)alert(error.message);else loadCompetitions();};
+$("cpRestore").onclick=async()=>{let id=Number($("cpProfileAthlete").value);let {error}=await db.from("ust_athlete_competition_exclusions").delete().eq("athlete_id",id).eq("season_start_year",cpSeason());if(error)alert(error.message);else loadCompetitions();};
+function renderCpPalmares(){let out=[];for(let r of cpResults.filter(x=>x.published&&x.medal)){let p=cpParticipants.find(x=>x.id===r.participant_id);if(!p)continue;let c=cpCompetitions.find(x=>x.id===p.competition_id);if(!c)continue;out.push({c,p,r});}$("cpPalmaresBody").innerHTML=out.length?out.sort((a,b)=>(b.c.competition_date||"").localeCompare(a.c.competition_date||"")).map(x=>`<tr><td>${x.c.season_start_year}–${x.c.season_start_year+1}</td><td>${esc(x.c.name)}</td><td>${esc(x.c.competition_date||"—")}</td><td>${esc(cpAthleteName(x.p.athlete_id))}</td><td>${esc(cpCategories.find(c=>c.code===x.p.category_code)?.label||x.p.category_code)}</td><td>${esc(x.r.medal)}</td></tr>`).join(""):'<tr><td colspan="6" class="empty">لا توجد نتائج منشورة.</td></tr>';}
+$("cpSeason").onchange=async()=>{let y=cpSeason();$("seasonYear").value=y;updateSeasonLabel();await loadCompetitions();};
+$("cpRefresh").onclick=loadCompetitions;
+$("cpParticipantCompetition").onchange=cpLoadEntries;
+$("cpExport").onclick=()=>{let rows=[];for(let p of cpParticipants){let c=cpCompetitions.find(x=>x.id===p.competition_id);if(!c||c.season_start_year!==cpSeason())continue;let r=cpResults.find(x=>x.participant_id===p.id);rows.push({"الموسم":`${c.season_start_year}-${c.season_start_year+1}`,"المنافسة":c.name,"التاريخ":c.competition_date,"الرياضي":cpAthleteName(p.athlete_id),"الفئة":p.category_code,"الجنس":p.gender,"وزن المشاركة":p.competition_weight,"المركز":r?.place||"","الميدالية":r?.medal||"","منشور":r?.published?"نعم":"لا"});}excelExport(`UST_COMPETITIONS_${cpSeason()}.xlsx`,rows,"سجل الموسم");};
 
 // =====================================
 // استعادة جلسة المدير
