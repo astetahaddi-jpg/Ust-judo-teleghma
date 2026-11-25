@@ -239,7 +239,7 @@ header{padding:14px;position:static}
 </div>
 <div class="tablewrap">
 <table>
-<thead><tr><th>اسم الرياضي</th><th>تاريخ الميلاد</th><th>الحالة</th><th>الملف الشخصي والإجراءات</th></tr></thead>
+<thead><tr><th>اسم الرياضي</th><th>تاريخ الميلاد</th><th>الصنف العمري</th><th>الحالة</th><th>الملف الشخصي والإجراءات</th></tr></thead>
 <tbody id="athletesBody"></tbody>
 </table>
 </div>
@@ -482,13 +482,14 @@ header{padding:14px;position:static}
 <div class="modal-box">
 <button type="button" id="closeAthleteModal" class="modal-close">✕ إغلاق</button>
 <h2 id="editAthleteTitle">تعديل معلومات الرياضي</h2>
-<p class="muted">سيتم حفظ المعلومات في جدول athletes، وستظهر التعديلات في جميع الأقسام التي تستعمل سجل الرياضي.</p>
+<p class="muted">يمكنك تعديل الجنس وبقية المعلومات. يُحسب الصنف العمري تلقائيًا من تاريخ الميلاد وسنة بداية الموسم المحددة.</p>
 <form id="editAthleteForm">
 <input type="hidden" id="editAthleteId">
 <div class="formgrid">
 <div><label for="editFirstName">الاسم</label><input id="editFirstName" type="text" required></div>
 <div><label for="editLastName">اللقب</label><input id="editLastName" type="text" required></div>
 <div><label for="editDateOfBirth">تاريخ الميلاد</label><input id="editDateOfBirth" type="date"></div>
+<div><label for="editGender">الجنس</label><select id="editGender"><option value="">غير محدد</option><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
 <div><label for="editBirthplace">مكان الميلاد</label><input id="editBirthplace" type="text"></div>
 <div style="grid-column:1/-1"><label for="editGuardianName">اسم الولي</label><input id="editGuardianName" type="text"></div>
 </div>
@@ -974,6 +975,27 @@ setMsg("athleteMessage","");
 }catch(e){setMsg("athleteMessage","تعذر تحميل الرياضيين: "+e.message);}
 }
 
+function athleteDateLabel(value){
+if(!value)return "غير مسجل";
+const m=String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+return m?`${m[3]}-${m[2]}-${m[1]}`:String(value);
+}
+
+function athleteAgeCategory(athlete){
+const raw=String(athlete?.date_of_birth||"");
+const match=raw.match(/^(\d{4})-\d{2}-\d{2}/);
+if(!match)return "غير محدد";
+const birthYear=Number(match[1]);
+const seasonStart=year();
+if(!Number.isInteger(birthYear)||birthYear<1900||birthYear>seasonStart)return "غير محدد";
+const category=cpCategories.find(c=>{
+const minYear=seasonStart-c.max;
+const maxYear=seasonStart-c.min;
+return birthYear>=minYear&&birthYear<=maxYear;
+});
+return category?category.code:"غير محدد";
+}
+
 function renderAthletes(){
 const q=$("athleteSearch").value.trim().toLowerCase();
 const status=$("athleteStatus").value;
@@ -986,7 +1008,8 @@ fullName(a).toLowerCase().includes(q)&&
 $("athletesBody").innerHTML=rows.map(a=>`
 <tr class="${a.is_active===false?"status-off":""}">
 <td>${esc(fullName(a))}</td>
-<td>${esc(a.date_of_birth||"غير مسجل")}</td>
+<td>${esc(athleteDateLabel(a.date_of_birth))}</td>
+<td>${esc(athleteAgeCategory(a))}</td>
 <td><span class="pill ${a.is_active===false?"gray":"green"}">${a.is_active===false?"موقوف مؤقتًا":"نشط"}</span></td>
 <td>
 <button class="smallbtn btn-light" data-profile-ath="${a.id}">عرض الملف</button>
@@ -996,7 +1019,7 @@ ${a.is_active===false
 :`<button class="smallbtn btn-gold" data-suspend="${a.id}">إيقاف مؤقت</button>`}
 <button class="smallbtn btn-red" data-deleteath="${a.id}">حذف نهائي</button>
 </td>
-</tr>`).join("")||`<tr><td colspan="4" class="empty">لا توجد نتائج.</td></tr>`;
+</tr>`).join("")||`<tr><td colspan="5" class="empty">لا توجد نتائج.</td></tr>`;
 
 $("athletesBody").querySelectorAll("[data-profile-ath]").forEach(b=>b.onclick=()=>showAthleteProfile(b.dataset.profileAth));
 $("athletesBody").querySelectorAll("[data-edit-ath]").forEach(b=>b.onclick=()=>openAthleteEdit(b.dataset.editAth));
@@ -1548,7 +1571,9 @@ const fields=[
 ["رقم الرياضي",athlete.id],
 ["الاسم",athlete.first_name],
 ["اللقب",athlete.last_name],
-["تاريخ الميلاد",athlete.date_of_birth],
+["تاريخ الميلاد",athleteDateLabel(athlete.date_of_birth)],
+["الصنف العمري",athleteAgeCategory(athlete)],
+["الجنس",athlete.gender==="male"?"ذكر":athlete.gender==="female"?"أنثى":"غير محدد"],
 ["مكان الميلاد",athlete.birthplace],
 ["اسم الولي",athlete.guardian_name],
 ["الحالة",athlete.is_active===false?"موقوف مؤقتًا":"نشط"],
@@ -1581,6 +1606,7 @@ $("editAthleteId").value=athlete.id;
 $("editFirstName").value=athlete.first_name||"";
 $("editLastName").value=athlete.last_name||"";
 $("editDateOfBirth").value=athlete.date_of_birth||"";
+$("editGender").value=athlete.gender||"";
 $("editBirthplace").value=athlete.birthplace||"";
 $("editGuardianName").value=athlete.guardian_name||"";
 setMsg("editAthleteMessage","");
@@ -1609,6 +1635,7 @@ const id=$("editAthleteId").value;
 const first_name=$("editFirstName").value.trim();
 const last_name=$("editLastName").value.trim();
 const date_of_birth=$("editDateOfBirth").value||null;
+const gender=$("editGender").value||null;
 const birthplace=$("editBirthplace").value.trim()||null;
 const guardian_name=$("editGuardianName").value.trim()||null;
 
@@ -1620,7 +1647,7 @@ saveButton.textContent="جارٍ الحفظ...";
 
 try{
 const {data,error}=await db.from("athletes").update({
-first_name,last_name,date_of_birth,birthplace,guardian_name
+first_name,last_name,date_of_birth,gender,birthplace,guardian_name
 }).eq("id",id).select("*").single();
 
 if(error)throw error;
