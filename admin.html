@@ -121,6 +121,15 @@ header{padding:14px;position:static}
 .brand p{max-width:230px}
 .modal-box{padding:15px}
 }
+
+/* Competition sections: collapsible accordion headings */
+#tab-competitions .cp-accordion{margin:0 0 12px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 4px 14px #244a7506}
+#tab-competitions .cp-accordion-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:right;padding:15px 17px;border:0;border-radius:0;background:linear-gradient(100deg,#eef6ff,#fff);color:var(--navy);font-size:16px;font-weight:800}
+#tab-competitions .cp-accordion-toggle:hover{filter:brightness(.985);transform:none}
+#tab-competitions .cp-accordion-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:#dcecff;color:var(--blue);font-size:21px;flex:0 0 28px}
+#tab-competitions .cp-accordion-content{margin:0;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none}
+#tab-competitions .cp-accordion-content[hidden]{display:none!important}
+
 </style>
 </head>
 
@@ -337,8 +346,11 @@ header{padding:14px;position:static}
 
 
 <section id="tab-competitions" class="hidden">
-<div class="panel">
-<h2>🏆 إدارة المنافسات | COMPÉTITIONS</h2>
+<div class="cp-accordion is-open" data-cp-accordion="1">
+<button type="button" class="cp-accordion-toggle" aria-expanded="true"><span>🏆 إدارة المنافسات | COMPÉTITIONS</span><span class="cp-accordion-icon" aria-hidden="true">−</span></button>
+<div class="panel cp-accordion-content">
+
+
 <p class="muted">وحدة مستقلة للمنافسات والنتائج. تعتمد الفئات على سنة بداية الموسم، ولا تغيّر بيانات التسجيل أو الاشتراكات أو التأمين.</p>
 <div class="grid">
 <div class="stat blue"><div class="label">المنافسات في الموسم</div><div class="value" id="cpCount">0</div></div>
@@ -352,9 +364,13 @@ header{padding:14px;position:static}
 <button id="cpExport" class="btn-light">تنزيل سجل الموسم Excel</button>
 </div>
 <p id="cpMessage" class="message"></p>
-</div>
-<div class="panel">
-<h2>إنشاء منافسة جديدة</h2>
+
+</div></div>
+<div class="cp-accordion" data-cp-accordion="2">
+<button type="button" class="cp-accordion-toggle" aria-expanded="false"><span>إنشاء منافسة جديدة</span><span class="cp-accordion-icon" aria-hidden="true">+</span></button>
+<div class="panel cp-accordion-content" hidden>
+
+
 <div class="formgrid">
 <div><label>اسم المنافسة</label><input id="cpName" placeholder="مثال: البطولة الولائية" required></div>
 <div><label>النوع</label><select id="cpType"><option value="official">رسمية</option><option value="friendly">ودية</option></select></div>
@@ -365,13 +381,21 @@ header{padding:14px;position:static}
 <div style="grid-column:1/-1"><label>ملاحظات</label><input id="cpNotes"></div>
 </div>
 <div class="toolbar"><button id="cpCreate">حفظ المنافسة</button></div>
-</div>
-<div class="panel">
-<h2>المنافسات المسجلة</h2>
+
+</div></div>
+<div class="cp-accordion" data-cp-accordion="3">
+<button type="button" class="cp-accordion-toggle" aria-expanded="false"><span>المنافسات المسجلة</span><span class="cp-accordion-icon" aria-hidden="true">+</span></button>
+<div class="panel cp-accordion-content" hidden>
+
+
 <div class="tablewrap"><table><thead><tr><th>المنافسة</th><th>النوع</th><th>المستوى</th><th>التاريخ</th><th>المكان</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="cpCompetitionsBody"><tr><td colspan="7" class="empty">لا توجد منافسات محملة.</td></tr></tbody></table></div>
-</div>
-<div class="panel">
-<h2>إضافة المشاركين وإدارة النتائج</h2>
+
+</div></div>
+<div class="cp-accordion" data-cp-accordion="4">
+<button type="button" class="cp-accordion-toggle" aria-expanded="false"><span>إضافة المشاركين وإدارة النتائج</span><span class="cp-accordion-icon" aria-hidden="true">+</span></button>
+<div class="panel cp-accordion-content" hidden>
+
+
 <div class="formgrid">
 <div><label>المنافسة</label><select id="cpParticipantCompetition"></select></div>
 <div><label>الفئة العمرية</label><select id="cpCategory"><option value="Poussins">-9 Poussins</option><option value="Benjamins">-11 Benjamins</option><option value="Minimes">-13 Minimes</option><option value="Cadets">-16 Cadets</option><option value="Juniors">-18 Juniors</option><option value="Seniors">+18 Seniors</option></select></div>
@@ -383,9 +407,13 @@ header{padding:14px;position:static}
 <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
 <h2>المشاركون والنتائج</h2>
 <div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>الفئة</th><th>الجنس</th><th>وزن المشاركة</th><th>المركز</th><th>الميدالية</th><th>النشر</th><th>إجراءات</th></tr></thead><tbody id="cpEntriesBody"><tr><td colspan="8" class="empty">اختر منافسة.</td></tr></tbody></table></div>
-</div>
-<div class="panel">
-<h2>ملف الرياضي في المنافسات / الاستبعاد الموسمي</h2>
+
+</div></div>
+<div class="cp-accordion" data-cp-accordion="5">
+<button type="button" class="cp-accordion-toggle" aria-expanded="false"><span>ملف الرياضي في المنافسات / الاستبعاد الموسمي</span><span class="cp-accordion-icon" aria-hidden="true">+</span></button>
+<div class="panel cp-accordion-content" hidden>
+
+
 <div class="formgrid">
 <div><label>الرياضي</label><select id="cpProfileAthlete"></select></div>
 <div><label>الوزن الأساسي (كغ) — اختياري</label><input id="cpBaseWeight" type="number" min="1" step="0.1" placeholder="يُترك فارغًا إن لم يُعرف"></div>
@@ -393,11 +421,16 @@ header{padding:14px;position:static}
 </div>
 <div class="toolbar"><button id="cpSaveProfile" class="btn-light">حفظ الوزن الأساسي</button><button id="cpExclude" class="btn-red">استبعاد من هذا الموسم</button><button id="cpRestore" class="btn-green">إعادة الأهلية</button></div>
 <p class="muted">الاستبعاد يخص وحدة المنافسات والموسم المحدد فقط، وتعود الأهلية تلقائيًا في الموسم التالي. لا يؤثر على حالة الرياضي أو ملفه المالي.</p>
-</div>
-<div class="panel">
-<h2>PALMARÈS DU CLUB | سجل التتويجات المنشورة</h2>
+
+</div></div>
+<div class="cp-accordion" data-cp-accordion="6">
+<button type="button" class="cp-accordion-toggle" aria-expanded="false"><span>PALMARÈS DU CLUB | سجل التتويجات المنشورة</span><span class="cp-accordion-icon" aria-hidden="true">+</span></button>
+<div class="panel cp-accordion-content" hidden>
+
+
 <div class="tablewrap"><table><thead><tr><th>الموسم</th><th>المنافسة</th><th>التاريخ</th><th>الرياضي</th><th>الفئة</th><th>الميدالية</th></tr></thead><tbody id="cpPalmaresBody"><tr><td colspan="6" class="empty">لا توجد نتائج منشورة.</td></tr></tbody></table></div>
-</div>
+
+</div></div>
 </section>
 
 <section id="tab-parents" class="hidden">
@@ -1967,6 +2000,22 @@ $("cpSeason").onchange=async()=>{let y=cpSeason();$("seasonYear").value=y;update
 $("cpRefresh").onclick=loadCompetitions;
 $("cpParticipantCompetition").onchange=cpLoadEntries;
 $("cpExport").onclick=()=>{let rows=[];for(let p of cpParticipants){let c=cpCompetitions.find(x=>x.id===p.competition_id);if(!c||c.season_start_year!==cpSeason())continue;let r=cpResults.find(x=>x.participant_id===p.id);rows.push({"الموسم":`${c.season_start_year}-${c.season_start_year+1}`,"المنافسة":c.name,"التاريخ":c.competition_date,"الرياضي":cpAthleteName(p.athlete_id),"الفئة":p.category_code,"الجنس":p.gender,"وزن المشاركة":p.competition_weight,"المركز":r?.place||"","الميدالية":r?.medal||"","منشور":r?.published?"نعم":"لا"});}excelExport(`UST_COMPETITIONS_${cpSeason()}.xlsx`,rows,"سجل الموسم");};
+
+
+// فتح وإغلاق أقسام المنافسات بالنقر على عناوينها
+document.querySelectorAll('#tab-competitions .cp-accordion-toggle').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item=btn.closest('.cp-accordion');
+    const body=item?.querySelector('.cp-accordion-content');
+    if(!body)return;
+    const willOpen=body.hidden;
+    body.hidden=!willOpen;
+    item.classList.toggle('is-open',willOpen);
+    btn.setAttribute('aria-expanded',String(willOpen));
+    const icon=btn.querySelector('.cp-accordion-icon');
+    if(icon)icon.textContent=willOpen?'−':'+';
+  });
+});
 
 // =====================================
 // استعادة جلسة المدير
