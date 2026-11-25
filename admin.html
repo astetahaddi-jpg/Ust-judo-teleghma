@@ -406,8 +406,16 @@ header{padding:14px;position:static}
 <div class="toolbar"><button id="cpFindAthletes" class="btn-light">عرض الرياضيين المطابقين</button></div>
 <div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>تاريخ الميلاد</th><th>الفئة التلقائية</th><th>الوزن الأساسي</th><th>اختيار الوزن المرجعي</th><th>الإجراء</th></tr></thead><tbody id="cpAthletesBody"><tr><td colspan="6" class="empty">اختر الفئة والجنس ثم اعرض الرياضيين.</td></tr></tbody></table></div>
 <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+<h2>تفاصيل المنافسة والمشاركون</h2>
+<div id="cpCompetitionDetails" class="notice">اختر منافسة لعرض تفاصيلها وتنزيل قوائم المشاركين.</div>
+<div id="cpExportControls" class="toolbar hidden">
+<button type="button" class="btn-green" id="cpExportAll">تنزيل ملف المنافسة الكامل Excel</button>
+<button type="button" class="btn-light" id="cpExportMale">تنزيل قائمة الذكور Excel</button>
+<button type="button" class="btn-light" id="cpExportFemale">تنزيل قائمة الإناث Excel</button>
+</div>
+<div class="detail-stats" id="cpParticipantStats"></div>
 <h2>المشاركون والنتائج</h2>
-<div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>الفئة</th><th>الجنس</th><th>وزن المشاركة</th><th>المركز</th><th>الميدالية</th><th>النشر</th><th>إجراءات</th></tr></thead><tbody id="cpEntriesBody"><tr><td colspan="8" class="empty">اختر منافسة.</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>الرياضي</th><th>تاريخ الميلاد</th><th>الفئة</th><th>الجنس</th><th>وزن المشاركة</th><th>تعديل المشاركة</th><th>المركز</th><th>الميدالية</th><th>النشر</th><th>إجراءات</th></tr></thead><tbody id="cpEntriesBody"><tr><td colspan="10" class="empty">اختر منافسة.</td></tr></tbody></table></div>
 
 </div></div>
 <div class="cp-accordion" data-cp-accordion="5">
@@ -2009,17 +2017,99 @@ async function loadCompetitions(){
  }catch(err){console.error(err);setMsg("cpMessage","تعذر تحميل بيانات المنافسات: "+err.message);}
 }
 function renderCpCompetitions(){
- $("cpCompetitionsBody").innerHTML=cpCompetitions.length?cpCompetitions.map(c=>`<tr><td>${esc(c.name)}</td><td>${cpTypeLabel(c.competition_type)}</td><td>${cpLevelLabel(c.level)}</td><td>${esc(c.competition_date||"—")}</td><td>${esc(c.location||"—")}</td><td>${cpStatusLabel(c.status)}</td><td><button class="smallbtn" onclick="cpSelectCompetition('${c.id}')">إدارة المشاركين</button><button class="smallbtn btn-light" onclick="cpChangeStatus('${c.id}')">تغيير الحالة</button><button class="smallbtn btn-red" onclick="cpDeleteCompetition('${c.id}')">حذف</button></td></tr>`).join(""):'<tr><td colspan="7" class="empty">لا توجد منافسات في هذا الموسم.</td></tr>';
+ $("cpCompetitionsBody").innerHTML=cpCompetitions.length?cpCompetitions.map(c=>`<tr><td><button type="button" class="smallbtn btn-light" onclick="cpSelectCompetition('${c.id}')">${esc(c.name)}</button></td><td>${cpTypeLabel(c.competition_type)}</td><td>${cpLevelLabel(c.level)}</td><td>${esc(c.competition_date||"—")}</td><td>${esc(c.location||"—")}</td><td>${cpStatusLabel(c.status)}</td><td><button class="smallbtn" onclick="cpSelectCompetition('${c.id}')">إدارة المشاركين</button><button class="smallbtn btn-light" onclick="cpChangeStatus('${c.id}')">تغيير الحالة</button><button class="smallbtn btn-red" onclick="cpDeleteCompetition('${c.id}')">حذف</button></td></tr>`).join(""):'<tr><td colspan="7" class="empty">لا توجد منافسات في هذا الموسم.</td></tr>';
  $("cpParticipantCompetition").innerHTML=cpCompetitions.map(c=>`<option value="${c.id}">${esc(c.name)} — ${esc(c.competition_date||"")}</option>`).join("");
- if(cpCompetitions.length)cpLoadEntries();else $("cpEntriesBody").innerHTML='<tr><td colspan="8" class="empty">أنشئ منافسة أولاً.</td></tr>';
+ if(cpCompetitions.length)cpLoadEntries();else {$("cpEntriesBody").innerHTML='<tr><td colspan="10" class="empty">أنشئ منافسة أولاً.</td></tr>';$("cpCompetitionDetails").textContent="لا توجد منافسات."; $("cpExportControls").classList.add("hidden");}
 }
-window.cpSelectCompetition=id=>{$("cpParticipantCompetition").value=id;cpLoadEntries();};
+window.cpSelectCompetition=id=>{
+ $("cpParticipantCompetition").value=id;
+ const accordion=document.querySelector('[data-cp-accordion="4"]');
+ if(accordion){const body=accordion.querySelector(".cp-accordion-content"),btn=accordion.querySelector(".cp-accordion-toggle");body.hidden=false;btn.setAttribute("aria-expanded","true");accordion.classList.add("is-open");const icon=btn.querySelector(".cp-accordion-icon");if(icon)icon.textContent="−";}
+ cpLoadEntries();
+ $("cpParticipantCompetition").scrollIntoView({behavior:"smooth",block:"center"});
+};
 window.cpChangeStatus=async id=>{let c=cpCompetitions.find(x=>x.id===id);let v=prompt("أدخل الحالة: preparation / ready / ongoing / finished / archived",c?.status||"preparation");if(!v)return;let {error}=await db.from("ust_competitions").update({status:v,updated_at:new Date().toISOString()}).eq("id",id);if(error)alert(error.message);else loadCompetitions();};
 window.cpDeleteCompetition=async id=>{if(!confirm("حذف المنافسة؟ يجب حذف المشاركين ونتائجهم أولاً إذا كانت هناك قيود مرتبطة."))return;let {error}=await db.from("ust_competitions").delete().eq("id",id);if(error)alert("تعذر الحذف: "+error.message);else loadCompetitions();};
 $("cpCreate").onclick=async()=>{let name=$("cpName").value.trim();if(!name){setMsg("cpMessage","أدخل اسم المنافسة.");return;}let y=cpSeason();let payload={season_start_year:y,name,competition_type:$("cpType").value,level:$("cpLevel").value,location:$("cpLocation").value.trim(),competition_date:$("cpDate").value||null,status:$("cpStatus").value,notes:$("cpNotes").value.trim()};let {error}=await db.from("ust_competitions").insert(payload);if(error){setMsg("cpMessage","تعذر الحفظ: "+error.message);return;}["cpName","cpLocation","cpDate","cpNotes"].forEach(id=>$(id).value="");await loadCompetitions();};
 $("cpFindAthletes").onclick=()=>{let category=$("cpCategory").value,gender=$("cpGender").value,search=$("cpAthleteSearch").value.trim().toLowerCase(),range=cpBirthYearRange(category);cpRenderReferenceWeights();if(!range){setMsg("cpMessage","تعذر تحديد سنوات الفئة المختارة.");return;}let matches=athletes.filter(a=>{const by=cpBirthYear(a);return a.is_active!==false&&cpGenderValue(a.gender)===gender&&by!==null&&by>=range.min&&by<=range.max&&(!search||fullName(a).toLowerCase().includes(search));});let ids=cpExcluded.map(x=>String(x.athlete_id));matches=matches.filter(a=>!ids.includes(String(a.id)));const weightOptions=cpWeightOptions();$("cpAthletesBody").innerHTML=matches.length?matches.map(a=>{let prof=cpProfiles.find(x=>String(x.athlete_id)===String(a.id));return `<tr><td>${esc(fullName(a))}</td><td>${esc(a.date_of_birth||"—")}</td><td>${cpCategoryFor(a)?.label||"—"}</td><td>${prof?.base_weight??"—"}</td><td><select id="cpWeightClass_${a.id}" style="min-width:145px">${weightOptions}</select></td><td><button class="smallbtn" onclick="cpAddParticipant('${a.id}')">إضافة</button></td></tr>`}).join(""):`<tr><td colspan="6" class="empty">لا يوجد رياضيون مواليد ${range.min}–${range.max} مطابقون للجنس المحدد. تحقق من تاريخ الميلاد والجنس وحالة الرياضي.</td></tr>`;};
 window.cpAddParticipant=async athleteId=>{let competitionId=$("cpParticipantCompetition").value;if(!competitionId){alert("أنشئ واختر منافسة أولاً.");return;}let cat=$("cpCategory").value,gender=$("cpGender").value,weightLabel=$("cpWeightClass_"+athleteId)?.value||"";if(!weightLabel){alert("اختر فئة الوزن المرجعية من القائمة.");return;}const weight=Number(String(weightLabel).replace(/[^0-9.]/g,""));if(!Number.isFinite(weight)||weight<=0){alert("تعذر تحديد قيمة الوزن من الفئة المختارة.");return;}let genderCode=cpGenderCode(gender);let {error}=await db.from("ust_competition_participants").insert({competition_id:competitionId,athlete_id:Number(athleteId),category_code:cat,gender:genderCode,competition_weight:weight,weight_label:weightLabel});if(error){alert("تعذر إضافة المشارك: "+error.message);return;}let q=await db.from("ust_competition_participants").select("*");if(!q.error)cpParticipants=q.data||[];await cpLoadEntries();};
-async function cpLoadEntries(){let id=$("cpParticipantCompetition").value;if(!id){$("cpEntriesBody").innerHTML='<tr><td colspan="8" class="empty">اختر منافسة.</td></tr>';return;}let rows=cpParticipants.filter(p=>p.competition_id===id);let ids=rows.map(p=>p.id);let resultRows=cpResults.filter(r=>ids.includes(r.participant_id));$("cpEntriesBody").innerHTML=rows.length?rows.map(p=>{let r=resultRows.find(x=>x.participant_id===p.id);return `<tr><td>${esc(cpAthleteName(p.athlete_id))}</td><td>${esc(cpCategories.find(c=>c.code===p.category_code)?.label||p.category_code)}</td><td>${esc(cpGenderValue(p.gender))}</td><td>${esc(p.weight_label||((p.competition_weight??"—")+" كغ"))}</td><td><input id="cpPlace_${p.id}" type="number" min="1" max="99" value="${r?.place??""}" style="width:70px"></td><td><select id="cpMedal_${p.id}" style="width:105px"><option value="">—</option><option value="ذهبية" ${r?.medal==="ذهبية"?"selected":""}>ذهبية</option><option value="فضية" ${r?.medal==="فضية"?"selected":""}>فضية</option><option value="برونزية" ${r?.medal==="برونزية"?"selected":""}>برونزية</option></select></td><td><input type="checkbox" id="cpPub_${p.id}" ${r?.published?"checked":""} style="width:auto"></td><td><button class="smallbtn" onclick="cpSaveResult('${p.id}')">حفظ النتيجة</button><button class="smallbtn btn-red" onclick="cpRemoveParticipant('${p.id}')">إزالة</button></td></tr>`}).join(""):'<tr><td colspan="8" class="empty">لا يوجد مشاركون في هذه المنافسة.</td></tr>';}
+function cpEditWeightOptions(category,gender,selected){
+ const rows=cpWeightClasses.filter(x=>x.category_code===category&&String(x.gender||"").toUpperCase()===gender&&x.enabled!==false).sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0));
+ return `<option value="">اختر الوزن</option>`+rows.map(x=>`<option value="${esc(x.weight_label)}" ${String(x.weight_label)===String(selected)?"selected":""}>${esc(x.weight_label)} كغ</option>`).join("");
+}
+window.cpUpdateEditWeights=id=>{
+ const cat=$("cpEditCat_"+id).value,gender=$("cpEditGender_"+id).value,weight=$("cpEditWeight_"+id);
+ if(weight)weight.innerHTML=cpEditWeightOptions(cat,gender,"");
+};
+window.cpSaveParticipantEdit=async id=>{
+ const category=$("cpEditCat_"+id).value,gender=$("cpEditGender_"+id).value,label=$("cpEditWeight_"+id).value;
+ if(!label){alert("اختر وزن المشاركة من القائمة المرجعية.");return;}
+ const numeric=Number(String(label).replace(/[^0-9.]/g,""));
+ if(!Number.isFinite(numeric)||numeric<=0){alert("قيمة الوزن غير صالحة.");return;}
+ const {error}=await db.from("ust_competition_participants").update({category_code:category,gender,weight_label:label,competition_weight:numeric}).eq("id",id);
+ if(error){alert("تعذر تعديل المشاركة: "+error.message);return;}
+ const q=await db.from("ust_competition_participants").select("*");if(q.error){alert(q.error.message);return;}
+ cpParticipants=q.data||[];await cpLoadEntries();alert("تم تحديث بيانات المشاركة دون المساس بالنتيجة.");
+};
+function cpCompetitionExportRows(competition,participants){
+ const meta=[
+ {"البيان":"اسم المنافسة","المعلومة":competition.name||""},
+ {"البيان":"نوع المنافسة","المعلومة":cpTypeLabel(competition.competition_type)},
+ {"البيان":"المستوى","المعلومة":cpLevelLabel(competition.level)},
+ {"البيان":"التاريخ","المعلومة":competition.competition_date||""},
+ {"البيان":"المكان","المعلومة":competition.location||""},
+ {"البيان":"الحالة","المعلومة":cpStatusLabel(competition.status)},
+ {"البيان":"الموسم الرياضي","المعلومة":`${competition.season_start_year}–${Number(competition.season_start_year)+1}`},
+ {"البيان":"ملاحظات","المعلومة":competition.notes||""},
+ {"البيان":"عدد المشاركين","المعلومة":participants.length},
+ {"البيان":"عدد الذكور","المعلومة":participants.filter(p=>cpGenderCode(p.gender)==="M").length},
+ {"البيان":"عدد الإناث","المعلومة":participants.filter(p=>cpGenderCode(p.gender)==="F").length}
+ ];
+ const list=participants.map((p,i)=>{
+  const a=athletes.find(x=>String(x.id)===String(p.athlete_id))||{};
+  return {"رقم":i+1,"الاسم":a.first_name||"","اللقب":a.last_name||"","الاسم الكامل":fullName(a)||"رياضي غير موجود","تاريخ الميلاد":a.date_of_birth||"","مكان الميلاد":a.birthplace||"","اسم الولي":a.guardian_name||"","الجنس":cpGenderValue(p.gender),"الصنف العمري":cpCategories.find(c=>c.code===p.category_code)?.label||p.category_code||"","وزن المشاركة":p.weight_label||((p.competition_weight??"")+" كغ"),"الوزن الأساسي (كغ)":cpProfiles.find(x=>String(x.athlete_id)===String(p.athlete_id))?.base_weight??""};
+ });
+ return {meta,list};
+}
+function cpExportCompetition(kind){
+ const id=$("cpParticipantCompetition").value,competition=cpCompetitions.find(c=>String(c.id)===String(id));
+ if(!competition){alert("اختر منافسة أولاً.");return;}
+ let participants=cpParticipants.filter(p=>String(p.competition_id)===String(id));
+ if(kind==="male")participants=participants.filter(p=>cpGenderCode(p.gender)==="M");
+ if(kind==="female")participants=participants.filter(p=>cpGenderCode(p.gender)==="F");
+ if(!participants.length){alert("لا توجد مشاركات في القائمة المحددة.");return;}
+ const {meta,list}=cpCompetitionExportRows(competition,participants);
+ const suffix=kind==="male"?"_MALE":kind==="female"?"_FEMALE":"_ALL";
+ const filename=`UST_${String(competition.name||"COMPETITION").replace(/[\\/:*?"<>|]/g,"_")}_${competition.season_start_year}${suffix}.xlsx`;
+ if(!window.XLSX){alert("تعذر تحميل مكتبة Excel.");return;}
+ const wb=XLSX.utils.book_new();
+ const ws1=XLSX.utils.json_to_sheet(meta);ws1["!views"]=[{rightToLeft:true}];
+ const ws2=XLSX.utils.json_to_sheet(list);ws2["!views"]=[{rightToLeft:true}];
+ ws2["!cols"]=Object.keys(list[0]).map(k=>({wch:Math.min(Math.max(String(k).length+5,14),32)}));
+ XLSX.utils.book_append_sheet(wb,ws1,"معلومات المنافسة");
+ XLSX.utils.book_append_sheet(wb,ws2,"المشاركون");
+ wb.Workbook={Views:[{RTL:true}]};
+ XLSX.writeFile(wb,filename,{bookType:"xlsx",compression:true});
+}
+$("cpExportAll").onclick=()=>cpExportCompetition("all");
+$("cpExportMale").onclick=()=>cpExportCompetition("male");
+$("cpExportFemale").onclick=()=>cpExportCompetition("female");
+async function cpLoadEntries(){
+ const id=$("cpParticipantCompetition").value;
+ if(!id){$("cpEntriesBody").innerHTML='<tr><td colspan="10" class="empty">اختر منافسة.</td></tr>';$("cpCompetitionDetails").textContent="اختر منافسة لعرض تفاصيلها."; $("cpExportControls").classList.add("hidden");$("cpParticipantStats").innerHTML="";return;}
+ const competition=cpCompetitions.find(c=>String(c.id)===String(id));
+ const rows=cpParticipants.filter(p=>String(p.competition_id)===String(id));
+ const males=rows.filter(p=>cpGenderCode(p.gender)==="M"),females=rows.filter(p=>cpGenderCode(p.gender)==="F");
+ $("cpCompetitionDetails").innerHTML=competition?`<strong>${esc(competition.name)}</strong><br>النوع: ${cpTypeLabel(competition.competition_type)} | المستوى: ${cpLevelLabel(competition.level)} | التاريخ: ${esc(competition.competition_date||"غير محدد")}<br>المكان: ${esc(competition.location||"غير محدد")} | الحالة: ${cpStatusLabel(competition.status)} | الموسم: ${competition.season_start_year}–${Number(competition.season_start_year)+1}<br>ملاحظات: ${esc(competition.notes||"لا توجد")}`:"";
+ $("cpExportControls").classList.toggle("hidden",!competition);
+ $("cpParticipantStats").innerHTML=`<div class="monthbox"><span>إجمالي المشاركين</span><strong>${rows.length}</strong></div><div class="monthbox"><span>الذكور</span><strong>${males.length}</strong></div><div class="monthbox"><span>الإناث</span><strong>${females.length}</strong></div>`;
+ const ordered=[...males,...females];
+ $("cpEntriesBody").innerHTML=ordered.length?ordered.map(p=>{
+  const r=cpResults.find(x=>x.participant_id===p.id),a=athletes.find(x=>String(x.id)===String(p.athlete_id))||{};
+  const gender=cpGenderCode(p.gender),cat=p.category_code||"";
+  return `<tr><td>${esc(fullName(a)||"رياضي غير موجود")}</td><td>${esc(a.date_of_birth||"—")}</td><td><select id="cpEditCat_${p.id}" style="min-width:130px" onchange="cpUpdateEditWeights('${p.id}')">${cpCategories.map(c=>`<option value="${c.code}" ${c.code===cat?"selected":""}>${esc(c.label)}</option>`).join("")}</select></td><td><select id="cpEditGender_${p.id}" style="min-width:90px" onchange="cpUpdateEditWeights('${p.id}')"><option value="M" ${gender==="M"?"selected":""}>ذكر</option><option value="F" ${gender==="F"?"selected":""}>أنثى</option></select></td><td><select id="cpEditWeight_${p.id}" style="min-width:120px">${cpEditWeightOptions(cat,gender,p.weight_label)}</select></td><td><button class="smallbtn btn-light" onclick="cpUpdateEditWeights('${p.id}')">تحديث الأوزان</button><button class="smallbtn btn-green" onclick="cpSaveParticipantEdit('${p.id}')">حفظ المشاركة</button></td><td><input id="cpPlace_${p.id}" type="number" min="1" max="99" value="${r?.place??""}" style="width:70px"></td><td><select id="cpMedal_${p.id}" style="width:105px"><option value="">—</option><option value="ذهبية" ${r?.medal==="ذهبية"?"selected":""}>ذهبية</option><option value="فضية" ${r?.medal==="فضية"?"selected":""}>فضية</option><option value="برونزية" ${r?.medal==="برونزية"?"selected":""}>برونزية</option></select></td><td><input type="checkbox" id="cpPub_${p.id}" ${r?.published?"checked":""} style="width:auto"></td><td><button class="smallbtn" onclick="cpSaveResult('${p.id}')">حفظ النتيجة</button><button class="smallbtn btn-red" onclick="cpRemoveParticipant('${p.id}')">إزالة</button></td></tr>`;
+ }).join(""):'<tr><td colspan="10" class="empty">لا يوجد مشاركون في هذه المنافسة.</td></tr>';
+}
 window.cpSaveResult=async participantId=>{let old=cpResults.find(x=>x.participant_id===participantId);let place=Number($("cpPlace_"+participantId).value)||null;let medal=$("cpMedal_"+participantId).value||null;let published=$("cpPub_"+participantId).checked;let payload={participant_id:participantId,place,medal,published,updated_at:new Date().toISOString()};let q=old?db.from("ust_competition_results").update(payload).eq("id",old.id):db.from("ust_competition_results").insert(payload);let {error}=await q;if(error){alert("تعذر حفظ النتيجة: "+error.message);return;}let {data}=await db.from("ust_competition_results").select("*");cpResults=data||[];renderCpPalmares();alert("تم حفظ النتيجة.");};
 window.cpRemoveParticipant=async id=>{if(!confirm("إزالة هذا المشارك؟"))return;let {error}=await db.from("ust_competition_results").delete().eq("participant_id",id);if(error){alert(error.message);return;}let x=await db.from("ust_competition_participants").delete().eq("id",id);if(x.error)alert(x.error.message);else{let q=await db.from("ust_competition_participants").select("*");cpParticipants=q.data||[];cpResults=(await db.from("ust_competition_results").select("*")).data||[];cpLoadEntries();renderCpPalmares();}};
 function cpRenderProfileSelect(){$("cpProfileAthlete").innerHTML=athletes.map(a=>`<option value="${a.id}">${esc(fullName(a))}</option>`).join("");}
