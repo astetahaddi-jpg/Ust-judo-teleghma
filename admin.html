@@ -1861,7 +1861,7 @@ function cpAge(a){if(!a?.date_of_birth)return null;let y=Number(String(a.date_of
 function cpCategoryFor(a){let age=cpAge(a);return age===null?null:cpCategories.find(c=>age>=c.min&&age<=c.max)||null;}
 function cpAthleteName(id){let a=athletes.find(x=>String(x.id)===String(id));return a?fullName(a):"رياضي غير موجود";}
 function cpMedal(place){return ({1:"ذهبية",2:"فضية",3:"برونزية"})[Number(place)]||"";}
-async function cpEnsureSeason(y){let {error}=await db.from("ust_competition_seasons").upsert({season_start_year:y,label:`${y}–${y+1}`},{onConflict:"season_start_year",ignoreDuplicates:true});if(error)throw error;}
+async function cpEnsureSeason(y){let {error}=await db.from("ust_competition_seasons").upsert({season_start_year:y},{onConflict:"season_start_year",ignoreDuplicates:true});if(error)throw error;}
 async function loadCompetitions(){
  setMsg("cpMessage","جارٍ تحميل بيانات المنافسات...");
  const y=year();
